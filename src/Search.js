@@ -6,7 +6,7 @@ function Search(props){
   }
   return(
   <Navbar className="bg-light justify-content-between">
-    <Form inline>
+    {/* <Form inline>
       <InputGroup>
         <InputGroup.Prepend>
           <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
@@ -17,7 +17,7 @@ function Search(props){
           aria-describedby="basic-addon1"
         />
       </InputGroup>
-    </Form>
+    </Form> */}
     <Form inline>
       <FormControl type="text" placeholder="Search" className=" mr-sm-2" onChange={handleSearch}/>
       <Button type="submit">Submit</Button>

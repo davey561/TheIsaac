@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import Plexus from './Plexus'
+import Viewport from './Viewport'
 import Search from './Search'
+import defaultOptions from './DefaultOptions';
 
 function App() {
     const eles = useState(
@@ -16,9 +17,9 @@ function App() {
     return (
       <div className="todo-app container">
         {/* <h1 className="">{this.state.elements}</h1> */}
-        <Search renderSearch={setTest}/>
-        <Plexus eles={eles}/>
-        <h1>test: {JSON.stringify(test)}</h1>
+        {/* <Search renderSearch={setTest}/> */}
+        <Viewport eles={eles} labeltest={test}/>
+        <h1>test: {test}</h1>
       </div>
     )
   }
