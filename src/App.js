@@ -1,25 +1,26 @@
-import React, {useState} from 'react';
-import Todos from './Todos';
+import React, { useState } from 'react';
 import Plexus from './Plexus'
+import Search from './Search'
 
-class App extends React.Component {
-  constructor(props){
-    super(props)
-  }
-  componentDidMount(){
-    // this.refs.graph.cy.on('click', function(){
-    //   window.alert('brushed my teeth with a bottle of jack');
-    // })
-  }
-  render(){
-    //ref="graph"
+function App() {
+    const eles = useState(
+      []
+    );
+    const [test,setTest] = useState("Davey");
+    // const renderSearch = (string) => {
+    //   setTest(string)
+    // };
+    const getTest = () => {
+      return test;
+    }
     return (
       <div className="todo-app container">
-        <h1 className="">Plexus P</h1>
-        <Plexus />
+        {/* <h1 className="">{this.state.elements}</h1> */}
+        <Search renderSearch={setTest}/>
+        <Plexus eles={eles}/>
+        <h1>test: {JSON.stringify(test)}</h1>
       </div>
-    );
+    )
   }
-}
 
 export default App;
