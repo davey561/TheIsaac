@@ -25,7 +25,7 @@ function Search(props){
         onChange={handleSearch}
         ref = {input => {setInput(input)}}
       />
-      <Button type="submit">Submit</Button>
+      <Button type="submit">Go</Button>
     </Form>
   </Navbar>
   )
