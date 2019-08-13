@@ -2,14 +2,19 @@
   color: red;
   /* background: url('./painting.png'); */
 }
-body {
-  height: 90%;
+.Plexus-container{
+height: 90%;
+width: 100%;
+}
+.bar{
+  width: 50%;
+  margin: auto;
+}
+#cy {
+  height: 620px;
   width: 100%;
   z-index: 999;
   display: block;
-}
-#root{
-  vertical-align: baseline;
 }
 #lasttwo{
 text-align: center
@@ -75,4 +80,3 @@ text-align: center
 .potential {
   color: #00008b
 }
-

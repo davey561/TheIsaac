@@ -5,8 +5,8 @@ import Plexus from './Plexus';
 
 function App() {
     return (
-      <div className="todo-app container">
-        <Plexus eles={[]}/>
+      <div className="Plexus-container">
+        <Plexus />
       </div>
     )
   }

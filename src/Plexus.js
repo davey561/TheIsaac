@@ -1,22 +1,20 @@
 
 import React, {useState, useEffect, Component} from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
+import cytoscape from 'cytoscape';
+import fcose from 'cytoscape-fcose';
 import PropTypes from 'prop-types';
 import firebase from 'firebase';
 import {Typeahead} from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 import defaultOptions from './Old/defaultOptions'
+cytoscape.use(fcose);
 
 function Plexus(props){
-    const [layout, setLayout] = useState({ 
-        name: 'cose', 
-        animate: 'end', 
-        animationDuration: 1200, 
-        randomize: true 
-    });
-    const [cy, setCy] = useState({});
-    const [eles, setEles] = useState(props.eles);
+    const [layout, setLayout] = useState(defaultOptions.fCoseOptions);
+    const [cy, setCy] = useState();
+    const [eles, setEles] = useState([]);
     const [eleIds, setEleIds] = useState(["1", "3", "5"])
     const [label, setLabel] = useState(props.labeltest);
     // let database; let elementsRef;
@@ -97,7 +95,9 @@ function Plexus(props){
                 autoFocus
             /> */}
             <br></br>
-            <Typeahead id = "searchSuggest"
+            <Typeahead 
+                className = "bar"
+                id = "searchSuggest"
                 ref={(typeahead) => typeaheadRef = typeahead}
                 onChange={(selected) => {
                     setLabel(selected)
@@ -109,7 +109,7 @@ function Plexus(props){
                 //selectHintOnEnter={true}
                 highlightOnlyResult={true}
                 maxResults={10}
-                bsSize="small"
+                //bsSize="small"
                 /* onBlur={() => {
                     typeaheadRef.getInstance().clear();
                 }} */
