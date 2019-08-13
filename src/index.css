@@ -1,15 +1,78 @@
+.hello {
+  color: red;
+  /* background: url('./painting.png'); */
+}
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-style: italic;
-  font-weight: bold;
+  height: 90%;
+  width: 100%;
+  z-index: 999;
+  display: block;
+}
+#root{
+  vertical-align: baseline;
+}
+#lasttwo{
+text-align: center
+}
+#title{
+  font-family: 'Optima'
+}
+.button1 {
+  position: relative;
+  margin: auto;
+  height: 30px;
+  width: 80px;
+  border-radius: 30%;
+  cursor: pointer;
+  border: 2px solid #FB7272;
+}
+#above{
+  /* display: flex;
+  justify-content: left; */
+  color: #FB7272;
+  text-align: left;
+}
+#snackbar {
+  visibility: hidden;
+  min-width: 50px;
+  margin-left: -600px;
+  background-color: #FB7272 ;
+  color: white;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  font-size: 24px;
+}
+#snackbar.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
 }
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+.potential {
+  color: #00008b
+}
+

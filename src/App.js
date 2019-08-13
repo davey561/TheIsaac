@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import Viewport from './Viewport';
-
+import Plexus from './Plexus';
+// import 'bootstrap';
+//Unclear if I need this wrapper component
 
 function App() {
-    const eles = useState(
-      []
-    )
     return (
       <div className="todo-app container">
-        <Viewport eles={eles}/>
+        <Plexus eles={[]}/>
       </div>
     )
   }
