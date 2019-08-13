@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import Viewport from './Viewport'
-import Search from './Search'
-import defaultOptions from './DefaultOptions';
+import Viewport from './Viewport';
+
 
 function App() {
     const eles = useState(

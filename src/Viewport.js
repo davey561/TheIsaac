@@ -3,11 +3,10 @@ import React, {useState, useEffect, Component} from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import PropTypes from 'prop-types';
 import firebase from 'firebase';
-import defaultOptions from './DefaultOptions';
-import Search from "./Search"
+import {Typeahead} from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
+import KeyboardEventHandler from 'react-keyboard-event-handler';
 
-let duration = 2000;
-let string = 'Davey';
 function Viewport(props){
     const [layout, setLayout] = useState({ 
         name: 'cose', 
@@ -17,13 +16,14 @@ function Viewport(props){
     });
     const [cy, setCy] = useState({});
     const [eles, setEles] = useState(props.eles);
+    const [eleIds, setEleIds] = useState(["1", "3", "5"])
     const [label, setLabel] = useState(props.labeltest);
     // let database; let elementsRef;
     // const [database, setDatabase] = useState();
     const [elementsRef, setRef] = useState();
     const [stylesheet, setStylesheet] = useState(
         [{ 
-            selector: '*',
+            selector: 'node',
             style: {
                 "font-family": "Optima",
                 'text-border-width': '5px', 'label': label
@@ -31,21 +31,17 @@ function Viewport(props){
         }]
     );
     const [click,setClick] = useState(false);
-    // let stylesheet =  [{ 
-    //             selector: 'node',
-    //             style: {
-    //                 "font-family": "Optima",
-    //                 'text-border-width': '5px', 'label': label
-    //             }
-    //         }];
     let cyRef = React.createRef();
     useEffect(() => {
-        // cyRef.layout(layout).run();
         const fetchData = async () => {
-            // database = firebase.database().ref();
             let ref = firebase.database().ref().child('elements');
             ref.once('value').then(snap => {
                 setEles(JSON.parse(snap.val()))
+                return JSON.parse(snap.val())
+            }).then(eles => {
+                console.log(getElementIds(eles));
+                setEleIds(getElementIds(eles));
+                // console.log(getElementIds(eles))
             });
             setRef(ref);
         };
@@ -54,45 +50,11 @@ function Viewport(props){
             cyRef.layout(layout).run()
         })
         cyRef.on('click', () => {
-            // window.alert('shake it');
-            // let layout = this.cy.layout(this.state.layout);
-            // layout.run();
-            duration++;
-            // setLayout({ 
-            //     name: 'cose', 
-            //     animate: true, 
-            //     animationDuration: 2500, 
-            //     randomize: true,
-            //     rando: duration
-            // });
             cyRef.layout(layout).run();
-
-            // if(click){
-            //     setClick(false)
-            // }else{
-            //     setClick(true)
-            // }
         })
-        // cyRef.layout(layout).run()
     }, []);
     useEffect(() => {
         console.log('effect for style being used!')
-        // stylesheet =  [{ 
-        //             selector: 'node',
-        //             style: {
-        //                 "font-family": "Optima",
-        //                 'text-border-width': '5px', 'label': label
-        //             }
-        //         }]
-        // setStylesheet(
-        //     [{ 
-        //         selector: '*',
-        //         style: {
-        //             "font-family": "Optima",
-        //             'text-border-width': '5px', 'label': label
-        //         }
-        //     }]
-        // )
     })
     const collectionToString = () => {
         let s = ""
@@ -107,19 +69,39 @@ function Viewport(props){
     }
     const getStyle = () => {
         return [{ 
-                    selector: '*',
+                    selector: 'node',
                     style: {
                         "font-family": "Optima",
                         'text-border-width': '5px', 'label': label
                     }
                 }]
     }
+    const getElementIds = (eles) => {
+        return cyRef.nodes().map((ele) => {
+            return ele.id();
+        });
+    }
     return (
         <div>
-            <Search 
+            {/* <Search 
                 renderSearch={setLabel}
                 //ref = {(search) => {this.setState({focus: search.focusInput})}}
                 autoFocus
+            /> */}
+            <br></br>
+            <Typeahead id = "searchSuggest"
+                onChange={(selected) => {
+                    setLabel(selected)
+                    // Handle selections...
+                }}
+                onInputChange={(text, event) => {
+                    setLabel(text)
+                }}
+                options={eleIds}
+                selectHintOnEnter={true}
+                highlightOnlyResult={true}
+                maxResults={10}
+                bsSize="small"
             />
             <CytoscapeComponent
                 elements={eles}
@@ -129,6 +111,9 @@ function Viewport(props){
                 cy={(cy) => { cyRef = cy }}
                 click = {click}
             />
+            <KeyboardEventHandler
+    handleKeys={['a', 'b', 'c']}
+    onKeyEvent={(key, e) => console.log(`do something upon keydown event of ${key}`)} />
         </div>
         );
 }
