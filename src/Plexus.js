@@ -6,45 +6,78 @@ import fcose from 'cytoscape-fcose';
 import PropTypes from 'prop-types';
 import firebase from 'firebase';
 import {Typeahead} from 'react-bootstrap-typeahead';
-import 'react-bootstrap-typeahead/css/Typeahead.css';
+import 'react-bootstrap-typeahead/css/Typeahead.css'
+import {Snackbar} from '@material/react-snackbar';
+// import '@material/react-snackbar/dist/snackbar.css';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 import defaultOptions from './Old/defaultOptions'
+import { ButtonToolbar, Button } from 'react-bootstrap';
+import { runLayoutDefault } from './Old/Layout';
+import { runLayout, save } from './Old/EventResponses';
+import {saveToText} from './Old/ConvertToBullets';
+import LastTwo from './Old/LastTwo';
 cytoscape.use(fcose);
 
 function Plexus(props){
     const [layout, setLayout] = useState(defaultOptions.fCoseOptions);
-    const [cy, setCy] = useState();
     const [eles, setEles] = useState([]);
-    const [eleIds, setEleIds] = useState(["1", "3", "5"])
-    const [label, setLabel] = useState(props.labeltest);
-    // let database; let elementsRef;
-    // const [database, setDatabase] = useState();
-    const [elementsRef, setRef] = useState();
-    const [stylesheet, setStylesheet] = useState(
-        [{ 
-            selector: 'node',
-            style: {
-                "font-family": "Optima",
-                'text-border-width': '5px', 'label': label
-            }
-        }]
-    );
-    const [click,setClick] = useState(false);
+    const [eleNames, setEleNames] = useState([]);
+    const [firebaseRef, setRef] = useState();
+    const [label, setLabel] = useState("Davey");
+    const [stylesheet, setStylesheet] = useState([{ 
+        selector: 'node',
+        style: {
+            "font-family": "Optima",
+            'text-border-width': '5px', 'label': label
+        }
+    }]);
+    const [lastTwo, setLastTwo] = useState(new LastTwo());
+    const [lastEdgeName, setLastEdgeName] = useState("");
+
+
     let cyRef = React.createRef();
     let typeaheadRef = React.createRef();
+
+    //Define function to fetch firebase data
+    const fetchData = async () => {
+        //Store firebase reference
+        let ref = firebase.database().ref().child('elements');
+        //Retrieve elements data
+        ref.once('value').then(snap => {
+            console.log(snap.val())
+            setEles(JSON.parse(snap.val()))
+            return JSON.parse(snap.val())
+        })
+        //Then create list of element ids
+        .then(eles => {
+            setEleNames(getElementNames(eles));
+        });
+        //Store firebase reference
+        setRef(ref);
+    };
+    //Return updated stylesheet (with new value for label)
+    const getStyle = () => {
+        return [{
+            selector: 'node',
+            style: { 'label': label }
+        }]
+    }
+    const clear = (evt) => {
+        if(evt.keyCode==13){
+            typeaheadRef.blur();
+        }
+    }
+    const getElementNames = () => {
+        return cyRef.nodes().map((ele) => {
+            return ele.data('name');
+        });
+    }
+    const getElements = () => {
+        return cyRef.elements();
+    }
+
+    //Things to do just on load
     useEffect(() => {
-        const fetchData = async () => {
-            let ref = firebase.database().ref().child('elements');
-            ref.once('value').then(snap => {
-                setEles(JSON.parse(snap.val()))
-                return JSON.parse(snap.val())
-            }).then(eles => {
-                console.log(getElementIds(eles));
-                setEleIds(getElementIds(eles));
-                // console.log(getElementIds(eles))
-            });
-            setRef(ref);
-        };
         fetchData();
         cyRef.on('', () => {
             cyRef.layout(layout).run()
@@ -53,48 +86,18 @@ function Plexus(props){
             cyRef.layout(layout).run();
         })
     }, []);
-    useEffect(() => {
-        console.log('effect for style being used!')
-    })
-    const collectionToString = () => {
-        let s = ""
-        let eles = cyRef.nodes();
-        if(eles){
-            eles.forEach(function(ele){
-                s+= ele.data('name') + ", "
-            });
-        }
-        console.log(s)
-        return s;
-    }
-    const getStyle = () => {
-        return [{ 
-                    selector: 'node',
-                    style: {
-                        "font-family": "Optima",
-                        'text-border-width': '5px', 'label': label
-                    }
-                }]
-        // return defaultOptions.style;
-    }
-    const clear = (evt) => {
-        if(evt.keyCode==13){
-            typeaheadRef.blur();
-        }
-    }
-    const getElementIds = (eles) => {
-        return cyRef.nodes().map((ele) => {
-            return ele.id();
-        });
-    }
     return (
         <div>
-            {/* <Search 
-                renderSearch={setLabel}
-                //ref = {(search) => {this.setState({focus: search.focusInput})}}
-                autoFocus
-            /> */}
             <br></br>
+            <ButtonToolbar className="button-container"> 
+                <Button variant="outline-primary" className="newButton">Add Node</Button>
+                <Button id="layoutButton" variant="outline-primary" className="newButton" 
+                    onClick={() => runLayoutDefault(getElements())}>Layout</Button>
+                <Button variant="outline-primary" className="newButton" 
+                    onClick={() => save(cyRef, firebaseRef)}>Save</Button>
+                <Button id="downloadButton" variant="outline-primary" className="newButton"
+                    onClick={() => saveToText(cyRef)}>Download</Button>
+            </ButtonToolbar>
             <Typeahead 
                 className = "bar"
                 id = "searchSuggest"
@@ -105,7 +108,7 @@ function Plexus(props){
                 onInputChange={(text, event) => {
                     setLabel(text)
                 }}
-                options={eleIds}
+                options={eleNames}
                 //selectHintOnEnter={true}
                 highlightOnlyResult={true}
                 maxResults={10}
@@ -121,25 +124,21 @@ function Plexus(props){
                 stylesheet={ getStyle() }
                 layout={ {name: 'cose' }}
                 cy={(cy) => { cyRef = cy }}
-                click = {click}
             />
             <KeyboardEventHandler
-                handleKeys={['a', 'b', 'c']}
+                handleKeys={['all']}
                 onKeyEvent={(key, e) => console.log(`do something upon keydown event of ${key}`)} 
             />
+            <p>{label}</p>
+            <div id="snackbar">
+                Memorized
+            </div>
         </div>
     );
 }
 Plexus.propTypes = {
-    elements: PropTypes.array
-};
-Plexus.defaultProps = {
-    elements: []
-    // [
-    //     { data: { id: 'one', label: 'Node 1' }, position: { x: 0, y: 0 } },
-    //     { data: { id: 'two', label: 'Node 2' }, position: { x: 100, y: 0 } },
-    //     { data: { source: 'one', target: 'two', label: 'Edge from Node1 to Node2' } }
-    // ],
+    eles: PropTypes.array,
+    stylesheet: PropTypes.array
 };
 export default Plexus;
 

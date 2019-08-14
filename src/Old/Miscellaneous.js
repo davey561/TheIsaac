@@ -17,6 +17,17 @@ export function collectionToString(eles){
   });
   return s;
 }
+// const collectionToString = () => {
+//   let s = ""
+//   let eles = cyRef.nodes();
+//   if(eles){
+//       eles.forEach(function(ele){
+//           s+= ele.data('name') + ", "
+//       });
+// //   }
+//   console.log(s)
+//   return s;
+// }
 
 //Convert object to array with corresponding indices:
 // export function toArray(obj, range){

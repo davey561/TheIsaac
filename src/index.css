@@ -7,8 +7,18 @@ height: 90%;
 width: 100%;
 }
 .bar{
-  width: 50%;
-  margin: auto;
+  width: 40%;
+  display: inline-block;
+  /* margin: auto; */
+  margin: 0% 8%
+}
+.button-container{
+  /* float:left; */
+  display: inline-block;
+}
+.newButton{
+  margin: 0% .3em;
+  /* color: #FB7272; */
 }
 #cy {
   height: 620px;
@@ -40,17 +50,19 @@ text-align: center
 #snackbar {
   visibility: hidden;
   min-width: 50px;
-  margin-left: -600px;
-  background-color: #FB7272 ;
-  color: white;
+  /* margin-left: -400px; */
+  color: #FB7272 ;
+  background-color: white;
   text-align: center;
   border-radius: 2px;
   padding: 16px;
   position: fixed;
   z-index: 1;
-  left: 50%;
+  left: 20px;
   bottom: 30px;
-  font-size: 24px;
+  font-size: 30px;
+  font-style: italic;
+  font-family: "Apple Chancery, cursive"
 }
 #snackbar.show {
     visibility: visible;
