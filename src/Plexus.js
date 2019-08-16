@@ -7,9 +7,6 @@ import PropTypes from 'prop-types';
 import firebase from 'firebase';
 import {Typeahead} from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css'
-import {Snackbar} from '@material/react-snackbar';
-import LastTwoComponent from './Old/LastTwoComponent';
-// import '@material/react-snackbar/dist/snackbar.css';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 import defaultOptions from './Old/defaultOptions'
 import { ButtonToolbar, Button } from 'react-bootstrap';
@@ -18,6 +15,7 @@ import { runLayout, save } from './Old/EventResponses';
 import {saveToText} from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
 import { cytoscapeEvents } from './Old/CyEvents';
+import {findGoodLocationForNewNode, addEdgeSmart} from './Old/ModifyGraph';
 cytoscape.use(fcose);
 
 function Plexus(props){
@@ -95,26 +93,30 @@ function Plexus(props){
         // let ref = firebase.database().ref().child('elements');
         // cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, setLastEdgeName, ref);
     }, [firebaseRef]);
-    useEffect(()=> {
-        let [source, target] = lastTwo.getNames(cyRef);
-        setLastTwoText(source + "&#160;&#160;&#160;&#160;&xrArr;&#160;&#160;&#160;&#160;" + target);
-        // window.alert('use effect on ref change')
-        // let ref = firebase.database().ref().child('elements');
-        // cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, setLastEdgeName, ref);
-    }, [cyRef, lastTwo]);
+    // useEffect(()=> {
+    //     let [source, target] = lastTwo.getNames(cyRef);
+    //     setLastTwoText(source + "&#160;&#160;&#160;&#160;&xrArr;&#160;&#160;&#160;&#160;" + target);
+    //     // window.alert('use effect on ref change')
+    //     // let ref = firebase.database().ref().child('elements');
+    //     // cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, setLastEdgeName, ref);
+    // }, [cyRef, lastTwo]);
     return (
         <div>
             <br></br>
-            {/* <div id = 'lasttwo' className="potential"><h3>Davey &#160;&#160;&#160;&#160;&#10233;&#160;&#160;&#160;&#160; Davey</h3></div> */}
             <ButtonToolbar className="button-container"> 
-                <Button variant="outline-primary" className="newButton">Add Node</Button>
-                <Button id="layoutButton" variant="outline-primary" className="newButton" 
+                <Button variant="outline-primary" className="newButton" size="sm"
+                    onClick={()=>findGoodLocationForNewNode(cyRef,5)}>Add Node</Button>
+                    <Button variant="outline-primary" className="newButton" size="sm"
+                    onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo)}>Add Edge</Button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <Button id="layoutButton" variant="outline-primary" className="newButton" size="sm" 
                     onClick={() => runLayoutDefault(getElements())}>Layout</Button>
-                <Button variant="outline-primary" className="newButton" 
+                <Button variant="outline-primary" className="newButton" size="sm"
                     onClick={() => save(cyRef, firebaseRef)}>Save</Button>
-                <Button id="downloadButton" variant="outline-primary" className="newButton"
+                <Button id="downloadButton" variant="outline-primary" className="newButton" size="sm"
                     onClick={() => saveToText(cyRef)}>Download</Button>
             </ButtonToolbar>
+            <h3 id = 'lasttwo' className="potential">&#160;&#160;&#160;&#160;&#10233;&#160;&#160;&#160;&#160;</h3>
             <Typeahead 
                 className = "bar"
                 id = "searchSuggest"

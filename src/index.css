@@ -7,18 +7,18 @@ height: 90%;
 width: 100%;
 }
 .bar{
-  width: 40%;
-  /* display: inline-block; */
-  float: right;
+  width: 30%;
+  display: inline-block;
+  /* float: right; */
   /* margin: auto; */
-  margin: 0% 4%
+  margin: 0% 2em
 }
 .button-container{
-  float:left;
-  /* display: inline-block; */
+  /* float:left; */
+  display: inline-block;
 }
 .newButton{
-  margin: 0% .3em;
+  margin: 0% .2em;
   /* color: #FB7272; */
 }
 #cy {
@@ -28,9 +28,12 @@ width: 100%;
   display: block;
 }
 #lasttwo{
-  text-align: center;
+  /* text-align: center; */
+  display: inline-block;
   font-family: 'Optima';
   font-style: italic;
+  margin: 0% 2em;
+  
 }
 #title{
   font-family: 'Optima'

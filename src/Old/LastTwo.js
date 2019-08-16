@@ -64,9 +64,8 @@ function LastTwo(props){
     }
     this.renderText = (cy) => {
         let [source, target] = this.getNames(cy);
-        // return document.getElementById("lasttwo").
-        //   getElementsByTagName("h3")[0].innerHTML = 
-        //   source + "&#160;&#160;&xrArr;&#160;&#160;" + target;
+        return document.getElementById("lasttwo").innerHTML = 
+        source + "&#160;&#160;&xrArr;&#160;&#160;" + target;
     }
     this.source = () => {
         return this.lastTwo[0];

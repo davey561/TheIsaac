@@ -268,4 +268,16 @@ function findNodesInViewport(cy, radius){
 export function deleteOneNode(targnode, cy){
   cy.remove(targnode); 
 }
+export function addEdgeSmart(cy, lastEdgeAdded, lastTwoObj){
+  let sourceNode = null; let targetNode =null;
+  //I think this check to see if there are any selected nodes
+  if(lastTwoObj.lastTwo.length==2){
+    sourceNode = cy.$('[id="'+lastTwoObj.lastTwo[0]+'"]');
+    targetNode = cy.$('[id="'+lastTwoObj.lastTwo[1]+'"]');
+  }
+  //Allow user to add edge
+  if(sourceNode!=null && targetNode!=null){
+    lastEdgeAdded = addEdge(cy, sourceNode, targetNode, lastEdgeAdded);
+  }
+}
   
