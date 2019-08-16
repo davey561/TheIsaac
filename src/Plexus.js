@@ -2,7 +2,10 @@
 import React, {useState, useEffect, Component} from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape from 'cytoscape';
+
 import fcose from 'cytoscape-fcose';
+import dagre from 'cytoscape-dagre';
+import cola from 'cytoscape-cola';
 import PropTypes from 'prop-types';
 import firebase from 'firebase';
 import {Typeahead} from 'react-bootstrap-typeahead';
@@ -11,12 +14,14 @@ import KeyboardEventHandler from 'react-keyboard-event-handler';
 import defaultOptions from './Old/defaultOptions'
 import { ButtonToolbar, Button } from 'react-bootstrap';
 import { runLayoutDefault } from './Old/Layout';
-import { runLayout, save } from './Old/EventResponses';
+import { runLayout, save, allEvents, numberKeyResponses, confMessage } from './Old/EventResponses';
 import {saveToText} from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
 import { cytoscapeEvents } from './Old/CyEvents';
 import {findGoodLocationForNewNode, addEdgeSmart} from './Old/ModifyGraph';
 cytoscape.use(fcose);
+cytoscape.use(cola);
+cytoscape.use(dagre);
 
 function Plexus(props){
     const [layout, setLayout] = useState(defaultOptions.fCoseOptions);
@@ -34,6 +39,9 @@ function Plexus(props){
     const [lastTwo, setLastTwo] = useState(new LastTwo());
     const [lastTwoText, setLastTwoText] = useState();
     const [lastEdgeName, setLastEdgeName] = useState("");
+
+    //constants pertaining specifically to keypress responses
+    const [repeatTracker, setRepeatTracker] = useState(false);
 
 
     let cyRef = React.createRef();
@@ -93,13 +101,22 @@ function Plexus(props){
         // let ref = firebase.database().ref().child('elements');
         // cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, setLastEdgeName, ref);
     }, [firebaseRef]);
-    // useEffect(()=> {
-    //     let [source, target] = lastTwo.getNames(cyRef);
-    //     setLastTwoText(source + "&#160;&#160;&#160;&#160;&xrArr;&#160;&#160;&#160;&#160;" + target);
-    //     // window.alert('use effect on ref change')
-    //     // let ref = firebase.database().ref().child('elements');
-    //     // cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, setLastEdgeName, ref);
-    // }, [cyRef, lastTwo]);
+    useEffect(()=> {
+        window.addEventListener("keyup", event => {
+            if (event.keyCode == 76) {
+              setRepeatTracker(false);
+            }
+          });
+          window.addEventListener("beforeunload", function (e) {
+            confMessage(cyRef,e);
+          });
+          window.addEventListener("unload", function(evt){
+            //saveWhichUser();
+            cyRef.nodes().classes('');
+            cyRef.elements().deselect();
+            save(cyRef);
+          });
+    }, [cyRef]);
     return (
         <div>
             <br></br>
@@ -145,10 +162,18 @@ function Plexus(props){
                 cy={(cy) => { cyRef = cy }}
             />
             <KeyboardEventHandler
-                handleKeys={['all']}
-                onKeyEvent={(key, e) => console.log(`do something upon keydown event of ${key}`)} 
+                handleKeys={['shift+e', 'shift+n', 'shift+space', 'shift+r', 'shift+backspace',
+                     'ctrl+d', 'all']}
+                onKeyEvent={(key, event) => 
+                   allEvents(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, repeatTracker)
+                } 
             />
-            <p>{label}</p>
+            <KeyboardEventHandler
+                handleKeys={['numeric']}
+                onKeyEvent={(key, event) => {numberKeyResponses(cyRef, key)}
+                } 
+            />
+            {/* <p>{label}</p> */}
             <div id="snackbar">
                 Memorized
             </div>

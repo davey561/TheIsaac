@@ -22,13 +22,6 @@ export function cleanNodes(cy){
     });
     
 }
-export function colaLayout(cy){
-    cy.layout(defaultOptions.cola).run();
-   // window.alert('hello');
-}
-export function dagreLayout(cy){
-    cy.layout(defaultOptions.dagre).run();
-}
 export function sizeNodeText(ele){
   let c = fullNodeTextCalcs(ele);
   let fontSize;

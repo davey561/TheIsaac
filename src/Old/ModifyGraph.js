@@ -1,6 +1,7 @@
 import { Core, EdgeCollection } from "cytoscape";
 import {runLayoutDefault} from "./EventResponses";
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
+import {concatName} from './Miscellaneous';
 
 export function addNode(cy, label, location){
     if (label==null) return null;
@@ -279,5 +280,79 @@ export function addEdgeSmart(cy, lastEdgeAdded, lastTwoObj){
   if(sourceNode!=null && targetNode!=null){
     lastEdgeAdded = addEdge(cy, sourceNode, targetNode, lastEdgeAdded);
   }
+}
+export function nedge(cy, lastTwoObj){
+  let eventualEdge = retrieveNewName(cy, false);
+  let eventualNode = retrieveNewName(cy, true);
+  let pastSelected = cy.getElementById(lastTwoObj.lastTwo[1]);
+  let newNode = addNode(cy, eventualNode, {x: 0, y: 0});
+  let newEdge = addNewEdge(cy, pastSelected, newNode, eventualEdge[0]);
+}
+export function nodify (cy){
+  if (cy.edges().filter(':selected').length == 1){
+    let newName = cy.edges().filter(':selected').data("name");
+    let unique = findUniqueName(cy, newName, true);
+    newName = unique[0];
+    let newId = unique[1];
+    let sourceX = cy.edges().filter(':selected').source().position().x;
+    let sourceY = cy.edges().filter(':selected').source().position().y;
+    let targetX = cy.edges().filter(':selected').target().position().x;
+    let targetY = cy.edges().filter(':selected').target().position().y;
+    let newNodeX = (sourceX + targetX)/2;
+    let newNodeY = (sourceY + targetY)/2;
+    cy.add({
+      data: { id: newId, name: newName },
+      position: { x: newNodeX, y: newNodeY }
+    }).select();
+    cy.add({
+      data: { source: cy.edges().filter(':selected').source().id(),
+              target: newId,
+              name: ''
+            }
+    });
+    cy.add({
+      data: { source: newId,
+              target: cy.edges().filter(':selected').target().id(),
+              name: ''
+            }
+    });
+    cy.remove(cy.edges().filter(':selected'));
+  }
+}
+export function edgify(cy){
+  if (cy.nodes().filter(':selected').length == 1){
+    if (cy.nodes().filter(':selected').incomers('edge').length==1 && cy.nodes().filter(':selected').outgoers('edge').length==1){
+      let edge = cy.nodes().filter(':selected');
+      if(edge.length == 1){
+        let unique = findUniqueName(cy, edge.data('name'), false);
+        let [newName, newId] = unique;
+        cy.add({
+          data: { name: newName,
+            source: cy.nodes().filter(':selected').incomers('node').id(),
+            target: cy.nodes().filter(':selected').outgoers('node').id()
+          }
+        }).select();
+        cy.remove(cy.nodes().filter(':selected'));
+      }
+    }
+  }
+}
+export function deleteAll(cy){
+  if(window.confirm('Delete all nodes and edges?')){
+    cy.remove(cy.elements());
+  }
+}
+export function deleteSome(cy){
+  if(cy.elements().filter(':selected').length>0){
+    let copy = cy.elements().filter(':selected').slice(0); //make copy of selectedNodes, because selectedNodes can change in every iteration
+    //(cy.on("remove", ...) in fx below)
+    let ids = cy.elements().filter(':selected').reduce( concatName );
+    if(window.confirm('Delete "' + ids + '"?')){
+      copy.forEach(function(ele){deleteOneNode(ele, cy)});
+    }
+  }
+}
+export function addNodeSmart(cy){
+  findGoodLocationForNewNode(cy,5)
 }
   

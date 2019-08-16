@@ -6,6 +6,9 @@
 height: 90%;
 width: 100%;
 }
+body{
+  background-color: 'lightblue';
+}
 .bar{
   width: 30%;
   display: inline-block;
@@ -22,7 +25,7 @@ width: 100%;
   /* color: #FB7272; */
 }
 #cy {
-  height: 620px;
+  height: 90%;
   width: 100%;
   z-index: 999;
   display: block;
