@@ -1,5 +1,6 @@
 import { Core, EdgeCollection } from "cytoscape";
-import {runLayoutDefault} from "./EventResponses"
+import {runLayoutDefault} from "./EventResponses";
+import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
 
 export function addNode(cy, label, location){
     if (label==null) return null;
@@ -17,26 +18,42 @@ export function addNode(cy, label, location){
         }
     );
   }
-  export function retrieveNewName(cy, isNode){
+  export function retrieveNewName(cy, isNode, existsAlready){
     let nodename = String(window.prompt("Name:", ""));
-    if((nodename=="null")||(nodename=="")){return null;}
-    return findUniqueName(cy, nodename, isNode);
+    if((nodename=="null")||(nodename=="")){return -1;}
+    return findUniqueName(cy, nodename, isNode, existsAlready);
   }
-  export function findUniqueName(cy, nodename, isNode){
-    let counter = 1;
+  export function findUniqueName(cy, nodename, isNode, existsAlready){
+    let counter = 0;
     let id = nodename + counter;
     let ele_type = (isNode ? "node": "edge");
     let group = (isNode ? cy.nodes(): cy.edges());
-    while (group.is(`[id = "${id}"]`)) {
-      if(!window.confirm(
-        `There is another ${ele_type} with this name. 
-        Confirm that you'd like this name.`)){
-        return null;
+    //while there's a node with the current name, ask if it's ok
+    let currentTaken = (isNode? group.is(`[name = "${nodename}"]`): false)
+    if(currentTaken){
+      if(window.confirm(
+        `There is another ${ele_type} with this name. Confirm that you'd like this name.`))
+      {
+        do {
+          counter++;
+          id = nodename+counter;
+        } while(group.is(`[id = "${id}"]`));
       }
-      counter++;
-      id = nodename + counter;
+      else {
+        return -1;
+      }
     }
     return [nodename, id];
+  }
+  export function rename(cy, event){
+    let isNode = true;
+    if(event.target !== cy && event.target.isEdge()){
+      isNode= false;
+    }
+    let newInfo = retrieveNewName(cy, isNode, true)[0];
+    if(newInfo!=-1){
+      event.target.data('name', newInfo);
+    }
   }
 //   function renameEdge(){
   
@@ -247,5 +264,8 @@ function findNodesInViewport(cy, radius){
     }
   });
   return nodesInViewport;
+}
+export function deleteOneNode(targnode, cy){
+  cy.remove(targnode); 
 }
   

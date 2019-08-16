@@ -4,8 +4,11 @@ Has some common methods for updating them.
 
 */
 
+import React from 'react';
 import {collectionToString} from './Miscellaneous'
-function LastTwo(){
+
+
+function LastTwo(props){
     this.lastTwo = [null,null];
     this.potClass = "potential-border";
     this.update = function(cy, ...newones){
@@ -61,9 +64,9 @@ function LastTwo(){
     }
     this.renderText = (cy) => {
         let [source, target] = this.getNames(cy);
-        return document.getElementById("lasttwo").
-          getElementsByTagName("h3")[0].innerHTML = 
-          source + "&#160;&#160;&#160;&#160;&rArr;&#160;&#160;&#160;&#160;" + target;
+        // return document.getElementById("lasttwo").
+        //   getElementsByTagName("h3")[0].innerHTML = 
+        //   source + "&#160;&#160;&xrArr;&#160;&#160;" + target;
     }
     this.source = () => {
         return this.lastTwo[0];

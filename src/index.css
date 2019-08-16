@@ -8,13 +8,14 @@ width: 100%;
 }
 .bar{
   width: 40%;
-  display: inline-block;
+  /* display: inline-block; */
+  float: right;
   /* margin: auto; */
-  margin: 0% 8%
+  margin: 0% 4%
 }
 .button-container{
-  /* float:left; */
-  display: inline-block;
+  float:left;
+  /* display: inline-block; */
 }
 .newButton{
   margin: 0% .3em;
@@ -27,7 +28,9 @@ width: 100%;
   display: block;
 }
 #lasttwo{
-text-align: center
+  text-align: center;
+  font-family: 'Optima';
+  font-style: italic;
 }
 #title{
   font-family: 'Optima'

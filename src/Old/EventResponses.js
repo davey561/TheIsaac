@@ -8,20 +8,26 @@ import {addNode, retrieveNewName, addEdge, findGoodLocationForNewNode,
 export function allEvents(cy, database, lastTwoObj, lastEdgeAdded) {
 }
 
-export function save(cy, database){
+export function save(cy, firebaseRef){
     //before saving, remove all style classes
     // cy.nodes().classes('');
     // let elements = cy.elements();
     //@ts-ignore
     // let mode = document.getElementById('codeSelection').value;
     // firebaseRef.child("Users").child(mode).set(JSON.stringify(elements.jsons()));
-    database.set(JSON.stringify(cy.elements().jsons()));
+    
     // localStorage.setItem('graphitems', JSON.stringify(cy.elements().jsons()));
     //Operate the snackbar
     
-    var x = document.getElementById("snackbar");
-    x.className = "show";
-    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    
+       //window.alert('saving');
+        firebase.database().ref().child('elements').set(JSON.stringify(cy.elements().jsons()));
+        var x = document.getElementById("snackbar");
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    // } catch (Exception) {
+    //    // window.alert('catching');
+    // }
 }
 
 export function nodify (cy){

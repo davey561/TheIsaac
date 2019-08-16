@@ -380,6 +380,7 @@ class defaultOptions{
   };
 }
 export default defaultOptions;
+
 function edgeTextCalcs(ele){
   let label = ele.data('name');
   let rendLength = distanceBetweenPoints(ele.renderedTargetEndpoint(), ele.renderedSourceEndpoint());
