@@ -1,5 +1,5 @@
 import {save} from './EventResponses';
-import {runLayoutDefault} from './Layout';
+import {runLayout2} from './Layout';
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
 import {retrieveNewName, deleteOneNode, rename} from './ModifyGraph';
 import defaultOptions from './defaultOptions';
@@ -7,31 +7,20 @@ import defaultOptions from './defaultOptions';
 
 
 //Cytoscape Events
-export function cytoscapeEvents(cy, lastTwoObj, lastEdgeName, setLastEdgeName, firebaseRef){
-  cy.on('', () => {
-    let dob = defaultOptions;
-    cy.layout(dob.layout).run()
-  }) 
+export function cytoscapeEvents(cy, lastTwoObj, lastEdgeName, setLastEdgeName, firebaseRef, typeahead, first){
   //keep track of last two
-   cy.on("add select", function(event){
-    //  cy.style().update();
-    //  ele.select();
-    });
    cy.on(
     "add data select tap",
-    function(event){
-      
-      let targnode = event.target;
-      
-      if(targnode === cy){
+    (event) => {
+      if(event.target === cy){
       }
-      else if (targnode.isNode()){
+      else if (event.target.isNode()){
         lastTwoObj.update(cy, event.target.id());
       }
       //if an edge has been added
-      else if(targnode.isEdge()){
+      else if(event.target.isEdge()){
         //if potentialStatus field is defined and true (indicating it's a potential edge), break
-        if (typeof targnode.data('potentialStatus') === 'undefined') {
+        if (typeof event.target.data('potentialStatus') === 'undefined') {
           lastTwoObj.update(cy, event.target.source().id(), event.target.target().id());
         }
       }
@@ -48,6 +37,7 @@ export function cytoscapeEvents(cy, lastTwoObj, lastEdgeName, setLastEdgeName, f
         save(cy, firebaseRef);
       }
     );
+
   });
   cy.on(
     "add remove select tap", function(event){
@@ -65,7 +55,7 @@ export function cytoscapeEvents(cy, lastTwoObj, lastEdgeName, setLastEdgeName, f
           return;
         }
       }
-      runLayoutDefault(eles);
+      runLayout2(eles);
     }
   )
   cy.on("remove", function(event){

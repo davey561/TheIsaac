@@ -5,10 +5,14 @@ import dagre from 'cytoscape-dagre';
 cytoscape.use(cola);
 cytoscape.use(dagre);
 
-export function runLayout(cy, layout){
-    layout.run();
+export function runLayout(cy, eles, layout){
+  cy.stop();
+  try{
+    eles.layout(layout).run();
+  } catch (Exception) {}
+ 
 }
-export function runLayoutDefault(eles){
+export function runLayout2(eles){
   try{
     eles.layout(defaultOptions.fCoseOptions).run();
   } catch (Exception){

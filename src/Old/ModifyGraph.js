@@ -2,10 +2,11 @@ import { Core, EdgeCollection } from "cytoscape";
 import {runLayoutDefault} from "./EventResponses";
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
 import {concatName} from './Miscellaneous';
+import { async } from "q";
 
 export function addNode(cy, label, location){
     if (label==null) return null;
-    return cy.add(
+    let newNode = cy.add(
         //@ts-ignore
         { 
             data: {
@@ -18,10 +19,12 @@ export function addNode(cy, label, location){
             position: location
         }
     );
+    newNode.select();
+    return newNode;
   }
   export function retrieveNewName(cy, isNode, existsAlready){
     let nodename = String(window.prompt("Name:", ""));
-    if((nodename=="null")||(nodename=="")){return -1;}
+    if(nodename=="null"){return -1;}
     return findUniqueName(cy, nodename, isNode, existsAlready);
   }
   export function findUniqueName(cy, nodename, isNode, existsAlready){
@@ -166,55 +169,46 @@ export function addNode(cy, label, location){
   }
   export function findGoodLocationForNewNode(cy, radius){
     let extent = cy.extent(); //gets dimensions of the viewport frame in terms of model coordinates
-    //window.alert(JSON.stringify(extent));
-    let newX;
-    let newY;
+    let newCoords = {};
     let goodLocation; //boolean value indicating whether node has been placed in a
     let i = 0;
-    let paddedExtent = [extent.x1 + radius, extent.x2-radius, extent.y1+radius, extent.y2-radius];
-    let nodesInViewport = cy.collection();
+    let paddedExtent = {
+      x1: extent.x1 + radius,
+      x2: extent.x2 - radius,
+      y1: extent.y1 + radius,
+      y2: extent.y2 - radius
+    }
+    //Find all the nodes currently in the viewport
+    let nodesInViewport = findNodesInViewport(cy, radius);
     do{
       goodLocation = true;
-      newX = randomIntInRange(paddedExtent[0], paddedExtent[1]);
-      newY = randomIntInRange(paddedExtent[2], paddedExtent[3]);
-      // window.alert("viewport: " + (extent.x1 + width) + ", " + (extent.x2-width) + "; " +  (extent.y1+height) + ", "  + (extent.y2-height));
-      //window.alert("newX,Y: " + newX + ", " + newY);
-      cy.nodes(':visible').forEach(function(ele){
+      newCoords = {
+        x: randomIntInRange(paddedExtent.x1, paddedExtent.x2),
+        y: randomIntInRange(paddedExtent.y1, paddedExtent.y2)
+      }
+      cy.nodes().forEach(function(ele){
         //if this element is in the viewport
-       // window.alert('position of ' + ele.data('name') + ": " + ele.position().x + ", " + ele.position().y);
-        if(between(ele.position().x, paddedExtent[0], paddedExtent[1]) 
-        && between(ele.position().y, paddedExtent[2], paddedExtent[3])  ){
-         // window.alert(ele.data('name') + "is deemed in");
+        if(between(ele.position().x, paddedExtent.x1, paddedExtent.x2) 
+        && between(ele.position().y, paddedExtent.y1, paddedExtent.y2))
+        {
           nodesInViewport.union(ele);
-          let tempDist = distance(newX, newY, ele.position().x, ele.position().y);
-          if(tempDist< ele.numericStyle('width')){
+          if(distanceBetweenPoints(newCoords, ele.position()) < ele.numericStyle('width')){
             goodLocation = false;
+            //window.alert('woulda been too close');
           }
         }
       });
       i++;
       if(i>3000){
-        // window.alert("Extent is too crowded with nodes to find good location, so zooming out and rerunning.");
-        // window.alert('over2000');
         let nodesInViewport = findNodesInViewport(cy, radius);
-        // window.alert('nodes in viewport: ' + nodesInViewport.toArray().toString());
-        // const zoomout = nodesInViewport.animation({
-        //   //@ts-ignore
-        //   zoom: cy.zoom()/4
-        // });
-        // zoomout.play();
-        // zoomout.promise().then(function(){
-        //   cy.center(nodesInViewport);
-        //   console.log('promise happned');
-        // });
-        cy.zoom(cy.zoom()/4);
+        // cy.zoom(cy.zoom()/4);
         cy.center(nodesInViewport);
         findGoodLocationForNewNode(cy, radius);
         return null;
+        console.log('viewport is too crowded for new node. zooming out to add it')
       }
-      //window.alert(i);
     } while(!goodLocation);
-    let newnode = addNode(cy, retrieveNewName(cy, true), {x: newX, y: newY});
+    return newCoords;
   }
   function randomIntInRange(x1, x2){
     return Math.floor(Math.random()*(x2-x1) + x1);
@@ -246,22 +240,18 @@ export function addNode(cy, label, location){
       return -1;
     }
   }
-  function between(x, x1, x2){
-    if(x>x1&&x<x2) return true;
-    return false;
-  } 
-//export {addNode, retrieveNewName};
-function findNodesInViewport(cy, radius){
-  let extent = cy.extent();
-  let paddedExtent = [extent.x1, extent.x2, extent.y1, extent.y2];
+function between(x, x1, x2){
+  if(x>x1&&x<x2) return true;
+  return false;
+}
+function findNodesInViewport(cy, radius) {
+  let paddedExtent = getPaddedExtent(cy, radius);
   let nodesInViewport = cy.collection();
   cy.nodes().forEach(function(ele){
-    //if this element is in the viewport
-    // window.alert('position of ' + ele.data('name') + ": " + ele.position().x + ", " + ele.position().y);
-    if(between(ele.position().x, paddedExtent[0], paddedExtent[1]) 
-    && between(ele.position().y, paddedExtent[2], paddedExtent[3])  ){
-      // window.alert(ele.data('name') + "is deemed in");
-      nodesInViewport = nodesInViewport.union(ele);
+    if(between(ele.position().x, paddedExtent.x1, paddedExtent.x2) 
+    && between(ele.position().y, paddedExtent.y1, paddedExtent.y2))
+    {
+      nodesInViewport.union(ele);
     }
   });
   return nodesInViewport;
@@ -353,6 +343,21 @@ export function deleteSome(cy){
   }
 }
 export function addNodeSmart(cy){
-  findGoodLocationForNewNode(cy,5)
+  let coords = findGoodLocationForNewNode(cy,5);
+  let newName = retrieveNewName(cy, true);
+  if(newName!=-1){
+    addNode(cy, newName, coords);
+  }
+  cy.container().focus();
+  console.log(352);
+}
+function getPaddedExtent(cy, radius){
+  let extent = cy.extent();
+  return {
+    x1: extent.x1 + radius,
+    x2: extent.x2 - radius,
+    y1: extent.y1 + radius,
+    y2: extent.y2 - radius
+  }
 }
   

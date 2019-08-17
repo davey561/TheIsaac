@@ -32,6 +32,16 @@ import { Core, Singular, CollectionReturnValue, Collection } from "cytoscape";
 //     cy.style().update();
 //   }
 //   //7) Search for node and change layout to center viewport on it
+  export function barSelect(cy, text){
+    let results = cy.nodes('[name@*="' + text + '"]');   //searches within the graph for a node that contains searchterms
+
+    //if there is only one result
+    if (results.size()==1){
+      let result = results[0];
+      cy.elements().unselect();
+      result.select();
+    }
+  }
   export function quickSelect(cy){
     var searchterms = window.prompt("Search:", "Davey");
     var results = cy.nodes('[name@*="' + searchterms + '"]');   //searches within the graph for a node that contains searchterms

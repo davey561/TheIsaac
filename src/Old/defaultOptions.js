@@ -103,7 +103,7 @@ class defaultOptions{
           return setTextMaxWidth(ele);
         },
         'font-size': function(ele){
-          return sizeNodeText(ele);
+          return Math.floor(sizeNodeText(ele)/2)*2;
         },
         label: function(ele){
           return setNodeLabel(ele);
@@ -133,7 +133,7 @@ class defaultOptions{
             let fontCap = arrAvg([ele.target().renderedWidth(), ele.source().renderedWidth()])/k;
             fontSize = Math.min(c.rendLength/c.label.length, fontCap);
           }
-          return WEIRD_TEXT_SIZING_FACTOR* 9/10 * fontSize/c.currZoomLevel;
+          return Math.floor(WEIRD_TEXT_SIZING_FACTOR* 9/10 * fontSize/c.currZoomLevel);
         },
         'label': function(ele){
           let c = edgeTextCalcs(ele);

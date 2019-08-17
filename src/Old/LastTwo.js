@@ -47,7 +47,7 @@ function LastTwo(props){
     this.style = (cy) => {
         cy.nodes().removeClass(this.potClass);
         this.toNodes(cy).addClass(this.potClass);
-        console.log(collectionToString(this.toNodes(cy)))
+        //console.log(collectionToString(this.toNodes(cy)))
     }
     this.toNodes = (cy) => {
         let eles = cy.collection();

@@ -11,13 +11,13 @@ import { saveToText } from './ConvertToBullets';
 import {quickSelect} from './FocusLevels';
 import {numberKeyDown} from './Miscellaneous';
 
-export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, repeatTracker) {
+export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, repeatTracker, typeahead) {
     
     console.log(lastTwoObj);
     console.log(`key: ${typeof key}`);
     switch(key){
         //Layouts
-        case 'l': fCoseLayout(cy, repeatTracker); break;
+        case 'l': runLayout(cy, cy.elements(), defaultOptions.layout); break;
         case 'a': colaLayout(cy); break;
         case 'd': dagreLayout(cy); break;
         case 'shift+r': randomLayout(cy); break;
@@ -43,8 +43,17 @@ export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, r
         case 'backspace': deleteSome(cy); break;
 
         //Search/Select
-        case 'space': quickSelect(cy); break;
-        case 'shift+space': break;
+        case 'space': 
+            //quickSelect(cy);
+            // typeahead.getInstance().clear() ;
+            typeahead.focus();
+            // typeahead.getInstance().clear();
+            break;
+        case 'shift+space': //typeahead.focus(); 
+            quickSelect(cy);
+            //document.
+            //setTimeout(()=>typeahead.clear(), 1000)
+            break;
         case 'esc': cy.elements().unselect(); break;
 
         //Multipurpose
@@ -97,7 +106,7 @@ event.preventDefault();
 }
 export const numberKeyResponses = (cy, key) => {
     let component = cy.elements().components()[parseInt(key)];
-    runLayoutDefault(component);
+    runLayout(cy, component, defaultOptions.layout);
 }
 export function confMessage(cy, e){
     var confirmationMessage = "\o/";
