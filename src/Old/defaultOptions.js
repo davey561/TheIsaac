@@ -12,13 +12,21 @@ cytoscape.use(fcose);
 cytoscape.use(cola);
 cytoscape.use(dagre);
 const IDEAL_EDGE_LENGTH = 20;
-const ANIMATION_DURATION = 1200;
+const ANIMATION_DURATION = 700;
 
 class defaultOptions{
+  // simpleLayout = (setFl) =>
+  //   {return {
+  //     stop: () => {
+  //         console.log('layout k stopped')
+  //         setFl(false);
+  //     },
+  //     name: 'cose'
+  // }};
   static layout = {
     name: 'cose', //uses the cose-bilkent layout, downloaded from internet, good for compound graphs
-    animate: 'end',  animationEasing: 'ease-out', animationDuration: ANIMATION_DURATION,
-    randomize: true,
+    animate: 'end',  animationEasing: 'ease-out', animationDuration: 400,
+    randomize: false,
     idealEdgeLength: IDEAL_EDGE_LENGTH, 
     //edgeelasty: 4,
     fit: true,
@@ -68,6 +76,17 @@ class defaultOptions{
     randomize: false,
     edgeLength: (edge) => {return 30}
   };
+  static euler = {
+    name: 'euler',
+    animate: 'end',
+    animationDuration: ANIMATION_DURATION,
+    randomize: false,
+    gravityRange: .1,
+    animationEasing: 'ease',
+    quality: 'draft',
+    idealEdgeLength: IDEAL_EDGE_LENGTH
+
+  }
   static animation = {
     animate: 'end',  animationEasing: 'ease-out', animationDuration: ANIMATION_DURATION
   }
@@ -91,6 +110,7 @@ class defaultOptions{
         'text-justification': 'center',
         'text-overflow-wrap': 'whitespace',
         'background-color': '#FE5454',
+        'background-opacity': .9,
         'width': function(ele){
           return 8*(2+ele.degree());
         },
@@ -116,37 +136,37 @@ class defaultOptions{
         'width': function(ele){
           return (ele.source().degree() + ele.target().degree())/4
         },
-        'font-size': function (ele){
-          // console.log('oh hello');
-          // return sizeEdgeFont(ele);
-          let c = edgeTextCalcs(ele);
-          if (c.label.length==0){return 1;}
-          let fontSize;
-          //if label is too long
-          if (c.label.length >= c.maxStrLength){
-            fontSize =  MIN_FONT_SIZE;
-          } 
-          //if the label fits, either make it large enough to fill the line, 
-          // or as large as a k-letter label would be in the average of the two nodes
-          else {
-            const k = 5;
-            let fontCap = arrAvg([ele.target().renderedWidth(), ele.source().renderedWidth()])/k;
-            fontSize = Math.min(c.rendLength/c.label.length, fontCap);
-          }
-          return Math.floor(WEIRD_TEXT_SIZING_FACTOR* 9/10 * fontSize/c.currZoomLevel);
-        },
-        'label': function(ele){
-          let c = edgeTextCalcs(ele);
-          //if label is too long
-          if (c.label.length > c.maxStrLength){
-            if(c.maxStrLength > 1){
-              c.label = c.label.slice(0, c.maxStrLength - 1) + '.';
-            } else {
-              c.label = '';
-            }
-          } 
-          return c.label;
-        },
+        // 'font-size': function (ele){
+        //   // console.log('oh hello');
+        //   // return sizeEdgeFont(ele);
+        //   let c = edgeTextCalcs(ele);
+        //   if (c.label.length==0){return 1;}
+        //   let fontSize;
+        //   //if label is too long
+        //   if (c.label.length >= c.maxStrLength){
+        //     fontSize =  MIN_FONT_SIZE;
+        //   } 
+        //   //if the label fits, either make it large enough to fill the line, 
+        //   // or as large as a k-letter label would be in the average of the two nodes
+        //   else {
+        //     const k = 5;
+        //     let fontCap = arrAvg([ele.target().renderedWidth(), ele.source().renderedWidth()])/k;
+        //     fontSize = Math.min(c.rendLength/c.label.length, fontCap);
+        //   }
+        //   return Math.floor(WEIRD_TEXT_SIZING_FACTOR* 9/10 * fontSize/c.currZoomLevel);
+        // },
+        // 'label': function(ele){
+        //   let c = edgeTextCalcs(ele);
+        //   //if label is too long
+        //   if (c.label.length > c.maxStrLength){
+        //     if(c.maxStrLength > 1){
+        //       c.label = c.label.slice(0, c.maxStrLength - 1) + '.';
+        //     } else {
+        //       c.label = '';
+        //     }
+        //   } 
+        //   return c.label;
+        // },
         'font-family': 'monospace',
         'curve-style': 'bezier',
         'source-endpoint': 'outside-to-line', 'target-endpoint': 'outside-to-line',

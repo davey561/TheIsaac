@@ -13,11 +13,12 @@ export function runLayout(cy, eles, layout){
  
 }
 export function runLayout2(eles){
+  let layout = defaultOptions.layout;
+  console.log(layout.randomize);
+  //using this try catch cuz sometimes is fired without an eles at all
   try{
-    eles.layout(defaultOptions.fCoseOptions).run();
-  } catch (Exception){
-
-  }
+    eles.createLayout(defaultOptions.euler).run();
+  } catch (Exception){}
 }
 export function randomLayout (cy){
   let layoutOptions = 

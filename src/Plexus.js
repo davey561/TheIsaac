@@ -1,5 +1,5 @@
 
-import React, {useState, useEffect, Component} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import PropTypes from 'prop-types';
 
 import CytoscapeComponent from 'react-cytoscapejs';
@@ -12,13 +12,15 @@ import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import dagre from 'cytoscape-dagre';
 import cola from 'cytoscape-cola';
+import coseBilkent from 'cytoscape-cose-bilkent';
+import euler from 'cytoscape-euler';
 
 import firebase from 'firebase';
 
 import 'react-bootstrap-typeahead/css/Typeahead.css'
 import defaultOptions from './Old/defaultOptions'
 
-import { runLayout } from './Old/Layout';
+import { runLayout, runLayout2 } from './Old/Layout';
 import { save, allEvents, numberKeyResponses, confMessage } from './Old/EventResponses';
 import { saveToText } from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
@@ -26,10 +28,13 @@ import { cytoscapeEvents } from './Old/CyEvents';
 import {addEdgeSmart, addNodeSmart} from './Old/ModifyGraph';
 import { quickSelect, barSelect } from './Old/FocusLevels';
 import windowEvents from './Old/WindowEvents';
+import { async } from 'q';
 
 cytoscape.use(fcose);
 cytoscape.use(cola);
 cytoscape.use(dagre);
+cytoscape.use(coseBilkent);
+cytoscape.use(euler);
 
 function Plexus(props){
     const [layout, setLayout] = useState(defaultOptions.fCoseOptions);
@@ -57,31 +62,12 @@ function Plexus(props){
     let cyRef = React.createRef();
     let typeaheadRef = React.createRef();
     //let firebaseRef;
-    let first = true;
+    const[firstLayout, setFirstLayout] = useState(true);
+    const [fl, setFl] = useState(true);
+    const [loading, setLoading] = useState(true);
 
-    //Define function to fetch firebase data
-    const fetchData = async () => {
-        //Store firebase reference
-        let ref = firebase.database().ref().child('elements');
-        //Retrieve elements data
-        ref.once('value').then(snap => {
-            console.log(snap.val())
-            setEles(JSON.parse(snap.val()))
-            return JSON.parse(snap.val())
-        })
-        //Then create list of element ids
-        .then(eles => {
-          setEleNames(getElementNames(eles));
-        });
-        //Store firebase reference
-        await setRef(ref);
-    };
     //Return updated stylesheet (with new value for label)
     const getStyle = () => {
-        // return [{
-        //     selector: 'node',
-        //     style: { 'label': label }
-        // }]
         return defaultOptions.style;
     }
     const clear = (evt) => {
@@ -89,6 +75,7 @@ function Plexus(props){
            
             // setEnteredText(typeaheadRef.getInput());
             console.log(typeaheadRef.getInput());
+            //Zoom into the search term node
             barSelect(cyRef, typeaheadRef.getInstance().getInput().value);
             
             //typeaheadRef.clear();
@@ -107,29 +94,116 @@ function Plexus(props){
         typeaheadRef.clear();
     }
 
-    //Things to do just on load
+    //For testing in this layout branch mode
     useEffect(() => {
-        fetchData().then(()=> {
-            cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, setLastEdgeName, firebaseRef, typeaheadRef, first);
-        });
+        console.log('in this new rad useEffect');
+        if(!loading){
+            console.log('in this rad new conditinal');
+            // console.log(cyRef.current);
+            cyRef.on('layoutstop', console.log('a layout did indeed stop'));
+            cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
+                setLastEdgeName, firebaseRef, typeaheadRef, 
+                firstLayout, setFirstLayout);
+            windowEvents(cyRef, setRepeatTracker);
+        }
+    }, [loading]);
+    //THIS IS THE NEWLY COMMENTED PART
+    useEffect(() => {
+        const fetchData = async () => {
+            // //Store firebase reference
+            let ref = firebase.database().ref().child('elements');
+            // //Retrieve elements data
+            ref.once('value').then(async (snap) => {
+                // console.log(snap.val())
+                await setEles(JSON.parse(snap.val()))
+                //Store firebase reference
+                await setRef(ref);
+                //Set loading to false
+                await setLoading(false);
+                return JSON.parse(snap.val())
+            })
+
+           // setEles(defaultOptions.Potter);
+
+
+            //Then create list of element ids. 
+            //COMMENTED OUT BECAUSE CYREF NOT NECESSARILY LOADED YET.
+            //IT WAS WORKING BEFORE BUT DON'T WANT TO MESS WITH ORDER IN UNCERTAIN TERRITORY 
+    
+            // .then(eles => {
+            //   setEleNames(getElementNames(eles));
+            // });
+    
+            
+        }
+        fetchData();
     }, []);
-    useEffect(()=> {
-        windowEvents(cyRef, setRepeatTracker);
-        //firebaseRef = firebase.database().ref().child('elements');
-        //cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, setLastEdgeName, firebaseRef, typeaheadRef, first);
-    }, [cyRef]);
+    // const runFirstLayout=  () => {
+    //     console.log('inside runFirstLayout');
+    //     if(!loading && fl){
+    //         console.log('inside conditional: !loading and fl');
+    //         //let k =  cyRef.layout(defaultOptions.layout);
+    //         let k =  cyRef.layout({
+    //             name: 'grid',
+    //             stop: () => {
+    //                 console.log('layout k stopped')
+    //                 setFl(false);
+    //             }
+    //         });
+    //         // k.stop = () => {
+    //         //             console.log('layout k stopped')
+    //         //             setFl(false);
+    //         //         };
+
+    //         // k.on('layoutstop', ()=> {
+    //         //     console.log('layout k stopped')
+    //         //     setFl(false);
+    //         // })
+    //         k.run();
+
+    //         //await setFl(false);
+    //    } 
+    //    cyRef.on('layoutstop', ()=> console.log('some layout other than k has stopped.'));  
+    // }
+    // useEffect(() => {
+    //    // runFirstLayout();
+       
+    // }, [loading]);
+
+    // //runFirstLayout();
+    // useLayoutEffect( () => {
+    //     //cyRef.stop();
+    //     //cyRef.ready(()=> {
+
+    //     let k =  cyRef.layout(defaultOptions.layout);
+    //     //k.run();
+    //     console.log('156, fl is now: ' + fl);
+    // }, [fl]);
+    // useEffect(()=>{
+    //     cyRef.one('ready', ()=> setFl(false));
+    // }, []);
+
+    // useLayoutEffect(()=> {
+    //     // if(!fl){
+    //     //     console.log(144);
+    //     //     cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
+    //     //         setLastEdgeName, firebaseRef, typeaheadRef, 
+    //     //         firstLayout, setFirstLayout);
+    //     //     windowEvents(cyRef, setRepeatTracker);
+    //     // }
+    // }, [fl]);
     return (
         <div>
             <br></br>
             <div id='top'>
             <ButtonToolbar className="button-container"> 
-                <Button id="layoutButton" variant="outline-secondary" className="newButton" size='lg'
+                <Button id="layoutButton" variant="outline-secondary" className="newButton" size='sm'
                     onClick={() => runLayout(cyRef, cyRef.elements(), defaultOptions.layout)}>Layout</Button>
-                <Button variant="outline-secondary" className="newButton" size='lg'
+                <Button variant="outline-secondary" className="newButton" size='sm'
                     onClick={() => save(cyRef, firebaseRef)}>Save</Button>
-                <Button id="downloadButton" variant="outline-secondary" className="newButton" size='lg'
+                <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
                     onClick={() => saveToText(cyRef)}>Download</Button>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <Button id="addNodeButton" variant="outline-primary" className="newButton" size="lg"
                     onClick={()=>{addNodeSmart(cyRef,5);}}>Add Node</Button>
                 <Button id='lasttwo' variant="outline-primary" className="newButton" size='lg'
@@ -164,16 +238,18 @@ function Plexus(props){
                 onKeyDown={(evt) => clear(evt)}
             />
             </div>
-            <CytoscapeComponent
-                autoFocus
-                id='cy'
-                elements={eles}
-                style={ { width: '100%', height: '740px' }}
-                stylesheet={ getStyle() }
-                /* layout={defaultOptions.layout} */
-                layout={{name: 'cose'}}
-                cy={(cy) => { cyRef = cy }}
-            />
+            {loading ?
+                <p>No cytoscape yet</p> :
+                <CytoscapeComponent
+                    autoFocus
+                    id='cy'
+                    elements={eles}
+                    style={ { width: '100%', height: '740px' }}
+                    stylesheet={ getStyle() }
+                    layout={defaultOptions.layout}
+                    //layout={{name: 'cose'}}
+                    cy={(cy) => { cyRef = cy }}
+                />}
             <KeyboardEventHandler
                 handleKeys={['shift+e', 'shift+n', 'shift+space', 'shift+r', 'shift+backspace',
                      'ctrl+d', 'all']}

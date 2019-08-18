@@ -13,8 +13,8 @@ import {numberKeyDown} from './Miscellaneous';
 
 export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, repeatTracker, typeahead) {
     
-    console.log(lastTwoObj);
-    console.log(`key: ${typeof key}`);
+    // console.log(lastTwoObj);
+    // console.log(`key: ${typeof key}`);
     switch(key){
         //Layouts
         case 'l': runLayout(cy, cy.elements(), defaultOptions.layout); break;

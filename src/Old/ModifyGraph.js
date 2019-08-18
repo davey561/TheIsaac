@@ -200,12 +200,16 @@ export function addNode(cy, label, location){
       });
       i++;
       if(i>3000){
-        let nodesInViewport = findNodesInViewport(cy, radius);
-        // cy.zoom(cy.zoom()/4);
-        cy.center(nodesInViewport);
-        findGoodLocationForNewNode(cy, radius);
-        return null;
-        console.log('viewport is too crowded for new node. zooming out to add it')
+        // let nodesInViewport = findNodesInViewport(cy, radius);
+
+        // let zooming = async() => {cy.zoom(cy.zoom()/4)};
+        // zooming().then(()=>{
+        //   cy.center(nodesInViewport);
+        //   return findGoodLocationForNewNode(cy, radius);
+        // });
+        // return null;
+        window.alert('viewport is too crowded for new node. zooming out to add it')
+        return -1;
       }
     } while(!goodLocation);
     return newCoords;
