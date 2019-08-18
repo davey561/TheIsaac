@@ -15,10 +15,18 @@ const IDEAL_EDGE_LENGTH = 20;
 const ANIMATION_DURATION = 1200;
 
 class defaultOptions{
+  // simpleLayout = (setFl) =>
+  //   {return {
+  //     stop: () => {
+  //         console.log('layout k stopped')
+  //         setFl(false);
+  //     },
+  //     name: 'cose'
+  // }};
   static layout = {
     name: 'cose', //uses the cose-bilkent layout, downloaded from internet, good for compound graphs
-    animate: 'end',  animationEasing: 'ease-out', animationDuration: ANIMATION_DURATION,
-    randomize: true,
+    //animate: 'end',  animationEasing: 'ease-out', animationDuration: ANIMATION_DURATION,
+    //randomize: true,
     idealEdgeLength: IDEAL_EDGE_LENGTH, 
     //edgeelasty: 4,
     fit: true,

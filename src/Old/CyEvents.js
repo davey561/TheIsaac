@@ -1,31 +1,34 @@
 import {save} from './EventResponses';
-import {runLayout2} from './Layout';
+import {runLayout2, runLayout} from './Layout';
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
 import {retrieveNewName, deleteOneNode, rename} from './ModifyGraph';
 import defaultOptions from './defaultOptions';
 
 
-
+let fl = 0;
 //Cytoscape Events
-export function cytoscapeEvents(cy, lastTwoObj, lastEdgeName, setLastEdgeName, firebaseRef, typeahead, first){
+export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName, 
+                                setLastEdgeName, firebaseRef, typeahead, 
+                                firstLayout, setFirstLayout){
   //keep track of last two
+  console.log('in cytoscape events')
    cy.on(
     "add data select tap",
     (event) => {
       if(event.target === cy){
       }
       else if (event.target.isNode()){
-        lastTwoObj.update(cy, event.target.id());
+        lastTwo.update(cy, event.target.id());
       }
       //if an edge has been added
       else if(event.target.isEdge()){
         //if potentialStatus field is defined and true (indicating it's a potential edge), break
         if (typeof event.target.data('potentialStatus') === 'undefined') {
-          lastTwoObj.update(cy, event.target.source().id(), event.target.target().id());
+          lastTwo.update(cy, event.target.source().id(), event.target.target().id());
         }
       }
-      lastTwoObj.style(cy);
-      lastTwoObj.renderText(cy);
+      lastTwo.style(cy);
+      lastTwo.renderText(cy);
     }
   );
   //autosave
@@ -39,30 +42,39 @@ export function cytoscapeEvents(cy, lastTwoObj, lastEdgeName, setLastEdgeName, f
     );
 
   });
-  cy.on(
-    "add remove select tap", function(event){
-      let isnode = true;
-      let eles;
-      if(event.target !== cy){
-        if(event.target.isEdge()){
-          isnode = false;
-          eles = cy.collection();
-          eles = eles.union(event.target.source()).union(event.target.target()).closedNeighborhood();
-        } else if (event.target.isNode()){
-          eles = event.target.closedNeighborhood();
+  // cy.one('layoutstop', async (event)=>{
+  //   console.log(event.layout);
+  //   cy.layout(defaultOptions.layout).run();
+  //   // window.alert(event.layout);
+  // })
+    cy.pon('layoutstop').then(()=> {
+      cy.on(
+        "add remove select tap", function(event){
+          let isnode = true;
+          let eles;
+          if(event.target !== cy){
+            if(event.target.isEdge()){
+              isnode = false;
+              eles = cy.collection();
+              eles = eles.union(event.target.source()).union(event.target.target()).closedNeighborhood();
+            } else if (event.target.isNode()){
+              eles = event.target.closedNeighborhood();
+            }
+            if(eles.length == 1){
+              return;
+            }
+          }
+          runLayout2(eles);
+          //runLayout(cy, eles, defaultOptions.fCoseOptions);
         }
-        if(eles.length == 1){
-          return;
-        }
-      }
-      runLayout2(eles);
-    }
-  )
+      );
+    })
+  //})
   cy.on("remove", function(event){
     //TODO delete from selected
     if(event.target.isNode()){
-      lastTwoObj.remove(cy, event.target.id());
-      lastTwoObj.style(cy);
+      lastTwo.remove(cy, event.target.id());
+      lastTwo.style(cy);
     }  
   })
   //rename
@@ -234,7 +246,7 @@ cy.on("mouseout",function(event){
     //if the event's target is not the cy background, and this is in fact this last potential edge
     if((event.target !== cy)&&(typeof event.target.data('potentialStatus')!=="undefined")) {
       event.target.removeClass('potential-edge');
-        lastTwoObj.lastTwo[0] = 'undefined';
+        lastTwo.lastTwo[0] = 'undefined';
       // lastPotentialEdge = null; 
     }
     
