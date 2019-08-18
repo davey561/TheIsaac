@@ -12,6 +12,8 @@ import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import dagre from 'cytoscape-dagre';
 import cola from 'cytoscape-cola';
+import coseBilkent from 'cytoscape-cose-bilkent';
+import euler from 'cytoscape-euler';
 
 import firebase from 'firebase';
 
@@ -31,6 +33,8 @@ import { async } from 'q';
 cytoscape.use(fcose);
 cytoscape.use(cola);
 cytoscape.use(dagre);
+cytoscape.use(coseBilkent);
+cytoscape.use(euler);
 
 function Plexus(props){
     const [layout, setLayout] = useState(defaultOptions.fCoseOptions);
@@ -90,17 +94,38 @@ function Plexus(props){
         typeaheadRef.clear();
     }
 
-    //Things to do just on load
+    //For testing in this layout branch mode
+    useEffect(() => {
+        console.log('in this new rad useEffect');
+        if(!loading){
+            console.log('in this rad new conditinal');
+            // console.log(cyRef.current);
+            cyRef.on('layoutstop', console.log('a layout did indeed stop'));
+            cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
+                setLastEdgeName, firebaseRef, typeaheadRef, 
+                firstLayout, setFirstLayout);
+            windowEvents(cyRef, setRepeatTracker);
+        }
+    }, [loading]);
+    //THIS IS THE NEWLY COMMENTED PART
     useEffect(() => {
         const fetchData = async () => {
-            //Store firebase reference
+            // //Store firebase reference
             let ref = firebase.database().ref().child('elements');
-            //Retrieve elements data
-            ref.once('value').then(snap => {
+            // //Retrieve elements data
+            ref.once('value').then(async (snap) => {
                 // console.log(snap.val())
-                setEles(JSON.parse(snap.val()))
+                await setEles(JSON.parse(snap.val()))
+                //Store firebase reference
+                await setRef(ref);
+                //Set loading to false
+                await setLoading(false);
                 return JSON.parse(snap.val())
             })
+
+           // setEles(defaultOptions.Potter);
+
+
             //Then create list of element ids. 
             //COMMENTED OUT BECAUSE CYREF NOT NECESSARILY LOADED YET.
             //IT WAS WORKING BEFORE BUT DON'T WANT TO MESS WITH ORDER IN UNCERTAIN TERRITORY 
@@ -109,44 +134,41 @@ function Plexus(props){
             //   setEleNames(getElementNames(eles));
             // });
     
-            //Store firebase reference
-            await setRef(ref);
-            //Set loading to false
-            await setLoading(false);
+            
         }
         fetchData();
     }, []);
-    const runFirstLayout=  () => {
-        console.log('inside runFirstLayout');
-        if(!loading && fl){
-            console.log('inside conditional: !loading and fl');
-            //let k =  cyRef.layout(defaultOptions.layout);
-            let k =  cyRef.layout({
-                name: 'grid',
-                stop: () => {
-                    console.log('layout k stopped')
-                    setFl(false);
-                }
-            });
-            // k.stop = () => {
-            //             console.log('layout k stopped')
-            //             setFl(false);
-            //         };
+    // const runFirstLayout=  () => {
+    //     console.log('inside runFirstLayout');
+    //     if(!loading && fl){
+    //         console.log('inside conditional: !loading and fl');
+    //         //let k =  cyRef.layout(defaultOptions.layout);
+    //         let k =  cyRef.layout({
+    //             name: 'grid',
+    //             stop: () => {
+    //                 console.log('layout k stopped')
+    //                 setFl(false);
+    //             }
+    //         });
+    //         // k.stop = () => {
+    //         //             console.log('layout k stopped')
+    //         //             setFl(false);
+    //         //         };
 
-            // k.on('layoutstop', ()=> {
-            //     console.log('layout k stopped')
-            //     setFl(false);
-            // })
-            k.run();
+    //         // k.on('layoutstop', ()=> {
+    //         //     console.log('layout k stopped')
+    //         //     setFl(false);
+    //         // })
+    //         k.run();
 
-            //await setFl(false);
-       } 
-       cyRef.on('layoutstop', ()=> console.log('some layout other than k has stopped.'));  
-    }
-    useEffect(() => {
-       // runFirstLayout();
+    //         //await setFl(false);
+    //    } 
+    //    cyRef.on('layoutstop', ()=> console.log('some layout other than k has stopped.'));  
+    // }
+    // useEffect(() => {
+    //    // runFirstLayout();
        
-    }, [loading]);
+    // }, [loading]);
 
     // //runFirstLayout();
     // useLayoutEffect( () => {
@@ -175,13 +197,13 @@ function Plexus(props){
             <br></br>
             <div id='top'>
             <ButtonToolbar className="button-container"> 
-                <Button id="layoutButton" variant="outline-secondary" className="newButton" size='lg'
+                <Button id="layoutButton" variant="outline-secondary" className="newButton" size='sm'
                     onClick={() => runLayout(cyRef, cyRef.elements(), defaultOptions.layout)}>Layout</Button>
-                <Button variant="outline-secondary" className="newButton" size='lg'
+                <Button variant="outline-secondary" className="newButton" size='sm'
                     onClick={() => save(cyRef, firebaseRef)}>Save</Button>
-                <Button id="downloadButton" variant="outline-secondary" className="newButton" size='lg'
+                <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
                     onClick={() => saveToText(cyRef)}>Download</Button>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <Button id="addNodeButton" variant="outline-primary" className="newButton" size="lg"
                     onClick={()=>{addNodeSmart(cyRef,5);}}>Add Node</Button>
                 <Button id='lasttwo' variant="outline-primary" className="newButton" size='lg'

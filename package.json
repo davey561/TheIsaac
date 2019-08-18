@@ -7,6 +7,7 @@
     "bootstrap": "^4.3.1",
     "cytoscape": "^3.9.0",
     "cytoscape-cola": "^2.3.0",
+    "cytoscape-cose-bilkent": "^4.0.0",
     "cytoscape-dagre": "^2.2.2",
     "cytoscape-euler": "^1.2.1",
     "cytoscape-fcose": "^1.0.0",
