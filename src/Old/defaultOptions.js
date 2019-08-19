@@ -81,10 +81,13 @@ class defaultOptions{
     animate: 'end',
     animationDuration: ANIMATION_DURATION,
     randomize: false,
-    gravityRange: .1,
+    //gravityRange: .1,
     animationEasing: 'ease',
-    quality: 'draft',
-    idealEdgeLength: IDEAL_EDGE_LENGTH
+    quality: 'proof',
+    springLength: IDEAL_EDGE_LENGTH*5,
+    dragCoeff: .08,
+    ungrabifyWhileSimulating: true
+    //theta: .01
 
   }
   static animation = {
