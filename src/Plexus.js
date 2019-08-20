@@ -21,7 +21,7 @@ import 'react-bootstrap-typeahead/css/Typeahead.css'
 import defaultOptions, { ANIMATION_DURATION } from './Old/defaultOptions'
 
 import { runLayout, runLayout2 } from './Old/Layout';
-import { save, allEvents, numberKeyResponses, confMessage, alphabetResponses } from './Old/EventResponses';
+import { save, keyResponses, numberKeyResponses, confMessage, alphabetResponses, typeaheadResponses } from './Old/EventResponses';
 import { saveToText } from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
 import { cytoscapeEvents } from './Old/CyEvents';
@@ -147,7 +147,9 @@ function Plexus(props){
     }, [loading]);
     useEffect(()=>{
         if(!loading){
-            setEleNames(getElementNames());
+            setEleNames(getElementNames().sort((a,b)=>{
+                return ((a<b) ? -1 : 1)
+            }));
         }
     }, [cyRef])
     return (
@@ -169,28 +171,29 @@ function Plexus(props){
                     onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo)}>&#10233;</Button>
                 &nbsp;&nbsp;&nbsp;&nbsp;
             </ButtonToolbar>
-            <Typeahead 
-                    className = "bar"
+            <KeyboardEventHandler 
+                className="bar"
+                handleKeys={['shift', 'enter']}
+                onKeyEvent={(key, event)=>typeaheadResponses(key, event, cyRef, typeaheadRef)}>
+                
+                <Typeahead 
+                    //className = "bar"
                     id = "searchSuggest"
                     ref={(typeahead) => typeaheadRef = typeahead}
                     onChange={(selected) => {
                         setLabel(selected)
                     }}
                     onInputChange={(text, event) => {
-                        //workaround for space bar
-                        {/* if(text===' '){
-                            typeaheadRef.getInstance().clear();
-                        } */}
                         setLabel(text)
                     }}
-                    //inputProps={onFocus}
                     options={eleNames}
                     selectHintOnEnter={true}
                     highlightOnlyResult={true}
                     maxResults={10}
-                    //onFocus={()=>clear1()}
                     onKeyDown={(evt) => clear(evt)}
                 />
+            </KeyboardEventHandler>
+               
             {/* <h3 id = 'lasttwo' className="potential">&#160;&#160;&#160;&#160;&#10233;&#160;&#160;&#160;&#160;</h3> */}
             </div>
             {loading ?
@@ -211,7 +214,7 @@ function Plexus(props){
                     'command+shift+backspace', 'shift+b',
                      'ctrl+d', 'all']}
                 onKeyEvent={(key, event) => 
-                   allEvents(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, repeatTracker, typeaheadRef)
+                   keyResponses(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, repeatTracker, typeaheadRef)
                 } 
             />
             <KeyboardEventHandler

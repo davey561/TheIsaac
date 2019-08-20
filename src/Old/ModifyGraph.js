@@ -35,18 +35,16 @@ export function addNode(cy, label, location){
     //while there's a node with the current name, ask if it's ok
     let currentTaken = (isNode? group.is(`[name = "${nodename}"]`): false)
     if(currentTaken){
-      if(window.confirm(
+      if(!window.confirm(
         `There is another ${ele_type} with this name. Confirm that you'd like this name.`))
       {
-        do {
-          counter++;
-          id = nodename+counter;
-        } while(group.is(`[id = "${id}"]`));
-      }
-      else {
         return -1;
       }
     }
+    do {
+      counter++;
+      id = nodename+counter;
+    } while(group.is(`[id = "${id}"]`));
     return [nodename, id];
   }
   export function rename(cy, event){
@@ -57,6 +55,21 @@ export function addNode(cy, label, location){
     let newInfo = retrieveNewName(cy, isNode, true)[0];
     if(newInfo!=-1){
       event.target.data('name', newInfo);
+    }
+  }
+  export function keyRename(cy){
+    let ele = cy.elements().filter(':selected')
+    if(ele.length!=1){
+      return -1;
+    } else{
+      ele = ele[0];
+      //node or edge?
+      let isNode;
+      ele.isNode()? isNode=true : isNode=false;
+      let newInfo = retrieveNewName(cy, isNode, true)[0];
+      if(newInfo!=-1){
+        ele.data('name', newInfo);
+      }
     }
   }
 //   function renameEdge(){

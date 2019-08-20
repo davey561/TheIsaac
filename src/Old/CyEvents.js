@@ -60,6 +60,7 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
             } else if (event.target.isNode()){
               eles = event.target.closedNeighborhood();
             }
+            eles = eles.difference(event.target);
             if(eles.length == 1){
               return;
             }

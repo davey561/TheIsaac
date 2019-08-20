@@ -4,14 +4,14 @@ import firebase from 'firebase';
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
 import {addNode, retrieveNewName, addEdge, findGoodLocationForNewNode, 
     newEdgePrompt, addNewEdge,addNewEdge2, updatePotentialEdge, 
-    findUniqueName, nedge, nodify, edgify, addEdgeSmart, deleteAll, deleteSome, addNodeSmart} 
+    findUniqueName, nedge, nodify, edgify, addEdgeSmart, deleteAll, deleteSome, addNodeSmart, keyRename} 
     from "./ModifyGraph";
 import {runLayout, colaLayout, dagreLayout, fCoseLayout} from './Layout';
 import { saveToText } from './ConvertToBullets';
-import {quickSelect} from './FocusLevels';
+import {quickSelect, barSelect} from './FocusLevels';
 import {numberKeyDown} from './Miscellaneous';
 
-export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, repeatTracker, typeahead) {
+export function keyResponses(key, event, cy, database, lastTwoObj, lastEdgeAdded, repeatTracker, typeahead) {
     
     // console.log(lastTwoObj);
     console.log(`key: ${key}`);
@@ -21,7 +21,6 @@ export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, r
         case 'shift+l': runLayout(cy, cy.elements(), defaultOptions.layout); break;
         case 'shift+a': colaLayout(cy); break;
         case 'shift+d': dagreLayout(cy); break;
-        case 'shift+r': randomLayout(cy); break;
 
         //Test
         case 'shift+ t': test(cy); break;
@@ -38,7 +37,7 @@ export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, r
         case 'shift+n': nodify(cy); break;
         case 'shift+e': edgify(cy); break;
         case 'command+shift+enter': nedge(cy, lastTwoObj); break;
-        case 'shift+r': break; //rename
+        case 'shift+r': keyRename(cy, ); break; //rename
         case 'command+shift+backspace': deleteAll(cy); break;
         case 'shift+backspace': deleteSome(cy); break;
 
@@ -101,6 +100,17 @@ export const numberKeyResponses = (cy, key) => {
 export const alphabetResponses = (cy, key, typeahead) => {
     typeahead.getInstance().focus();
 }
+export const typeaheadResponses = (key, event, cy, typeahead)=>{
+    switch(key){
+        case 'enter':  
+            console.log(typeahead.getInput());
+            //Zoom into the search term node
+            barSelect(cy, typeahead.getInstance().getInput().value);
+            typeahead.clear();
+            typeahead.blur(); break;
+        case 'shift': typeahead.blur(); typeahead.clear(); break;
+    }
+}
 export function confMessage(cy, e){
     var confirmationMessage = "\o/";
   
@@ -111,3 +121,4 @@ export function confMessage(cy, e){
     //@ts-ignore
     localStorage.setItem('User', document.getElementById('codeSelection').value);
   }
+
