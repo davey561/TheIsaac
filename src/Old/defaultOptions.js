@@ -12,7 +12,7 @@ cytoscape.use(fcose);
 cytoscape.use(cola);
 cytoscape.use(dagre);
 const IDEAL_EDGE_LENGTH = 20;
-const ANIMATION_DURATION = 700;
+export const ANIMATION_DURATION = 800;
 
 class defaultOptions{
   // simpleLayout = (setFl) =>
@@ -47,7 +47,7 @@ class defaultOptions{
     randomize: false,
     idealEdgeLength: IDEAL_EDGE_LENGTH, 
     //edgeelasty: 4,
-    fit: true,
+    fit: false,
     // nodeRepulsion: 5000, 
     //gravityRange: 10000000, 
     // gravity: 50,
@@ -83,11 +83,13 @@ class defaultOptions{
     randomize: false,
     //gravityRange: .1,
     animationEasing: 'ease',
-    quality: 'proof',
+    //quality: 'proof',
     springLength: IDEAL_EDGE_LENGTH*5,
-    dragCoeff: .08,
-    ungrabifyWhileSimulating: true
+    // springCoeff: .005,
+    dragCoeff: .1,
+    ungrabifyWhileSimulating: true,
     //theta: .01
+    fit: false
 
   }
   static animation = {
