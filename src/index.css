@@ -72,6 +72,14 @@ body{
   color: #FB7272;
   text-align: left;
 }
+#loading{
+  color: #FB7272 ;
+  background-color: white;
+  font-size: 169px;
+  text-align: center;
+  font-style: italic;
+  font-family: "Apple Chancery, cursive"
+}
 #snackbar {
   visibility: hidden;
   min-width: 50px;

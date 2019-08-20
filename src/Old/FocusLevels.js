@@ -1,4 +1,5 @@
 import { Core, Singular, CollectionReturnValue, Collection } from "cytoscape";
+import {ANIMATION_DURATION} from './defaultOptions';
 
 //10) Find a connected grahp that contains the searched for node
   //for example and demonstration purposes, find the connected graph containing Davey nodes
@@ -214,6 +215,14 @@ import { Core, Singular, CollectionReturnValue, Collection } from "cytoscape";
   );
   //window.alert('animation code complete, ' + whattofitto.data('name'));
   return whattofitto;
+}
+export const animateFitDirect = (cy, eles, duration) => {
+  cy.animate(
+    {fit:
+      {eles: eles, padding: 60}
+    },
+    {duration: duration}
+  );
 }
 
  ////focusednodes is the collection of nodes to which the viewport is fitted

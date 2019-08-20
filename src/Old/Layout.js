@@ -1,7 +1,8 @@
-import defaultOptions from './defaultOptions';
+import defaultOptions, { ANIMATION_DURATION } from './defaultOptions';
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm'
 import cola from 'cytoscape-cola';
 import dagre from 'cytoscape-dagre';
+import { animateFitDirect } from './FocusLevels';
 cytoscape.use(cola);
 cytoscape.use(dagre);
 
@@ -12,12 +13,20 @@ export function runLayout(cy, eles, layout){
   } catch (Exception) {}
  
 }
-export function runLayout2(eles){
-  let layout = defaultOptions.layout;
-  console.log(layout.randomize);
+export function runLayout3(createdLayout){
+  createdLayout.stop();
+  try{
+    createdLayout.run();
+  } catch (Exception) {}
+}
+export function runLayout2(cy, eles, layout){
   //using this try catch cuz sometimes is fired without an eles at all
   try{
-    eles.createLayout(defaultOptions.euler).run();
+    if(cy.animated()) {cy.stop()}
+    else {eles.closedNeighborhood().closedNeighborhood().kruskal()
+        .createLayout(defaultOptions.fCoseOptions).run();}
+    animateFitDirect(cy, eles, ANIMATION_DURATION);
+    
   } catch (Exception){}
 }
 export function randomLayout (cy){

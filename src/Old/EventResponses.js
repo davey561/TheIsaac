@@ -1,4 +1,4 @@
-import {runLayoutDefault, randomFCoseLayout, randomLayout} from './Layout';
+import {runLayoutDefault, randomFCoseLayout, randomLayout, runLayout2} from './Layout';
 import defaultOptions from './defaultOptions';
 import firebase from 'firebase';
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
@@ -14,50 +14,43 @@ import {numberKeyDown} from './Miscellaneous';
 export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, repeatTracker, typeahead) {
     
     // console.log(lastTwoObj);
-    // console.log(`key: ${typeof key}`);
+    console.log(`key: ${key}`);
     switch(key){
+        case 'shift': typeahead.getInstance().blur(); break;
         //Layouts
-        case 'l': runLayout(cy, cy.elements(), defaultOptions.layout); break;
-        case 'a': colaLayout(cy); break;
-        case 'd': dagreLayout(cy); break;
+        case 'shift+l': runLayout(cy, cy.elements(), defaultOptions.layout); break;
+        case 'shift+a': colaLayout(cy); break;
+        case 'shift+d': dagreLayout(cy); break;
         case 'shift+r': randomLayout(cy); break;
 
         //Test
-        case 't': test(cy); break;
-        case 'ctrl+b': window.alert('f word'); break;
+        case 'shift+ t': test(cy); break;
 
         //Backing up
-        case 's': save(cy); break;
-        case 'ctrl+d': saveToText(cy); break;
-        case 'z': break;
-        case 'y': break;
+        case 'meta + s': event.preventDefault(); save(cy); break;
+        case 'meta + d': event.preventDefault(); saveToText(cy); break;
+        case 'meta + z': event.preventDefault(); break;
+        case 'meta + y': event.preventDefault(); break;
         
         //Modifying the graph
-        case 'n': addNodeSmart(cy); break;
-        case 'e': addEdgeSmart(cy, lastEdgeAdded, lastTwoObj); break;
+        case 'shift+space': addNodeSmart(cy); break;
+        case 'shift+enter': addEdgeSmart(cy, lastEdgeAdded, lastTwoObj); break;
         case 'shift+n': nodify(cy); break;
         case 'shift+e': edgify(cy); break;
-        case 'enter': nedge(cy, lastTwoObj); break;
-        case 'r': break;
-        case 'shift+backspace': deleteAll(cy); break;
-        case 'backspace': deleteSome(cy); break;
+        case 'command+shift+enter': nedge(cy, lastTwoObj); break;
+        case 'shift+r': break; //rename
+        case 'command+shift+backspace': deleteAll(cy); break;
+        case 'shift+backspace': deleteSome(cy); break;
 
         //Search/Select
-        case 'space': 
-            //quickSelect(cy);
-            // typeahead.getInstance().clear() ;
-            typeahead.focus();
-            // typeahead.getInstance().clear();
-            break;
         case 'shift+space': //typeahead.focus(); 
-            quickSelect(cy);
-            //document.
-            //setTimeout(()=>typeahead.clear(), 1000)
+            typeahead.focus();
+        // typeahead.getInstance().clear();
             break;
-        case 'esc': cy.elements().unselect(); break;
+        case 'esc': typeahead.getInstance().blur(); cy.elements().unselect(); break;
 
         //Multipurpose
-        case 'tab': flip(cy, lastTwoObj, event); break;
+        case 'tab': event.preventDefault(); flip(cy, lastTwoObj, event); break;
 
         //zoom/pan
         case 'up':
@@ -68,10 +61,7 @@ export function allEvents(key, event, cy, database, lastTwoObj, lastEdgeAdded, r
         case 'plus':
         case 'minus':
             break;
-        case 'b': break;
-
-        case 'numeric': console.log('numbers recognized'); break;
-
+        case 'shift+b': break;
 
     }
 }
@@ -107,6 +97,9 @@ event.preventDefault();
 export const numberKeyResponses = (cy, key) => {
     let component = cy.elements().components()[parseInt(key)];
     runLayout(cy, component, defaultOptions.layout);
+}
+export const alphabetResponses = (cy, key, typeahead) => {
+    typeahead.getInstance().focus();
 }
 export function confMessage(cy, e){
     var confirmationMessage = "\o/";

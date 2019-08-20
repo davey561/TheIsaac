@@ -9,7 +9,7 @@ let fl = 0;
 //Cytoscape Events
 export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName, 
                                 setLastEdgeName, firebaseRef, typeahead, 
-                                firstLayout, setFirstLayout){
+                                firstLayout, setFirstLayout, layout){
   //keep track of last two
   console.log('in cytoscape events')
    cy.on(
@@ -64,8 +64,8 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
               return;
             }
           }
-          runLayout2(eles);
-          //runLayout(cy, eles, defaultOptions.fCoseOptions);
+          runLayout2(cy, eles, layout);
+          // runLayout(cy, eles, layout);
         }
       );
     })

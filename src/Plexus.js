@@ -18,10 +18,10 @@ import euler from 'cytoscape-euler';
 import firebase from 'firebase';
 
 import 'react-bootstrap-typeahead/css/Typeahead.css'
-import defaultOptions from './Old/defaultOptions'
+import defaultOptions, { ANIMATION_DURATION } from './Old/defaultOptions'
 
 import { runLayout, runLayout2 } from './Old/Layout';
-import { save, allEvents, numberKeyResponses, confMessage } from './Old/EventResponses';
+import { save, allEvents, numberKeyResponses, confMessage, alphabetResponses } from './Old/EventResponses';
 import { saveToText } from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
 import { cytoscapeEvents } from './Old/CyEvents';
@@ -37,7 +37,7 @@ cytoscape.use(coseBilkent);
 cytoscape.use(euler);
 
 function Plexus(props){
-    const [layout, setLayout] = useState(defaultOptions.fCoseOptions);
+    const [layout, setLayout] = useState(defaultOptions.layout);
     const [eles, setEles] = useState([]);
     const [eleNames, setEleNames] = useState([]);
     const [firebaseRef, setRef] = useState();
@@ -72,13 +72,12 @@ function Plexus(props){
     }
     const clear = (evt) => {
         if(evt.keyCode==13){
-           
             // setEnteredText(typeaheadRef.getInput());
             console.log(typeaheadRef.getInput());
             //Zoom into the search term node
             barSelect(cyRef, typeaheadRef.getInstance().getInput().value);
             
-            //typeaheadRef.clear();
+            typeaheadRef.clear();
             typeaheadRef.blur();
         }
     }
@@ -91,22 +90,21 @@ function Plexus(props){
         return cyRef.elements();
     }
     const clear1= () => {
-        typeaheadRef.clear();
+        typeaheadRef.getInstance().clear();
+    }
+    const setFitToTrue = (layout) => {
+        let realLayout = {...layout};
+        //first,unrelatedly, change fit setting of layout to true
+        realLayout.fit=true;
+        realLayout.animate= 'end';  
+        realLayout.animationEasing='ease-in-sine'; 
+        realLayout.animationDuration= 2*ANIMATION_DURATION;
+        realLayout.refresh=50;
+        //realLayout.ease
+        return realLayout;
     }
 
     //For testing in this layout branch mode
-    useEffect(() => {
-        console.log('in this new rad useEffect');
-        if(!loading){
-            console.log('in this rad new conditinal');
-            // console.log(cyRef.current);
-            cyRef.on('layoutstop', console.log('a layout did indeed stop'));
-            cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
-                setLastEdgeName, firebaseRef, typeaheadRef, 
-                firstLayout, setFirstLayout);
-            windowEvents(cyRef, setRepeatTracker);
-        }
-    }, [loading]);
     //THIS IS THE NEWLY COMMENTED PART
     useEffect(() => {
         const fetchData = async () => {
@@ -138,60 +136,20 @@ function Plexus(props){
         }
         fetchData();
     }, []);
-    // const runFirstLayout=  () => {
-    //     console.log('inside runFirstLayout');
-    //     if(!loading && fl){
-    //         console.log('inside conditional: !loading and fl');
-    //         //let k =  cyRef.layout(defaultOptions.layout);
-    //         let k =  cyRef.layout({
-    //             name: 'grid',
-    //             stop: () => {
-    //                 console.log('layout k stopped')
-    //                 setFl(false);
-    //             }
-    //         });
-    //         // k.stop = () => {
-    //         //             console.log('layout k stopped')
-    //         //             setFl(false);
-    //         //         };
-
-    //         // k.on('layoutstop', ()=> {
-    //         //     console.log('layout k stopped')
-    //         //     setFl(false);
-    //         // })
-    //         k.run();
-
-    //         //await setFl(false);
-    //    } 
-    //    cyRef.on('layoutstop', ()=> console.log('some layout other than k has stopped.'));  
-    // }
-    // useEffect(() => {
-    //    // runFirstLayout();
-       
-    // }, [loading]);
-
-    // //runFirstLayout();
-    // useLayoutEffect( () => {
-    //     //cyRef.stop();
-    //     //cyRef.ready(()=> {
-
-    //     let k =  cyRef.layout(defaultOptions.layout);
-    //     //k.run();
-    //     console.log('156, fl is now: ' + fl);
-    // }, [fl]);
-    // useEffect(()=>{
-    //     cyRef.one('ready', ()=> setFl(false));
-    // }, []);
-
-    // useLayoutEffect(()=> {
-    //     // if(!fl){
-    //     //     console.log(144);
-    //     //     cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
-    //     //         setLastEdgeName, firebaseRef, typeaheadRef, 
-    //     //         firstLayout, setFirstLayout);
-    //     //     windowEvents(cyRef, setRepeatTracker);
-    //     // }
-    // }, [fl]);
+    useEffect(() => {
+        if(!loading){
+            //event responses (nonkey)
+            cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
+                setLastEdgeName, firebaseRef, typeaheadRef, 
+                firstLayout, setFirstLayout, layout);
+            windowEvents(cyRef, setRepeatTracker);
+        }
+    }, [loading]);
+    useEffect(()=>{
+        if(!loading){
+            setEleNames(getElementNames());
+        }
+    }, [cyRef])
     return (
         <div>
             <br></br>
@@ -203,55 +161,54 @@ function Plexus(props){
                     onClick={() => save(cyRef, firebaseRef)}>Save</Button>
                 <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
                     onClick={() => saveToText(cyRef)}>Download</Button>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;
                 <Button id="addNodeButton" variant="outline-primary" className="newButton" size="lg"
                     onClick={()=>{addNodeSmart(cyRef,5);}}>Add Node</Button>
                 <Button id='lasttwo' variant="outline-primary" className="newButton" size='lg'
                     onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo)}>&#10233;</Button>
                 &nbsp;&nbsp;&nbsp;&nbsp;
             </ButtonToolbar>
-            {/* <h3 id = 'lasttwo' className="potential">&#160;&#160;&#160;&#160;&#10233;&#160;&#160;&#160;&#160;</h3> */}
             <Typeahead 
-                className = "bar"
-                id = "searchSuggest"
-                ref={(typeahead) => typeaheadRef = typeahead}
-                onChange={(selected) => {
-                    setLabel(selected)
-                }}
-                onInputChange={(text, event) => {
-                    //workaround for space bar
-                    if(text===' '){
-                        typeaheadRef.clear();
-                    }
-                    setLabel(text)
-                }}
-                //inputProps={onFocus}
-                options={eleNames}
-                //selectHintOnEnter={true}
-                highlightOnlyResult={true}
-                maxResults={10}
-                //bsSize="small"
-                /* onBlur={() => {
-                    typeaheadRef.getInstance().clear();
-                }} */
-                onFocus={()=>{typeaheadRef.getInstance().clear();}}
-                onKeyDown={(evt) => clear(evt)}
-            />
+                    className = "bar"
+                    id = "searchSuggest"
+                    ref={(typeahead) => typeaheadRef = typeahead}
+                    onChange={(selected) => {
+                        setLabel(selected)
+                    }}
+                    onInputChange={(text, event) => {
+                        //workaround for space bar
+                        {/* if(text===' '){
+                            typeaheadRef.getInstance().clear();
+                        } */}
+                        setLabel(text)
+                    }}
+                    //inputProps={onFocus}
+                    options={eleNames}
+                    selectHintOnEnter={true}
+                    highlightOnlyResult={true}
+                    maxResults={10}
+                    //onFocus={()=>clear1()}
+                    onKeyDown={(evt) => clear(evt)}
+                />
+            {/* <h3 id = 'lasttwo' className="potential">&#160;&#160;&#160;&#160;&#10233;&#160;&#160;&#160;&#160;</h3> */}
             </div>
             {loading ?
-                <p>No cytoscape yet</p> :
+                <p id='loading'>Awakening...</p> :
                 <CytoscapeComponent
                     autoFocus
                     id='cy'
                     elements={eles}
                     style={ { width: '100%', height: '740px' }}
                     stylesheet={ getStyle() }
-                    layout={defaultOptions.layout}
-                    //layout={{name: 'cose'}}
+                    layout={setFitToTrue(layout)}
                     cy={(cy) => { cyRef = cy }}
                 />}
             <KeyboardEventHandler
-                handleKeys={['shift+e', 'shift+n', 'shift+space', 'shift+r', 'shift+backspace',
+                handleKeys={['shift+e', 'shift+n', 'shift+space', 'shift+r', 'shift+backspace', 
+                    'shift+space', 'shift+enter', 'shift+l', 'shift+a', 'shift+d', 'shift+t',
+                    'meta+s', 'meta+d', 'meta+z', 'meta+y', 'command+shift+enter', "shift+backspace",
+                    'command+shift+backspace', 'shift+b',
                      'ctrl+d', 'all']}
                 onKeyEvent={(key, event) => 
                    allEvents(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, repeatTracker, typeaheadRef)
@@ -260,6 +217,11 @@ function Plexus(props){
             <KeyboardEventHandler
                 handleKeys={['numeric']}
                 onKeyEvent={(key, event) => {numberKeyResponses(cyRef, key)}
+                } 
+            />
+            <KeyboardEventHandler
+                handleKeys={['alphabetic']}
+                onKeyEvent={(key, event) => {alphabetResponses(cyRef, key, typeaheadRef)}
                 } 
             />
             {/* <p>{label}</p> */}
