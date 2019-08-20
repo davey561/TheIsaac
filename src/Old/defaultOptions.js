@@ -188,23 +188,22 @@ class defaultOptions{
     { selector: '.over-node',
       style: 
       {
-        'border-width' : 1
+        'border-width' : 2
       }
     },
     { selector: '.selected-node',
     style: 
     {
-      'border-style' : 'double',
-      'border-width' : 2
+      'border-style' : 'double'
     }
     },
-    { selector: '.selected-over-node',
-      style: 
-      {
-        'border-style' : 'double',
-        'border-width' : 3
-      }
-    },
+    // { selector: '.selected-over-node',
+    //   style: 
+    //   {
+    //     'border-style' : 'double',
+    //     'border-width' : 3
+    //   }
+    // },
     { selector: '.potential-border',
       style: 
       {
@@ -224,23 +223,24 @@ class defaultOptions{
       style: 
       {
         'line-style' : 'dotted',
-        'line-color' : 'Gainsboro'
+        //'line-color' : 'Gainsboro'
       }
     },
     { selector: '.selected-edge',
       style: 
-      { 
-        'line-style' : 'solid',
-        'line-color' : 'black'
+      {
+        'line-color' : 'black',
+        //'line-fill': 'radial-gradient'
       }
     },
-    { selector: '.selected-over-edge',
-      style: 
-      { 
-        'line-style' : 'dotted',
-        'line-color' : 'black'
-      }
-    }
+    // { selector: '.selected-over-edge',
+    //   style: 
+    //   { 
+    //     'line-style' : 'dotted',
+    //     'line-color' : 'black',
+    //     'line-fill': 'radial-gradient'
+    //   }
+    // }
   ];
   
   static blank = [];

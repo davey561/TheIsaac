@@ -135,21 +135,7 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
       }
     }
     else if(targnode.isEdge()){
-      if (targnode.hasClass('potential-edge')){
-        targnode.addClass('over-edge');
-        cy.style().update();
-      }
-      else if (!targnode.hasClass('selected-edge')){
-        targnode.addClass('over-edge');
-        cy.style().update();
-      }
-      else if (!targnode.hasClass('selected-edge')){
-        targnode.addClass('over-edge');
-      }
-      else {
-        targnode.removeClass('over-edge');
-        targnode.addClass('selected-over-edge');
-      }
+      targnode.addClass('over-edge');
     }
   });
 
@@ -167,13 +153,7 @@ cy.on("mouseout",function(event){
     }
   }
   else if(targnode.isEdge()){
-    if (targnode.hasClass('selected-over-edge')){
-      targnode.removeClass('selected-over-edge');
-      targnode.addClass('selected-edge');
-    }
-    else{
-      targnode.removeClass('over-edge');
-    }
+    targnode.removeClass('over-edge');
   }
 });
 
@@ -183,7 +163,7 @@ cy.on("mouseout",function(event){
     if(event.target.isNode()){
       if(targnode.hasClass('over-node')){
         targnode.removeClass('over-node');
-        targnode.addClass('selected-over-node');
+        targnode.addClass('selected-node');
       }
       //Make border double-lined and larger on selection
       else if (targnode.hasClass('selected-over-node')){
@@ -195,16 +175,8 @@ cy.on("mouseout",function(event){
     }
     else if (event.target.isEdge()){
       // targnode.style('line-color', 'black');\
-      if(targnode.hasClass('over-edge')){
-        targnode.removeClass('over-edge');
-        targnode.addClass('selected-over-edge');
-      }
-      else if (targnode.hasClass('selected-over-edge')){
-
-      }
-      else {
-        targnode.addClass('selected-edge');
-      }
+      targnode.removeClass('over-edge');
+      targnode.addClass('selected-edge');
       // cy.$(targnode).select();
       // window.alert('edge selected is black')
     }
@@ -220,24 +192,16 @@ cy.on("mouseout",function(event){
     let targnode = event.target;
     if(event.target.isNode()){
       //Make border of nodes back to normal style and width.
-      if (targnode.hasClass('selected-over-node')){
+  
         targnode.removeClass('selected-over-node');
         targnode.removeClass('selected-node');
         targnode.removeClass('over-node');
-      }
-      else {
-        targnode.removeClass('selected-node');
-      }
     }
     else if(event.target.isEdge()){
-      if (targnode.hasClass('selected-over-edge')){
-        targnode.removeClass('selected-over-edge');
-        targnode.removeClass('selected-edge');
-        targnode.removeClass('over-edge');
-      }
-      else {
-        targnode.removeClass('selected-edge');
-      }
+      targnode.removeClass('selected-edge');
+      targnode.removeClass('over-edge')
+      console.log('removed classes on unselect')
+       
     }
   });
   
