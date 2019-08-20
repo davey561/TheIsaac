@@ -43,7 +43,7 @@ class defaultOptions{
   };
   static fCoseOptions = {
     name: 'fcose', //uses the cose-bilkent layout, downloaded from internet, good for compound graphs
-    animate: 'end',  animationEasing: 'ease', animationDuration: ANIMATION_DURATION,
+    animate: true,  animationEasing: 'ease', animationDuration: ANIMATION_DURATION,
     randomize: false,
     idealEdgeLength: IDEAL_EDGE_LENGTH, 
     //edgeelasty: 4,

@@ -20,12 +20,13 @@ export function runLayout3(createdLayout){
   } catch (Exception) {}
 }
 export function runLayout2(cy, eles, layout){
-  console.log('running euler');
-  //console.log(layout.randomize);
   //using this try catch cuz sometimes is fired without an eles at all
   try{
-    eles.closedNeighborhood().closedNeighborhood().kruskal().createLayout(defaultOptions.fCoseOptions).run();
-    if(!cy.animated()) animateFitDirect(cy, eles, ANIMATION_DURATION);
+    if(cy.animated()) {cy.stop()}
+    else {eles.closedNeighborhood().closedNeighborhood().kruskal()
+        .createLayout(defaultOptions.fCoseOptions).run();}
+    animateFitDirect(cy, eles, ANIMATION_DURATION);
+    
   } catch (Exception){}
 }
 export function randomLayout (cy){
