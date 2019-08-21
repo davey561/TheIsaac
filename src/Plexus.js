@@ -3,7 +3,7 @@ import React, {useState, useEffect, useLayoutEffect} from 'react';
 import PropTypes from 'prop-types';
 
 import CytoscapeComponent from 'react-cytoscapejs';
-import {Typeahead} from 'react-bootstrap-typeahead';
+import {Typeahead, Menu, MenuItem} from 'react-bootstrap-typeahead';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 import { ButtonToolbar, Button } from 'react-bootstrap';
 
@@ -20,8 +20,9 @@ import firebase from 'firebase';
 import 'react-bootstrap-typeahead/css/Typeahead.css'
 import defaultOptions, { ANIMATION_DURATION } from './Old/defaultOptions'
 
-import { runLayout, runLayout2 } from './Old/Layout';
-import { save, keyResponses, numberKeyResponses, confMessage, alphabetResponses, typeaheadResponses } from './Old/EventResponses';
+import { runLayout, traversalLayout } from './Old/Layout';
+import { save, confMessage, setMenuOptions } from './Old/EventResponses';
+import {generalKeyResponses, alphabetResponses, numberKeyResponses, typeaheadResponses} from './Old/KeyResponses';
 import { saveToText } from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
 import { cytoscapeEvents } from './Old/CyEvents';
@@ -29,6 +30,8 @@ import {addEdgeSmart, addNodeSmart} from './Old/ModifyGraph';
 import { quickSelect, barSelect } from './Old/FocusLevels';
 import windowEvents from './Old/WindowEvents';
 import { async } from 'q';
+
+import logo from './plexusloading.gif';
 
 cytoscape.use(fcose);
 cytoscape.use(cola);
@@ -42,15 +45,7 @@ function Plexus(props){
     const [eleNames, setEleNames] = useState([]);
     const [firebaseRef, setRef] = useState();
     const [label, setLabel] = useState("Davey");
-    const [stylesheet, setStylesheet] = useState([{ 
-        selector: 'node',
-        style: {
-            "font-family": "Optima",
-            'text-border-width': '5px', 'label': label
-        }
-    }]);
     const [lastTwo, setLastTwo] = useState(new LastTwo());
-    const [lastTwoText, setLastTwoText] = useState();
     const [lastEdgeName, setLastEdgeName] = useState("");
 
     //constants pertaining specifically to keypress responses
@@ -65,41 +60,24 @@ function Plexus(props){
     const[firstLayout, setFirstLayout] = useState(true);
     const [fl, setFl] = useState(true);
     const [loading, setLoading] = useState(true);
+    
+    //need to do this in hacky way
+    //const[menuResults, setMenuResults] = useState([]);
+    let menuResults;
 
     //Return updated stylesheet (with new value for label)
     const getStyle = () => {
         return defaultOptions.style;
-    }
-    const clear = (evt) => {
-        if(evt.keyCode==13){
-            // setEnteredText(typeaheadRef.getInput());
-            console.log(typeaheadRef.getInput());
-            //Zoom into the search term node
-            barSelect(cyRef, typeaheadRef.getInstance().getInput().value);
-            
-            typeaheadRef.clear();
-            typeaheadRef.blur();
-        }
-    }
-    const getElementNames = () => {
-        return cyRef.nodes().map((ele) => {
-            return ele.data('name');
-        });
-    }
-    const getElements = () => {
-        return cyRef.elements();
-    }
-    const clear1= () => {
-        typeaheadRef.getInstance().clear();
     }
     const setFitToTrue = (layout) => {
         let realLayout = {...layout};
         //first,unrelatedly, change fit setting of layout to true
         realLayout.fit=true;
         realLayout.animate= 'end';  
-        realLayout.animationEasing='ease-in-sine'; 
-        realLayout.animationDuration= 2*ANIMATION_DURATION;
+        realLayout.animationEasing='ease-in-out-quint'; 
+        realLayout.animationDuration= 2.5*ANIMATION_DURATION;
         realLayout.refresh=50;
+        realLayout.randomize=false;
         //realLayout.ease
         return realLayout;
     }
@@ -120,19 +98,10 @@ function Plexus(props){
                 await setLoading(false);
                 return JSON.parse(snap.val())
             })
-
-           // setEles(defaultOptions.Potter);
-
-
-            //Then create list of element ids. 
-            //COMMENTED OUT BECAUSE CYREF NOT NECESSARILY LOADED YET.
-            //IT WAS WORKING BEFORE BUT DON'T WANT TO MESS WITH ORDER IN UNCERTAIN TERRITORY 
-    
+            //Then create list of element ids--OBSOLETE, NOW DONE IN CYEVENTS
             // .then(eles => {
             //   setEleNames(getElementNames(eles));
             // });
-    
-            
         }
         fetchData();
     }, []);
@@ -141,63 +110,69 @@ function Plexus(props){
             //event responses (nonkey)
             cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
                 setLastEdgeName, firebaseRef, typeaheadRef, 
-                firstLayout, setFirstLayout, layout);
+                firstLayout, setFirstLayout, layout, setEleNames);
             windowEvents(cyRef, setRepeatTracker);
+            setMenuOptions(cyRef, setEleNames);
         }
     }, [loading]);
-    useEffect(()=>{
-        if(!loading){
-            setEleNames(getElementNames().sort((a,b)=>{
-                return ((a<b) ? -1 : 1)
-            }));
-        }
-    }, [cyRef])
     return (
         <div>
             <br></br>
             <div id='top'>
-            <ButtonToolbar className="button-container"> 
-                <Button id="layoutButton" variant="outline-secondary" className="newButton" size='sm'
-                    onClick={() => runLayout(cyRef, cyRef.elements(), defaultOptions.layout)}>Layout</Button>
-                <Button variant="outline-secondary" className="newButton" size='sm'
-                    onClick={() => save(cyRef, firebaseRef)}>Save</Button>
-                <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
-                    onClick={() => saveToText(cyRef)}>Download</Button>
-                &nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;
-                <Button id="addNodeButton" variant="outline-primary" className="newButton" size="lg"
-                    onClick={()=>{addNodeSmart(cyRef,5);}}>Add Node</Button>
-                <Button id='lasttwo' variant="outline-primary" className="newButton" size='lg'
-                    onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo)}>&#10233;</Button>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-            </ButtonToolbar>
-            <KeyboardEventHandler 
-                className="bar"
-                handleKeys={['shift', 'enter']}
-                onKeyEvent={(key, event)=>typeaheadResponses(key, event, cyRef, typeaheadRef)}>
-                
-                <Typeahead 
-                    //className = "bar"
-                    id = "searchSuggest"
-                    ref={(typeahead) => typeaheadRef = typeahead}
-                    onChange={(selected) => {
-                        setLabel(selected)
-                    }}
-                    onInputChange={(text, event) => {
-                        setLabel(text)
-                    }}
-                    options={eleNames}
-                    selectHintOnEnter={true}
-                    highlightOnlyResult={true}
-                    maxResults={10}
-                    onKeyDown={(evt) => clear(evt)}
-                />
-            </KeyboardEventHandler>
-               
-            {/* <h3 id = 'lasttwo' className="potential">&#160;&#160;&#160;&#160;&#10233;&#160;&#160;&#160;&#160;</h3> */}
+                <ButtonToolbar className="button-container"> 
+                    <Button id="layoutButton" variant="outline-secondary" className="newButton" size='sm'
+                        onClick={() => runLayout(cyRef, cyRef.elements(), defaultOptions.layout)}>Layout</Button>
+                    <Button variant="outline-secondary" className="newButton" size='sm'
+                        onClick={() => save(cyRef, firebaseRef)}>Save</Button>
+                    <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
+                        onClick={() => saveToText(cyRef)}>Download</Button>
+                    &nbsp;
+                    <Button id="addNodeButton" variant="outline-primary" className="newButton" size="lg"
+                        onClick={()=>{addNodeSmart(cyRef,5);}}>Add Node</Button>
+                    <Button id='lasttwo' variant="outline-primary" className="newButton" size='lg'
+                        onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo)}>&#10233;</Button>
+                </ButtonToolbar>
+                <KeyboardEventHandler 
+                    className="bar"
+                    handleKeys={['shift', 'enter']}
+                    onKeyEvent={(key, event)=>typeaheadResponses(key, event, cyRef, typeaheadRef, menuResults)}>
+                    
+                    <Typeahead 
+                        //className = "bar"
+                        id = "searchSuggest"
+                        ref={(typeahead) => typeaheadRef = typeahead}
+                        onChange={(selected) => {
+                            setLabel(selected)
+                        }}
+                        onInputChange={(text, event) => {
+                            setLabel(text)
+                        }}
+                        options={eleNames}
+                        selectHintOnEnter={true}
+                        highlightOnlyResult={true}
+                        maxResults={10}
+                        //onKeyDown={(evt) => clear(evt)}
+                        labelKey='name'
+                        renderMenu={(results, menuProps) => 
+                            {
+                                menuResults = results;
+                                return (<Menu {...menuProps}>
+                                {results.map((result, index) => (
+                                    <MenuItem option={result} position={index}>
+                                    {result.name}
+                                    </MenuItem>
+                                ))}
+                                </Menu>)
+                            }
+                        }
+                    />
+                </KeyboardEventHandler>
             </div>
             {loading ?
-                <p id='loading'>Awakening...</p> :
+                <p id='loading'>
+                    <img src={logo} id='loader'></img> <br></br>
+                    Awaking...
+                </p> :
                 <CytoscapeComponent
                     autoFocus
                     id='cy'
@@ -214,7 +189,8 @@ function Plexus(props){
                     'command+shift+backspace', 'shift+b',
                      'ctrl+d', 'all']}
                 onKeyEvent={(key, event) => 
-                   keyResponses(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, repeatTracker, typeaheadRef)
+                    generalKeyResponses(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, 
+                                repeatTracker, typeaheadRef, setEleNames)
                 } 
             />
             <KeyboardEventHandler

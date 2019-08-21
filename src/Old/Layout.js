@@ -19,13 +19,13 @@ export function runLayout3(createdLayout){
     createdLayout.run();
   } catch (Exception) {}
 }
-export function runLayout2(cy, eles, layout){
+export function traversalLayout(cy, eles, layout){
   //using this try catch cuz sometimes is fired without an eles at all
   try{
     if(cy.animated()) {cy.stop()}
     else {eles.closedNeighborhood().closedNeighborhood().kruskal()
         .createLayout(defaultOptions.fCoseOptions).run();}
-    animateFitDirect(cy, eles, ANIMATION_DURATION);
+    animateFitDirect(cy, eles, ANIMATION_DURATION*.8);
     
   } catch (Exception){}
 }

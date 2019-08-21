@@ -1,5 +1,5 @@
-import {save} from './EventResponses';
-import {runLayout2, runLayout} from './Layout';
+import {save, getElementData, setMenuOptions} from './EventResponses';
+import {traversalLayout, runLayout} from './Layout';
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
 import {retrieveNewName, deleteOneNode, rename} from './ModifyGraph';
 import defaultOptions from './defaultOptions';
@@ -9,7 +9,7 @@ let fl = 0;
 //Cytoscape Events
 export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName, 
                                 setLastEdgeName, firebaseRef, typeahead, 
-                                firstLayout, setFirstLayout, layout){
+                                firstLayout, setFirstLayout, layout, setEleNames){
   //keep track of last two
   console.log('in cytoscape events')
    cy.on(
@@ -38,6 +38,7 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
       "add remove data",
       function(event){
         save(cy, firebaseRef);
+        setMenuOptions(cy, setEleNames);
       }
     );
 
@@ -60,12 +61,12 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
             } else if (event.target.isNode()){
               eles = event.target.closedNeighborhood();
             }
-            eles = eles.difference(event.target);
+            if(event.type==='remove') eles = eles.difference(event.target);
             if(eles.length == 1){
               return;
             }
           }
-          runLayout2(cy, eles, layout);
+          traversalLayout(cy, eles, layout);
           // runLayout(cy, eles, layout);
         }
       );
