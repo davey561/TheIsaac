@@ -29,15 +29,17 @@ const style = {
         },
         'font-family': 'monospace',
         'text-wrap': 'wrap',
-        'text-max-width': function(ele){
-            return setTextMaxWidth(ele);
-        },
+        // 'text-max-width': function(ele){
+        //     return setTextMaxWidth(ele);
+        // },
         'font-size': function(ele){
-            return Math.floor(sizeNodeText(ele));
+            //return Math.floor(sizeNodeText(ele));
+            return 1.5*ele.width() / ele.data('name').length; //so buffering less
             //return MIN_FONT_SIZE; //so buffering is less
         },
         label: function(ele){
-            return setNodeLabel(ele);
+           // return setNodeLabel(ele);
+           return ele.data('name'); //so buffers less
         }
         }
     },
@@ -51,7 +53,8 @@ const style = {
             // console.log('oh hello');
             // return sizeEdgeFont(ele);
             
-            let c = edgeTextCalcs(ele);
+            //let c = edgeTextCalcs(ele);
+
             // if (!c.label || c.label.length==0){return 1;}
             // let fontSize;
             // //if label is too long
@@ -66,19 +69,21 @@ const style = {
             // fontSize = Math.min(c.rendLength/c.label.length, fontCap);
             // }
             // return WEIRD_TEXT_SIZING_FACTOR* 9/10 * fontSize/c.currZoomLevel;
-            return MIN_FONT_SIZE; //simplied so that buffering is less
+            //return MIN_FONT_SIZE; //simplied so that buffering is less
+            return 6 + 0.3 * arrAvg([ele.source().width(), ele.target().width()]) / ele.data('name').length; //so buffering less
         },
         'label': function(ele){
-            let c = edgeTextCalcs(ele);
-            //if label is too long
-            if (c.label.length > c.maxStrLength){
-            if(c.maxStrLength > 1){
-                c.label = c.label.slice(0, c.maxStrLength - 1) + '.';
-            } else {
-                c.label = '';
-            }
-            } 
-            return c.label;
+            // let c = edgeTextCalcs(ele);
+            // //if label is too long
+            // if (c.label.length > c.maxStrLength){
+            // if(c.maxStrLength > 1){
+            //     c.label = c.label.slice(0, c.maxStrLength - 1) + '.';
+            // } else {
+            //     c.label = '';
+            // }
+            // } 
+            // return c.label;
+            return ele.data('name'); //so buffers less
         },
         'font-family': 'monospace',
         'curve-style': 'bezier',

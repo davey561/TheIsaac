@@ -27,7 +27,7 @@ export function traversalLayout(cy, eles, layout){
     if(cy.animated()) {cy.stop()}
     else {eles.closedNeighborhood().closedNeighborhood() // no longer using kruskal
         .createLayout(defaultOptions.fCoseOptions).run();}
-    animateFitDirect(cy, eles, ANIMATION_DURATION*.8);
+    animateFitDirect(cy, eles, ANIMATION_DURATION*.5);
     
   } catch (Exception){}
 }

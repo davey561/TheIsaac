@@ -49,18 +49,20 @@ export function addNode(cy, label, location){
   }
   export function getBarReady(cy, ele, typeahead, mode, defaultName){
     let instance = typeahead.getInstance();
-    instance.clear();
     instance.focus();
     let input = instance.getInput();
     switch(mode){
       case "search": 
-        
+        input.select();
         break;
       case "rename": 
+        instance.clear();
         console.log('renaming');
         input.value= defaultName;
+        input.select();
         break;
       case "create": 
+        instance.clear();
         input.value = defaultName;
         input.select();
         break;
@@ -372,7 +374,6 @@ export function addNodeSmart(cy){
     addNode(cy, newName, coords);
   }
   cy.container().focus();
-  console.log(352);
 }
 function getPaddedExtent(cy, radius){
   let extent = cy.extent();

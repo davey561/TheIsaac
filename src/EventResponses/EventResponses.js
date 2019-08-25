@@ -74,8 +74,10 @@ export const getElementData = (cy) => {
     return data;
 }
 export const setMenuOptions = (cy, setEleNames) => {
-    setEleNames(getElementData(cy).sort((a,b)=>{
+    let sorted = getElementData(cy).sort((a,b)=>{
         return ((a.name<b.name) ? -1 : 1)
-    }));
+    });
+    setEleNames(sorted);
+    return sorted;
 }
 

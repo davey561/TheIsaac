@@ -28,7 +28,7 @@ import defaultOptions, { ANIMATION_DURATION } from './Defaults/defaultOptions'
 import { runLayout, traversalLayout, makeChangesForInitialLayout } from './Old/Layout';
 import { save, confMessage, setMenuOptions, eventResponses, eventResponseParameters } from './EventResponses/EventResponses';
 import {generalKeyResponses, alphabetResponses, numberKeyResponses, typeaheadResponses} from './EventResponses/KeyResponses';
-import BarHandler, { inputChangeHandler, onBlurHandler, clear, focusHandler} from './EventResponses/BarHandlers';
+import BarHandler, { inputChangeHandler, onBlurHandler, clear, focusHandler, setBarSettings} from './EventResponses/BarHandlers';
 import { saveToText } from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
 import { cytoscapeEvents } from './EventResponses/CyEvents';
@@ -63,12 +63,9 @@ function Plexus(props){
     const [typeMode, setTypeMode] = useState("search");
     //export {setTypeMode};
     const [barOptions, setBarOptions] = useState({
-        allowNew: true,
-        renderMenu: ()=>{},
+        allowNew: false,
         inputHandler: () => {},
-        focusHandler: () => typeaheadRef.getInstance().clear(),
-        //defaultInputValue: (x) => {}
-
+        options: eleNames
     });
     const [eleBeingModified, setEleBeingModified] = useState(-1);
     const [defaultInputValue, setDefaultInputValue] = useState("Davey");
@@ -115,62 +112,25 @@ function Plexus(props){
             //All non-key-press event responses
             eventResponses(null, null, "cy&window", ...eval(eventResponseParameters));
 
-            //Initially set the options for the universal bar
-            setMenuOptions(cyRef, setEleNames);
+            //Initially set the options for the universal bar, later updating gets done in CyEvents
+            let s = setMenuOptions(cyRef, setEleNames); 
+            setBarSettings(setBarOptions, typeMode, menuResults, s);
+            console.log('setting options: ', cyRef.elements()[0].data('name'));
 
             setCy(cyRef);
         }
     }, [loading]);
-    // useEffect(()=>{
-    //     switch(typeMode){
-    //         case "search": 
-    //             //typeaheadRef.getInstance().getInput().value = lastTwo.getNames()[1]
-    //             setDefaultInputValue(lastTwo.target()); break;
-    //         case "rename": case "create": 
-    //             setDefaultInputValue(eleBeingModified); break;
-    //     }
-    // }, [lastTwo.lastTwo])
-    //for typeahead mode change
     useEffect(()=> {
-        switch(typeMode){
-            case "search": 
-                setBarOptions({
-                    allowNew: false,
-                    renderMenu: (results, menuProps) => {
-                        menuResults = results;
-                        return (<Menu {...menuProps}>
-                        {results.map((result, index) => (
-                            <MenuItem option={result} position={index}>
-                            {result.name}
-                            </MenuItem>
-                        ))}
-                        </Menu>)
-                    },
-                    inputHandler: () => {},
-                    //focusHandler: () => clear(typeaheadRef)
-                });
-                break;
-            case "rename":
-                setBarOptions({
-                    allowNew: true,
-                    //renderMenu:
-                    inputHandler: inputChangeHandler,
-                 //  focusHandler: () => {}
-
-                });
-                break;
-            case "create": 
-                setBarOptions({
-                    allowNew: true,
-                    //renderMenu: ()=>{},
-                    inputHandler: inputChangeHandler,
-                    //focusHandler: () => {}
-                });
-                break;
-        }
-        setEleNames(eleNames); //no change here
+        console.log('eleNames when setting bar settings: ', eleNames, "\ntype mode: ", typeMode);
+        
+        setBarSettings(setBarOptions, typeMode, menuResults, eleNames);
         //setOnChangeHandler();
     }, [typeMode]);
+    // useEffect(()=>{
+    //     if(!loading){
+    //         setMenuOptions(cy, setEleNames);
+    //     }
+    // }, [cyRef])
 
     return (
         <div>
@@ -213,14 +173,15 @@ function Plexus(props){
                                 onChange={(selected) => {
                                     BarHandler(selected, cyRef, eleBeingModified, typeaheadRef, typeMode);
                                 }}
-                                options={eleNames}
+                                options={barOptions.options}
+                                //emptyLabel={"Fuck the fuckers"}
                                 selectHintOnEnter={true}
                                 maxResults={10}
                                 //defaultSelected = {[barOptions.defaultInputValue]}
                                 //highlightOnlyResult={true}
+                                onFocus={()=> console.log(barOptions.options)}
                                 onBlur={() => onBlurHandler(typeMode, setTypeMode)}
                                 labelKey='name'
-                                renderMenu={barOptions.renderMenu}
                             />
                         </KeyboardEventHandler>
                     </div>
