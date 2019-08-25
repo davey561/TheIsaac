@@ -1,5 +1,5 @@
 import { Core, Singular, CollectionReturnValue, Collection } from "cytoscape";
-import {ANIMATION_DURATION} from './defaultOptions';
+import {ANIMATION_DURATION} from '../Defaults/defaultOptions';
 
 //10) Find a connected grahp that contains the searched for node
   //for example and demonstration purposes, find the connected graph containing Davey nodes
@@ -33,12 +33,14 @@ import {ANIMATION_DURATION} from './defaultOptions';
 //     cy.style().update();
 //   }
 //   //7) Search for node and change layout to center viewport on it
-  export function barSelect(cy, text){
-    let results = cy.nodes('[name@*="' + text + '"]');   //searches within the graph for a node that contains searchterms
+
+//Searching via universal bar
+  export function barSelect(cy, id){
+   // console.log('id is ', id)
+    let result = cy.getElementById(id);   //searches within the graph for a node that contains searchterms
 
     //if there is only one result
-    if (results.size()==1){
-      let result = results[0];
+    if (result){
       cy.elements().unselect();
       result.select();
     }

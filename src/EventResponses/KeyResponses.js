@@ -1,14 +1,15 @@
-import defaultOptions from './defaultOptions';
+import defaultOptions from '../Defaults/defaultOptions';
 import {nedge, nodify, edgify, addEdgeSmart, deleteAll, deleteSome, addNodeSmart, keyRename} 
-    from "./ModifyGraph";
-import {runLayout, colaLayout, dagreLayout, fCoseLayout} from './Layout';
-import { saveToText } from './ConvertToBullets';
-import {save, flip} from './EventResponses';
-import {barSelect} from './FocusLevels';
+    from "../Old/ModifyGraph";
+import {runLayout, colaLayout, dagreLayout, fCoseLayout, layoutThenFit} from '../Old/Layout';
+import { saveToText } from '../Old/ConvertToBullets';
+import {save, flip,test} from './EventResponses';
+import {barSelect} from '../Old/FocusLevels';
 
 export function generalKeyResponses(key, event, cy, database, lastTwoObj, 
-    lastEdgeAdded, repeatTracker, typeahead, setEleNames) {
-    console.log(`key: ${key}`);
+    lastEdgeAdded, typeahead, setEleNames, typeMode, setTypeMode,
+    eleBeingModified, setEleBeingModified) {
+   // console.log(`key: ${key}`);
     switch(key){
         //case 'shift': typeahead.getInstance().blur(); break;
         
@@ -18,7 +19,7 @@ export function generalKeyResponses(key, event, cy, database, lastTwoObj,
         case 'shift+d': dagreLayout(cy); break;
 
         //Test
-        case 'shift+ t': test(cy); break;
+        case 'shift+t': test(cy); break;
 
         //Backing up
         case 'meta + s': event.preventDefault(); save(cy); break;
@@ -32,7 +33,7 @@ export function generalKeyResponses(key, event, cy, database, lastTwoObj,
         case 'shift+n': nodify(cy); break;
         case 'shift+e': edgify(cy); break;
         case 'command+shift+enter': nedge(cy, lastTwoObj); break;
-        case 'shift+r': keyRename(cy, ); break; //rename
+        case 'shift+r': event.preventDefault(); keyRename(cy, setTypeMode, typeahead, setEleBeingModified, typeMode); break; //rename
         case 'command+shift+backspace': deleteAll(cy); break;
         case 'shift+backspace': deleteSome(cy); break;
 
@@ -61,21 +62,25 @@ export function generalKeyResponses(key, event, cy, database, lastTwoObj,
 }
 export const numberKeyResponses = (cy, key) => {
     let component = cy.elements().components()[parseInt(key)];
-    runLayout(cy, component, defaultOptions.layout);
+    layoutThenFit(cy, cy.elements(), component, defaultOptions.fCoseOptions);
 }
 export const alphabetResponses = (cy, key, typeahead) => {
-    typeahead.getInstance().focus();
+    let instance = typeahead.getInstance();
+    instance.clear();
+    instance.focus();
 }
-export const typeaheadResponses = (key, event, cy, typeahead, menuResults)=>{
+export const typeaheadResponses = (key, event, cy, typeahead, menuResults, mode)=>{
     switch(key){
         case 'enter':  
-            console.log(typeahead.getInput());
-            //Zoom into the search term node
-            try{
-                barSelect(cy, menuResults[0].name);
-            } catch(Exception){}
-            typeahead.clear();
-            typeahead.blur(); break;
-        case 'shift': typeahead.blur(); typeahead.clear(); break;
+            enterResponses(mode, typeahead);
+            break;
+        case 'esc': event.preventDefault(); typeahead.blur(); typeahead.clear(); break;
+    }
+}
+export const enterResponses = (mode, typeahead) => {
+    switch(mode){
+        case "rename":
+            typeahead.blur();
+            break;
     }
 }

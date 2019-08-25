@@ -1,17 +1,20 @@
 import {save, getElementData, setMenuOptions} from './EventResponses';
-import {traversalLayout, runLayout} from './Layout';
-import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
-import {retrieveNewName, deleteOneNode, rename} from './ModifyGraph';
-import defaultOptions from './defaultOptions';
-
+import {traversalLayout, runLayout} from '../Old/Layout';
+import cytoscape from 'cytoscape/dist/cytoscape.esm';
+import {retrieveNewName, deleteOneNode, rename, getBarReady} from '../Old/ModifyGraph';
+import defaultOptions from '../Defaults/defaultOptions';
 
 let fl = 0;
 //Cytoscape Events
 export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName, 
                                 setLastEdgeName, firebaseRef, typeahead, 
-                                firstLayout, setFirstLayout, layout, setEleNames){
+                                firstLayout, setFirstLayout, layout, setEleNames,
+                                typeMode, setTypeMode, eleBeingModified, setEleBeingModified){
   //keep track of last two
   console.log('in cytoscape events')
+  cy.on('tapstart cxttapstart', (event) => {
+    setEleBeingModified(event.target);
+  })
    cy.on(
     "add data select tap",
     (event) => {
@@ -81,7 +84,9 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   })
   //rename
   cy.on("cxttap",function(event){
-    rename(cy, event);
+    let mode = 'rename';
+    setTypeMode(mode);
+    getBarReady(cy, event.target, typeahead, mode, event.target.data('name'));
   });
 
   //Delete node on taphold

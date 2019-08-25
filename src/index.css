@@ -93,8 +93,8 @@ body{
   font-family: "Apple Chancery, cursive"
 }
 #loader{
-  width: 169px;
-  height: 169px;
+  width: 49px;
+  height: 49px;
   /* float: left; */
 }
 #snackbar {

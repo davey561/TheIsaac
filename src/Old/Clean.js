@@ -4,7 +4,7 @@ import cytoscape from 'cytoscape/dist/cytoscape.esm';
 import cola from 'cytoscape-cola';
 //import dagre from 'cytoscape-dagre';
 import dagre from 'cytoscape-dagre';
-import defaultOptions from './defaultOptions'
+import defaultOptions from '../Defaults/defaultOptions'
 import {distance} from './ModifyGraph';
 import { hasWhiteSpace } from './Miscellaneous';
 cytoscape.use(cola);
@@ -48,7 +48,7 @@ export function sizeNodeText(ele){
         (c.tbHeight * c.tbWidth)/(2.25 * c.label.length)
       ));
   }
-  return WEIRD_TEXT_SIZING_FACTOR * fontSize/c.currZoomLevel;
+  return WEIRD_TEXT_SIZING_FACTOR * Math.floor(fontSize/c.currZoomLevel);
 }
 export function setTextMaxWidth(ele){
   const c = nodeTextCalcs(ele);

@@ -1,5 +1,5 @@
 import { Core, EdgeCollection } from "cytoscape";
-import {runLayoutDefault} from "./EventResponses";
+import {runLayoutDefault} from "../EventResponses/EventResponses";
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
 import {concatName} from './Miscellaneous';
 import { async } from "q";
@@ -47,29 +47,35 @@ export function addNode(cy, label, location){
     } while(group.is(`[id = "${id}"]`));
     return [nodename, id];
   }
-  export function rename(cy, event){
-    let isNode = true;
-    if(event.target !== cy && event.target.isEdge()){
-      isNode= false;
+  export function getBarReady(cy, ele, typeahead, mode, defaultName){
+    let instance = typeahead.getInstance();
+    instance.clear();
+    instance.focus();
+    let input = instance.getInput();
+    switch(mode){
+      case "search": 
+        
+        break;
+      case "rename": 
+        console.log('renaming');
+        input.value= defaultName;
+        break;
+      case "create": 
+        input.value = defaultName;
+        input.select();
+        break;
     }
-    let newInfo = retrieveNewName(cy, isNode, true)[0];
-    if(newInfo!=-1){
-      event.target.data('name', newInfo);
-    }
+    
   }
-  export function keyRename(cy){
-    let ele = cy.elements().filter(':selected')
-    if(ele.length!=1){
+  export function keyRename(cy, setTypeMode, typeahead, setEleBeingModified, typeMode){
+    let eles = cy.elements().filter(':selected');
+    if(eles.length!=1){
       return -1;
     } else{
-      ele = ele[0];
-      //node or edge?
-      let isNode;
-      ele.isNode()? isNode=true : isNode=false;
-      let newInfo = retrieveNewName(cy, isNode, true)[0];
-      if(newInfo!=-1){
-        ele.data('name', newInfo);
-      }
+      let ele = eles[0];
+      setEleBeingModified(ele);
+      setTypeMode('rename');
+      getBarReady(cy, ele, typeahead, typeMode, ele.data('name'));
     }
   }
 //   function renameEdge(){
