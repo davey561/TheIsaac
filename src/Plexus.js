@@ -156,11 +156,15 @@ function Plexus(props){
                             <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
                                 onClick={() => saveToText(cyRef)}>Download</Button>
                             &nbsp;
-                            <Button id="addNodeButton" variant="outline-primary" className="newButton" //size="lg"
+                            <Button id="addNodeButton" variant="outline-primary" className="newButton" size="sm"
                                 onClick={()=>{addNodeSmart(cyRef, setEleBeingModified, typeaheadRef, setTypeMode);}}>Add Node</Button>
-                            <Button id='lasttwo' variant="outline-primary" className="newButton" //size='lg'
+                            <Button id='lasttwo' variant="outline-primary" className="newButton" size='sm'
                                 onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo, setEleBeingModified, typeaheadRef, setTypeMode)}>Add Edge: &nbsp; __ &#10233; __</Button>
                         </ButtonToolbar>
+                        <div id = 'zoom'>
+                            {/* <img id='zoomIcon' src={require('./detective.png')}></img> */}
+                            <h4  id='zoomLevel' className='chancery'></h4>
+                        </div>
                         <KeyboardEventHandler 
                             className="bar"
                             handleKeys={['esc', 'enter']}

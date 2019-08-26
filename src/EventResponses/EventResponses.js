@@ -51,6 +51,13 @@ export function save(cy, firebaseRef){
 export const test = (cy) =>{
     // cy.style().update();
     console.log(cy.nodes()[0].data(), cy.edges()[0].data());
+    let pr = cy.elements().pageRank();
+    let arrEles = cy.nodes().toArray();
+    let rankings = arrEles.map((ele)=> pr.rank(ele));
+    console.log(rankings);
+
+    //cy.nodes().style('width')
+    
 }
 export const flip = (cy, lastTwo, event) => {
 event.preventDefault();

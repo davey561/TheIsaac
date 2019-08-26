@@ -223,5 +223,6 @@ cy.on("mouseout",function(event){
   // updates node text on zoom, updates edge text on position
   cy.on('zoom position', function(evt){
     cy.style().update();
+    document.getElementById('zoomLevel').innerHTML = Math.floor(cy.zoom())+"x";
   })
 }

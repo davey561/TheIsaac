@@ -41,7 +41,7 @@ export function compilePropositionList(cy){
     let edgeName;
     incidents.forEach(function(edge){
       edgeName = edge.data('name');
-      relation = (edgeName.length==0 ? '': `${edge.data('name')}`)
+      relation = (!edgeName ? '': `${edge.data('name')}`)
       s += `\n  - ${relation} ${edge.target().data('name')}`
     });
     nodeList += nodeName + ", "

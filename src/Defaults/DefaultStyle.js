@@ -30,7 +30,7 @@ const style = {
         'font-family': 'monospace',
         'text-wrap': 'wrap',
         'text-max-width': function(ele){
-            return ele.width();
+            return 1.1*ele.width();
             //return setTextMaxWidth(ele);
         },
         'font-size': function(ele){
@@ -142,7 +142,7 @@ const style = {
     'selected-edge': { selector: '.selected-edge',
         style: 
         {
-        'line-color' : 'black',
+        'line-color' : '#7da2ff',
         //'line-fill': 'radial-gradient'
         }
     }

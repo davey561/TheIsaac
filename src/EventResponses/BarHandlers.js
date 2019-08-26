@@ -52,6 +52,7 @@ export const onBlurHandler = (mode, setTypeMode, nedgeInProgress, setNedgeInProg
             if(nedgeInProgress.ongoing){
                 console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
                 setEleBeingModified(nedgeInProgress.ele);
+                nedgeInProgress.ele.select();
                 getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
                 setNedgeInProgress({ongoing: false, ele: null});
             } else {

@@ -289,6 +289,7 @@ export function nedge(cy, lastTwoObj, setEleBeingModified, typeahead, setTypeMod
   let pastSelected = cy.getElementById(lastTwoObj.lastTwo[1]);
   let newNode = addNode(cy, -1, findGoodLocationForNewNode(cy, 5));
   let newEdge = addNewEdge(cy, pastSelected, newNode, -1);
+  newEdge.select();
   setEleBeingModified(newEdge);
   setNedgeInProgress({ongoing: true, ele: newNode}); //communicate cross-program that blur response should be special for this nedging; this other function can
   //figure out which edge to target by just taking the only incident edge of the eleBeingModified 
