@@ -9,11 +9,11 @@ cytoscape.use(cola);
 cytoscape.use(dagre);
 
 export function runLayout(cy, eles, layout){
-  cy.stop();
-  try{
-    eles.layout(layout).run();
-  } catch (Exception) {}
- 
+  if(!cy.animated()){
+    try{
+      eles.layout(layout).run();
+    } catch (Exception) {}
+  }
 }
 export function runLayout3(createdLayout){
   createdLayout.stop();
@@ -67,7 +67,7 @@ export const makeChangesForInitialLayout = (layout) => {
   realLayout.fit=true;
   realLayout.animate= 'end';  
   realLayout.animationEasing='ease-in-out-quint'; 
-  realLayout.animationDuration= 2.5*ANIMATION_DURATION;
+  realLayout.animationDuration= 1.5*ANIMATION_DURATION;
   realLayout.randomize=false;
   //realLayout.ease
   return realLayout;

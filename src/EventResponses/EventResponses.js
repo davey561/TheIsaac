@@ -16,16 +16,16 @@ import windowEvents from './WindowEvents';
 
 export const eventResponseParameters = "[cyRef, firebaseRef, lastTwo, \
     typeaheadRef, setEleNames, setLastTwo, lastEdgeName, setLastEdgeName, \
-    firstLayout, setFirstLayout, layout, typeMode, setTypeMode, eleBeingModified, setEleBeingModified]";
+    firstLayout, setFirstLayout, layout, typeMode, setTypeMode, eleBeingModified, setEleBeingModified, nedgeInProgress, setNedgeInProgress]";
 
 export function eventResponses(key, event, eventKind,
     cyRef, firebaseRef, lastTwo,
     typeaheadRef, setEleNames, setLastTwo, lastEdgeName, setLastEdgeName, 
-    firstLayout, setFirstLayout, layout, typeMode, setTypeMode, eleBeingModified, setEleBeingModified){
+    firstLayout, setFirstLayout, layout, typeMode, setTypeMode, eleBeingModified, setEleBeingModified, nedgeInProgress, setNedgeInProgress){
     switch(eventKind){
         case "key": 
             generalKeyResponses(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, 
-                typeaheadRef, setEleNames, typeMode, setTypeMode, eleBeingModified, setEleBeingModified);
+                typeaheadRef, setEleNames, typeMode, setTypeMode, eleBeingModified, setEleBeingModified, nedgeInProgress, setNedgeInProgress);
             break;
         case "cy&window":
             cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
@@ -67,7 +67,7 @@ function saveWhichUser(){
     localStorage.setItem('User', document.getElementById('codeSelection').value);
 }
 export const getElementData = (cy) => {
-    let data = cy.nodes().map((ele) => {
+    let data = cy.nodes(':visible').map((ele) => {
         return ele.data();
     });
     //console.log(data);

@@ -38,7 +38,7 @@ import {ANIMATION_DURATION} from '../Defaults/defaultOptions';
   export function barSelect(cy, id){
    // console.log('id is ', id)
     let result = cy.getElementById(id);   //searches within the graph for a node that contains searchterms
-
+    console.log(result.data())
     //if there is only one result
     if (result){
       cy.elements().unselect();
@@ -88,7 +88,7 @@ import {ANIMATION_DURATION} from '../Defaults/defaultOptions';
     //     var emphmax = Math.max(...temparray); window.alert("max in temp array is")
     //     //window.alert('emphmax found:' + emphmax);
     //     //Find the average of these values
-    //     var emphavg = temparray.reduce(function(a, b) { return a + b; }) / temparray.length;
+    //     var emphavg = temparray.reduce(function() { return a + b; }) / temparray.length;
     //     window.alert('average emph has been calculated: ' + emphavg);
 
     //     //now, if style of nodes was last updated in styleEles function, then w, h, font size of each should vary according to this change in emphasis

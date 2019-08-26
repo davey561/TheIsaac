@@ -51,7 +51,7 @@ body{
 #cy {
   /* height: 90%; */
   /* width: 100%; */
-  z-index: 999;
+  z-index: 1;
   display: block;
 }
 #lasttwo{
@@ -104,13 +104,15 @@ body{
   color: #FB7272 ;
   background-color: white;
   text-align: center;
-  border-radius: 2px;
+  border-radius: 10px;
+  border: 1px solid #FB7272;
   padding: 16px;
-  position: fixed;
+  position: absolute;
+  opacity: .9;
   z-index: 1;
   left: 20px;
   bottom: 30px;
-  font-size: 56px;
+  font-size: 36px;
   font-style: italic;
   font-family: "Apple Chancery, cursive"
 }
@@ -122,21 +124,21 @@ body{
 
 @-webkit-keyframes fadein {
     from {bottom: 0; opacity: 0;}
-    to {bottom: 30px; opacity: 1;}
+    to {bottom: 30px; opacity: .9;}
 }
 
 @keyframes fadein {
     from {bottom: 0; opacity: 0;}
-    to {bottom: 30px; opacity: 1;}
+    to {bottom: 30px; opacity: .9;}
 }
 
 @-webkit-keyframes fadeout {
-    from {bottom: 30px; opacity: 1;}
+    from {bottom: 30px; opacity: .9;}
     to {bottom: 0; opacity: 0;}
 }
 
 @keyframes fadeout {
-    from {bottom: 30px; opacity: 1;}
+    from {bottom: 30px; opacity: .9;}
     to {bottom: 0; opacity: 0;}
 }
 .potential {

@@ -1,17 +1,19 @@
 import { Core, EdgeCollection } from "cytoscape";
 import {runLayoutDefault} from "../EventResponses/EventResponses";
 import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
-import {concatName} from './Miscellaneous';
+import {concatName, arrAvg} from './Miscellaneous';
 import { async } from "q";
+import {getBarReady} from '../EventResponses/BarHandlers';
 
+//confusing: this is analogous to addNewEdge for edges, not the addEdge function. the addEdge function is outdated
 export function addNode(cy, label, location){
     if (label==null) return null;
+    let labelSections = (label!=-1 ? {id: label[0], name: label[0]}: {name: ""});
     let newNode = cy.add(
         //@ts-ignore
         { 
             data: {
-                id: label[1], 
-                name: label[0],
+                ...labelSections,
                 emphasis: 1,
                 //  merged_as_mutual: false, 
                 //  level: 0
@@ -47,28 +49,6 @@ export function addNode(cy, label, location){
     } while(group.is(`[id = "${id}"]`));
     return [nodename, id];
   }
-  export function getBarReady(cy, ele, typeahead, mode, defaultName){
-    let instance = typeahead.getInstance();
-    instance.focus();
-    let input = instance.getInput();
-    switch(mode){
-      case "search": 
-        input.select();
-        break;
-      case "rename": 
-        instance.clear();
-        console.log('renaming');
-        input.value= defaultName;
-        input.select();
-        break;
-      case "create": 
-        instance.clear();
-        input.value = defaultName;
-        input.select();
-        break;
-    }
-    
-  }
   export function keyRename(cy, setTypeMode, typeahead, setEleBeingModified, typeMode){
     let eles = cy.elements().filter(':selected');
     if(eles.length!=1){
@@ -76,8 +56,9 @@ export function addNode(cy, label, location){
     } else{
       let ele = eles[0];
       setEleBeingModified(ele);
-      setTypeMode('rename');
-      getBarReady(cy, ele, typeahead, typeMode, ele.data('name'));
+      ele.select();
+      console.log('ele being modified is ' + ele.data('name'), ", typemode is: ", typeMode);
+      getBarReady(cy, ele, typeahead, typeMode, ele.data('name'), setTypeMode);
     }
   }
 //   function renameEdge(){
@@ -138,25 +119,26 @@ export function addNode(cy, label, location){
 //     // window.alert('at end of IN');
 //   }
   
-  //6) Add an edge, given a source and target
+  //6) Add an edge, given a source and target--basically, this is OUTDATED now
   export function addEdge(cy, sourcenode, targetnode, lastEdgeAdded){
     let edgename = newEdgePrompt(false, cy, sourcenode, targetnode, lastEdgeAdded);
     //If the edgename given is blank, or user hits cancel stop this function. Otherwise, continue.
-    if(edgename=="null"){return 0;}
+    if(edgename=="null"){return "";}
     //Add new edge
     return addNewEdge(cy, sourcenode, targetnode, edgename);
     
     //window.alert('edge name: ' + edgename +', source node: ' + sourcenode.data('name'));
   }
   
+  //confusing, but this is analogous to addNode (there is no addNewNode)
   export function addNewEdge(cy, sourcenode, targetnode, edgename){
-    cy.add([
+    let newEdge = cy.add([
       {
         group: "edges",
-        data: { name: edgename, source: sourcenode.id(), target: targetnode.id()}
+        data: { /*name: edgename,*/ source: sourcenode.id(), target: targetnode.id()}
       }
     ]);
-    return edgename;
+    return newEdge;
   }
   export function addNewEdge2(cy, srcid, trgid, edgename){
     //window.alert([srcid, trgid].toString());
@@ -201,6 +183,7 @@ export function addNode(cy, label, location){
     }
     //Find all the nodes currently in the viewport
     let nodesInViewport = findNodesInViewport(cy, radius);
+    console.log(nodesInViewport);
     do{
       goodLocation = true;
       newCoords = {
@@ -212,7 +195,7 @@ export function addNode(cy, label, location){
         if(between(ele.position().x, paddedExtent.x1, paddedExtent.x2) 
         && between(ele.position().y, paddedExtent.y1, paddedExtent.y2))
         {
-          nodesInViewport.union(ele);
+          //console.log(ele.data('name'), " included in viewport");
           if(distanceBetweenPoints(newCoords, ele.position()) < ele.numericStyle('width')){
             goodLocation = false;
             //window.alert('woulda been too close');
@@ -223,13 +206,12 @@ export function addNode(cy, label, location){
       if(i>3000){
         // let nodesInViewport = findNodesInViewport(cy, radius);
 
-        // let zooming = async() => {cy.zoom(cy.zoom()/4)};
-        // zooming().then(()=>{
-        //   cy.center(nodesInViewport);
-        //   return findGoodLocationForNewNode(cy, radius);
-        // });
+        cy.zoom(cy.zoom()/2);
+        cy.center(nodesInViewport);
+        console.log("node in viewport, ", nodesInViewport);
+          return findGoodLocationForNewNode(cy, radius);
         // return null;
-        window.alert('viewport is too crowded for new node. zooming out to add it')
+        //window.alert('viewport is too crowded for new node. zooming out to add it')
         return -1;
       }
     } while(!goodLocation);
@@ -272,7 +254,11 @@ function between(x, x1, x2){
 function findNodesInViewport(cy, radius) {
   let paddedExtent = getPaddedExtent(cy, radius);
   let nodesInViewport = cy.collection();
+  
   cy.nodes().forEach(function(ele){
+    if(ele.data('name')==='Hello'){
+      console.log('howdy')
+    }
     if(between(ele.position().x, paddedExtent.x1, paddedExtent.x2) 
     && between(ele.position().y, paddedExtent.y1, paddedExtent.y2))
     {
@@ -284,7 +270,7 @@ function findNodesInViewport(cy, radius) {
 export function deleteOneNode(targnode, cy){
   cy.remove(targnode); 
 }
-export function addEdgeSmart(cy, lastEdgeAdded, lastTwoObj){
+export function addEdgeSmart(cy, lastEdgeAdded, lastTwoObj, setEleBeingModified, typeahead, setTypeMode){
   let sourceNode = null; let targetNode =null;
   //I think this check to see if there are any selected nodes
   if(lastTwoObj.lastTwo.length==2){
@@ -293,40 +279,42 @@ export function addEdgeSmart(cy, lastEdgeAdded, lastTwoObj){
   }
   //Allow user to add edge
   if(sourceNode!=null && targetNode!=null){
-    lastEdgeAdded = addEdge(cy, sourceNode, targetNode, lastEdgeAdded);
+    let newEdge = addNewEdge(cy, sourceNode, targetNode, lastEdgeAdded);
+    setEleBeingModified(newEdge);
+    newEdge.select();
+    getBarReady(cy, newEdge, typeahead, "create", lastEdgeAdded, setTypeMode);
   }
 }
-export function nedge(cy, lastTwoObj){
-  let eventualEdge = retrieveNewName(cy, false);
-  let eventualNode = retrieveNewName(cy, true);
+export function nedge(cy, lastTwoObj, setEleBeingModified, typeahead, setTypeMode, setNedgeInProgress){
   let pastSelected = cy.getElementById(lastTwoObj.lastTwo[1]);
-  let newNode = addNode(cy, eventualNode, {x: 0, y: 0});
-  let newEdge = addNewEdge(cy, pastSelected, newNode, eventualEdge[0]);
+  let newNode = addNode(cy, -1, findGoodLocationForNewNode(cy, 5));
+  let newEdge = addNewEdge(cy, pastSelected, newNode, -1);
+  setEleBeingModified(newEdge);
+  setNedgeInProgress({ongoing: true, ele: newNode}); //communicate cross-program that blur response should be special for this nedging; this other function can
+  //figure out which edge to target by just taking the only incident edge of the eleBeingModified 
+  getBarReady(cy, newEdge, typeahead, "create", "", setTypeMode);
 }
 export function nodify (cy){
   if (cy.edges().filter(':selected').length == 1){
     let newName = cy.edges().filter(':selected').data("name");
-    let unique = findUniqueName(cy, newName, true);
-    newName = unique[0];
-    let newId = unique[1];
-    let sourceX = cy.edges().filter(':selected').source().position().x;
-    let sourceY = cy.edges().filter(':selected').source().position().y;
-    let targetX = cy.edges().filter(':selected').target().position().x;
-    let targetY = cy.edges().filter(':selected').target().position().y;
-    let newNodeX = (sourceX + targetX)/2;
-    let newNodeY = (sourceY + targetY)/2;
-    cy.add({
-      data: { id: newId, name: newName },
-      position: { x: newNodeX, y: newNodeY }
+    //let unique = findUniqueName(cy, newName, true);
+    //newName = unique[0];
+    //let newId = unique[1];
+    let source = cy.edges().filter(':selected').source().position();
+    let target = cy.edges().filter(':selected').target().position();
+    let newNode = {x: arrAvg([source.x, target.x]), y: arrAvg([source.y, target.y])};
+    let intNode = cy.add({
+      data: { name: newName },
+      position: newNode
     }).select();
     cy.add({
       data: { source: cy.edges().filter(':selected').source().id(),
-              target: newId,
+              target: intNode.id(),
               name: ''
             }
     });
     cy.add({
-      data: { source: newId,
+      data: { source: intNode.id(),
               target: cy.edges().filter(':selected').target().id(),
               name: ''
             }
@@ -367,13 +355,12 @@ export function deleteSome(cy){
     }
   }
 }
-export function addNodeSmart(cy){
+export function addNodeSmart(cy, setEleBeingModified, typeahead, setTypeMode){
   let coords = findGoodLocationForNewNode(cy,5);
-  let newName = retrieveNewName(cy, true);
-  if(newName!=-1){
-    addNode(cy, newName, coords);
-  }
-  cy.container().focus();
+  let newNode = addNode(cy, -1, coords);
+  setEleBeingModified(newNode);
+  getBarReady(cy, newNode, typeahead, "create", "", setTypeMode);
+  //cy.container().focus();
 }
 function getPaddedExtent(cy, radius){
   let extent = cy.extent();

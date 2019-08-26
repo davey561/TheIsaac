@@ -27,12 +27,12 @@ import firebase from 'firebase';
 import defaultOptions, { ANIMATION_DURATION } from './Defaults/defaultOptions'
 import { runLayout, traversalLayout, makeChangesForInitialLayout } from './Old/Layout';
 import { save, confMessage, setMenuOptions, eventResponses, eventResponseParameters } from './EventResponses/EventResponses';
-import {generalKeyResponses, alphabetResponses, numberKeyResponses, typeaheadResponses} from './EventResponses/KeyResponses';
+import {generalKeyResponses, alphabetResponses, numberKeyResponses, typeaheadResponses, shiftNumbersList} from './EventResponses/KeyResponses';
 import BarHandler, { inputChangeHandler, onBlurHandler, clear, focusHandler, setBarSettings} from './EventResponses/BarHandlers';
 import { saveToText } from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
 import { cytoscapeEvents } from './EventResponses/CyEvents';
-import {addEdgeSmart, addNodeSmart} from './Old/ModifyGraph';
+import {addEdgeSmart, addNodeSmart, nedge} from './Old/ModifyGraph';
 import windowEvents from './EventResponses/WindowEvents';
 import { async } from 'q';
 import logo from './plexusloading.gif';
@@ -57,6 +57,8 @@ function Plexus(props){
     const [label, setLabel] = useState("Davey"); //for debugging purposes; will eventually be removed once 'rename' uses universal top bar
     const [lastTwo, setLastTwo] = useState(new LastTwo()); //object that stores the last two nodes with which the user interacted
     const [lastEdgeName, setLastEdgeName] = useState(""); //the name of the last edge added, to be used as default when adding new edge
+    const [stylesheet, setStylesheet] = useState(defaultOptions.style);
+    const [nedgeInProgress, setNedgeInProgress] = useState({ongoing: false, ele: {}});
 
     //Relating to keypress responses
     const [enteredText, setEnteredText] = useState("");
@@ -104,6 +106,9 @@ function Plexus(props){
             })
         }
         fetchData();
+
+        //don't render at first with labels, make it's more scratchy
+
     }, []);
 
     //After load
@@ -115,9 +120,9 @@ function Plexus(props){
             //Initially set the options for the universal bar, later updating gets done in CyEvents
             let s = setMenuOptions(cyRef, setEleNames); 
             setBarSettings(setBarOptions, typeMode, menuResults, s);
-            console.log('setting options: ', cyRef.elements()[0].data('name'));
 
             setCy(cyRef);
+            //setStylesheet(defaultOptions.style);
         }
     }, [loading]);
     useEffect(()=> {
@@ -151,10 +156,10 @@ function Plexus(props){
                             <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
                                 onClick={() => saveToText(cyRef)}>Download</Button>
                             &nbsp;
-                            <Button id="addNodeButton" variant="outline-primary" className="newButton" size="lg"
-                                onClick={()=>{addNodeSmart(cyRef,5);}}>Add Node</Button>
-                            <Button id='lasttwo' variant="outline-primary" className="newButton" size='lg'
-                                onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo)}>&#10233;</Button>
+                            <Button id="addNodeButton" variant="outline-primary" className="newButton" //size="lg"
+                                onClick={()=>{addNodeSmart(cyRef, setEleBeingModified, typeaheadRef, setTypeMode);}}>Add Node</Button>
+                            <Button id='lasttwo' variant="outline-primary" className="newButton" //size='lg'
+                                onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo, setEleBeingModified, typeaheadRef, setTypeMode)}>Add Edge: &nbsp; __ &#10233; __</Button>
                         </ButtonToolbar>
                         <KeyboardEventHandler 
                             className="bar"
@@ -180,7 +185,7 @@ function Plexus(props){
                                 //defaultSelected = {[barOptions.defaultInputValue]}
                                 //highlightOnlyResult={true}
                                 onFocus={()=> console.log(barOptions.options)}
-                                onBlur={() => onBlurHandler(typeMode, setTypeMode)}
+                                onBlur={() => onBlurHandler(typeMode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeaheadRef)}
                                 labelKey='name'
                             />
                         </KeyboardEventHandler>
@@ -190,9 +195,12 @@ function Plexus(props){
                         id='cy'
                         elements={eles}
                         style={ { width: '100%', height: '740px' }}
-                        stylesheet={ defaultOptions.style }
+                        stylesheet={ stylesheet }
                         layout={makeChangesForInitialLayout(layout)}
                         cy={(cy) => { cyRef = cy }}
+                        /* textureOnViewport={true}
+                        hideEdgesOnViewport={true} */
+                        pixelRatio='auto'
                     />
                 </Fragment>
             }
@@ -206,11 +214,11 @@ function Plexus(props){
                     eventResponses(key, event, "key", ...eval(eventResponseParameters))
                 } 
             />
-            {/* <KeyboardEventHandler
-                handleKeys={['numeric']}
+            <KeyboardEventHandler
+                handleKeys={shiftNumbersList()}
                 onKeyEvent={(key, event) => {numberKeyResponses(cyRef, key)}
                 } 
-            /> */}
+            />
             <KeyboardEventHandler
                 handleKeys={['alphabetic', 'numeric']}
                 onKeyEvent={(key, event) => {alphabetResponses(cyRef, key, typeaheadRef)}

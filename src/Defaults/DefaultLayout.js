@@ -4,7 +4,7 @@ export const ANIMATION_DURATION = 800;
 const layout = {
     cose: {
         name: 'cose',
-        animate: 'end',  animationEasing: 'ease', animationDuration: 2*ANIMATION_DURATION,
+        animate: 'end',  animationEasing: 'ease', animationDuration: ANIMATION_DURATION,
         randomize: false,
         refresh: 1,
         idealEdgeLength: IDEAL_EDGE_LENGTH,
@@ -18,7 +18,7 @@ const layout = {
         name: 'fcose', //uses the cose-bilkent layout, downloaded from internet, good for compound graphs
         animate: true,  animationEasing: 'ease', animationDuration: ANIMATION_DURATION,
         randomize: false,
-        idealEdgeLength: IDEAL_EDGE_LENGTH,
+        idealEdgeLength: .7*IDEAL_EDGE_LENGTH,
         fit: false,
         nodeDimensionsIncludeLabels: true,
         padding: 30,

@@ -2,6 +2,7 @@ import {barSelect} from '../Old/FocusLevels';
 import { database } from 'firebase';
 import React from 'react';
 import {Typeahead, Menu, MenuItem} from 'react-bootstrap-typeahead';
+//import {getBarReady} from './BarHandlers'
 
 export const clear = (typeahead) => {
     typeahead.clear();
@@ -41,10 +42,23 @@ export const inputChangeHandler = (text, event, mode, ele) => {
 
     }
 }
-export const onBlurHandler = (mode, setTypeMode) => {
+export const onBlurHandler = (mode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeahead) => {
     switch(mode){
-        case "rename": case "create":
+        case "rename": 
             setTypeMode('search');
+            break;
+        case "create":
+            //communicating with nedge function in ModfiyGraph.js through react state nedgeInProgress
+            if(nedgeInProgress.ongoing){
+                console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
+                setEleBeingModified(nedgeInProgress.ele);
+                getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
+                setNedgeInProgress({ongoing: false, ele: null});
+            } else {
+                setTypeMode('search');
+            }
+                
+            
     }
 }
 export const retrieveBarOptions = (eleNames) => {
@@ -84,3 +98,29 @@ export const setBarSettings = (setBarOptions, typeMode, menuResults, eleNames) =
             break;
     }
 }
+export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode){
+    let instance = typeahead.getInstance();
+    instance.focus();
+    let input = instance.getInput();
+    switch(mode){
+      case "search": 
+        setTypeMode('search');
+        input.select();
+        break;
+      case "rename": 
+        setTypeMode('rename');
+        instance.clear();
+        console.log('renaming');
+        input.value= defaultName;
+        input.select();
+        break;
+      case "create": 
+        console.log("settignignsldgnlsglksjlk type mode", setTypeMode);
+        setTypeMode('create');
+        instance.clear();
+        input.value = defaultName;
+        input.select();
+        break;
+    }
+    
+  }

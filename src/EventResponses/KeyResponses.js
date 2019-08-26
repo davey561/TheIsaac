@@ -8,7 +8,7 @@ import {barSelect} from '../Old/FocusLevels';
 
 export function generalKeyResponses(key, event, cy, database, lastTwoObj, 
     lastEdgeAdded, typeahead, setEleNames, typeMode, setTypeMode,
-    eleBeingModified, setEleBeingModified) {
+    eleBeingModified, setEleBeingModified, nedgeInProgress, setNedgeInProgress) {
    // console.log(`key: ${key}`);
     switch(key){
         //case 'shift': typeahead.getInstance().blur(); break;
@@ -28,12 +28,12 @@ export function generalKeyResponses(key, event, cy, database, lastTwoObj,
         case 'meta + y': event.preventDefault(); break;
         
         //Modifying the graph
-        case 'shift+space': addNodeSmart(cy); break;
-        case 'shift+enter': addEdgeSmart(cy, lastEdgeAdded, lastTwoObj); break;
+        case 'shift+space': event.preventDefault(); addNodeSmart(cy, setEleBeingModified, typeahead, setTypeMode); break;
+        case 'shift+enter': addEdgeSmart(cy, lastEdgeAdded, lastTwoObj, setEleBeingModified, typeahead, setTypeMode); break;
         case 'shift+n': nodify(cy); break;
         case 'shift+e': edgify(cy); break;
-        case 'command+shift+enter': nedge(cy, lastTwoObj); break;
-        case 'shift+r': event.preventDefault(); keyRename(cy, setTypeMode, typeahead, setEleBeingModified, typeMode); break; //rename
+        case 'command+shift+enter': nedge(cy, lastTwoObj, setEleBeingModified, typeahead, setTypeMode, setNedgeInProgress); break;
+        case 'shift+r': event.preventDefault(); keyRename(cy, setTypeMode, typeahead, setEleBeingModified, "rename"); break; //rename
         case 'command+shift+backspace': deleteAll(cy); break;
         case 'shift+backspace': deleteSome(cy); break;
 
@@ -61,8 +61,14 @@ export function generalKeyResponses(key, event, cy, database, lastTwoObj,
     }
 }
 export const numberKeyResponses = (cy, key) => {
-    let component = cy.elements().components()[parseInt(key)];
+    let component = cy.elements().components()[parseInt(key.slice(-1))];
     layoutThenFit(cy, cy.elements(), component, defaultOptions.fCoseOptions);
+}
+export const shiftNumbersList = () =>{
+    let result = [...Array(10).keys()].map((ele)=>
+    `shift+${ele}`
+    );
+    return result;
 }
 export const alphabetResponses = (cy, key, typeahead) => {
     let instance = typeahead.getInstance();
@@ -79,7 +85,7 @@ export const typeaheadResponses = (key, event, cy, typeahead, menuResults, mode)
 }
 export const enterResponses = (mode, typeahead) => {
     switch(mode){
-        case "rename":
+        case "rename": case "create":
             typeahead.blur();
             break;
     }

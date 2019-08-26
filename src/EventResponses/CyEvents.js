@@ -1,8 +1,9 @@
 import {save, getElementData, setMenuOptions} from './EventResponses';
 import {traversalLayout, runLayout} from '../Old/Layout';
 import cytoscape from 'cytoscape/dist/cytoscape.esm';
-import {retrieveNewName, deleteOneNode, rename, getBarReady} from '../Old/ModifyGraph';
+import {retrieveNewName, deleteOneNode, rename} from '../Old/ModifyGraph';
 import defaultOptions from '../Defaults/defaultOptions';
+import {getBarReady} from './BarHandlers';
 
 let fl = 0;
 //Cytoscape Events
@@ -85,8 +86,8 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   //rename
   cy.on("cxttap",function(event){
     let mode = 'rename';
-    setTypeMode(mode);
-    getBarReady(cy, event.target, typeahead, mode, event.target.data('name'));
+    event.target.select();
+    getBarReady(cy, event.target, typeahead, mode, event.target.data('name'), setTypeMode); //now includes call to setTypeMode
   });
 
   //Delete node on taphold
@@ -95,14 +96,11 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
     if(!(event.target === cy)){
       if(event.target.isEdge()){
         document.getElementById('root').click();
-        if(window.confirm('Delete "' + event.target.data("type") + 
-          '" between ' + event.target.source().data('name') + " and " + 
-          event.target.target().data('name')+"?")){
+        // if(window.confirm('Delete "' + event.target.data("type") + 
+        //   '" between ' + event.target.source().data('name') + " and " + 
+        //   event.target.target().data('name')+"?")){
           cy.remove(event.target);
-        }
-        else {
-          
-        }
+        //}
       }
       else if(event.target.isNode()){
         if(window.confirm('Delete "' + event.target.data('name') + '"?')){

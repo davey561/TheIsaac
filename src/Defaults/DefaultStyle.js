@@ -29,17 +29,23 @@ const style = {
         },
         'font-family': 'monospace',
         'text-wrap': 'wrap',
-        // 'text-max-width': function(ele){
-        //     return setTextMaxWidth(ele);
-        // },
+        'text-max-width': function(ele){
+            return ele.width();
+            //return setTextMaxWidth(ele);
+        },
         'font-size': function(ele){
             //return Math.floor(sizeNodeText(ele));
-            return 1.5*ele.width() / ele.data('name').length; //so buffering less
+            let l;
+            ele.data('name') && ele.data('name').length>0 ? l = ele.data('name').length : l=5;
+            return 0.5 * ele.width() / Math.sqrt(l); //so buffering less
             //return MIN_FONT_SIZE; //so buffering is less
         },
         label: function(ele){
            // return setNodeLabel(ele);
-           return ele.data('name'); //so buffers less
+           if(ele.data('name') && ele.data('name').length>0){
+               return ele.data('name');
+           }
+           return ""; //so buffers less
         }
         }
     },
@@ -70,7 +76,9 @@ const style = {
             // }
             // return WEIRD_TEXT_SIZING_FACTOR* 9/10 * fontSize/c.currZoomLevel;
             //return MIN_FONT_SIZE; //simplied so that buffering is less
-            return 6 + 0.3 * arrAvg([ele.source().width(), ele.target().width()]) / ele.data('name').length; //so buffering less
+            let l;
+            ele.data('name') && ele.data('name').length>0 ? l = ele.data('name').length : l=5;
+            return 2 + .25 * arrAvg([ele.source().width(), ele.target().width()]) / Math.sqrt(l); //so buffering less
         },
         'label': function(ele){
             // let c = edgeTextCalcs(ele);
@@ -83,7 +91,12 @@ const style = {
             // }
             // } 
             // return c.label;
-            return ele.data('name'); //so buffers less
+           
+            //so buffers less
+           if(ele.data('name') && ele.data('name').length>0){
+               return ele.data('name');
+           }
+           return "";
         },
         'font-family': 'monospace',
         'curve-style': 'bezier',
