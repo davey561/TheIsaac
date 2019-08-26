@@ -1,8 +1,8 @@
 import {save} from './EventResponses';
-const windowEvents= (cyRef, setRepeatTracker) => {
+const windowEvents= (cyRef) => {
     window.addEventListener("keyup", event => {
         if (event.keyCode == 76) {
-          setRepeatTracker(false);
+         // setRepeatTracker(false);
         }
       });
       window.addEventListener("beforeunload", function (e) {

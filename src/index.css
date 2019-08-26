@@ -10,8 +10,8 @@ body{
   background-color: 'lightblue';
 }
 .bar{
-  width:25%;
-  /* display: inline-block; */
+  width:40%;
+  display: inline-block;
   /* display: flex;
   justify-content: space-between; */
   /* float: right; */
@@ -19,13 +19,25 @@ body{
   margin: 0% 2em;
   left: 0px;
 }
-/* .button-container{ */
+#parent {
+  list-style: none;
+  width: 100%;
+  height: 90px;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.button-container{
   /* float:left; */
-  /* display: inline-block; */
+  display: inline-block;
+  white-space: nowrap;
+  overflow-x: auto;
   /* display: flex;
   justify-content: space-between; */
   
-/* } */
+}
 #top{
   display: flex;
   justify-content: space-between;
@@ -39,7 +51,7 @@ body{
 #cy {
   /* height: 90%; */
   /* width: 100%; */
-  z-index: 999;
+  z-index: 1;
   display: block;
 }
 #lasttwo{
@@ -80,6 +92,11 @@ body{
   font-style: italic;
   font-family: "Apple Chancery, cursive"
 }
+#loader{
+  width: 49px;
+  height: 49px;
+  /* float: left; */
+}
 #snackbar {
   visibility: hidden;
   min-width: 50px;
@@ -87,13 +104,15 @@ body{
   color: #FB7272 ;
   background-color: white;
   text-align: center;
-  border-radius: 2px;
+  border-radius: 10px;
+  border: 1px solid #FB7272;
   padding: 16px;
-  position: fixed;
+  position: absolute;
+  opacity: .9;
   z-index: 1;
   left: 20px;
   bottom: 30px;
-  font-size: 30px;
+  font-size: 36px;
   font-style: italic;
   font-family: "Apple Chancery, cursive"
 }
@@ -105,21 +124,21 @@ body{
 
 @-webkit-keyframes fadein {
     from {bottom: 0; opacity: 0;}
-    to {bottom: 30px; opacity: 1;}
+    to {bottom: 30px; opacity: .9;}
 }
 
 @keyframes fadein {
     from {bottom: 0; opacity: 0;}
-    to {bottom: 30px; opacity: 1;}
+    to {bottom: 30px; opacity: .9;}
 }
 
 @-webkit-keyframes fadeout {
-    from {bottom: 30px; opacity: 1;}
+    from {bottom: 30px; opacity: .9;}
     to {bottom: 0; opacity: 0;}
 }
 
 @keyframes fadeout {
-    from {bottom: 30px; opacity: 1;}
+    from {bottom: 30px; opacity: .9;}
     to {bottom: 0; opacity: 0;}
 }
 .potential {

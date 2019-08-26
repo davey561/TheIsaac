@@ -1,17 +1,21 @@
-import {save} from './EventResponses';
-import {runLayout2, runLayout} from './Layout';
-import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm';
-import {retrieveNewName, deleteOneNode, rename} from './ModifyGraph';
-import defaultOptions from './defaultOptions';
-
+import {save, getElementData, setMenuOptions} from './EventResponses';
+import {traversalLayout, runLayout} from '../Old/Layout';
+import cytoscape from 'cytoscape/dist/cytoscape.esm';
+import {retrieveNewName, deleteOneNode, rename} from '../Old/ModifyGraph';
+import defaultOptions from '../Defaults/defaultOptions';
+import {getBarReady} from './BarHandlers';
 
 let fl = 0;
 //Cytoscape Events
 export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName, 
                                 setLastEdgeName, firebaseRef, typeahead, 
-                                firstLayout, setFirstLayout, layout){
+                                firstLayout, setFirstLayout, layout, setEleNames,
+                                typeMode, setTypeMode, eleBeingModified, setEleBeingModified){
   //keep track of last two
   console.log('in cytoscape events')
+  cy.on('tapstart cxttapstart', (event) => {
+    setEleBeingModified(event.target);
+  })
    cy.on(
     "add data select tap",
     (event) => {
@@ -38,6 +42,7 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
       "add remove data",
       function(event){
         save(cy, firebaseRef);
+        setMenuOptions(cy, setEleNames);
       }
     );
 
@@ -60,11 +65,12 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
             } else if (event.target.isNode()){
               eles = event.target.closedNeighborhood();
             }
+            if(event.type==='remove') eles = eles.difference(event.target);
             if(eles.length == 1){
               return;
             }
           }
-          runLayout2(cy, eles, layout);
+          traversalLayout(cy, eles, layout);
           // runLayout(cy, eles, layout);
         }
       );
@@ -79,7 +85,9 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   })
   //rename
   cy.on("cxttap",function(event){
-    rename(cy, event);
+    let mode = 'rename';
+    event.target.select();
+    getBarReady(cy, event.target, typeahead, mode, event.target.data('name'), setTypeMode); //now includes call to setTypeMode
   });
 
   //Delete node on taphold
@@ -88,14 +96,11 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
     if(!(event.target === cy)){
       if(event.target.isEdge()){
         document.getElementById('root').click();
-        if(window.confirm('Delete "' + event.target.data("type") + 
-          '" between ' + event.target.source().data('name') + " and " + 
-          event.target.target().data('name')+"?")){
+        // if(window.confirm('Delete "' + event.target.data("type") + 
+        //   '" between ' + event.target.source().data('name') + " and " + 
+        //   event.target.target().data('name')+"?")){
           cy.remove(event.target);
-        }
-        else {
-          
-        }
+        //}
       }
       else if(event.target.isNode()){
         if(window.confirm('Delete "' + event.target.data('name') + '"?')){
@@ -134,21 +139,7 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
       }
     }
     else if(targnode.isEdge()){
-      if (targnode.hasClass('potential-edge')){
-        targnode.addClass('over-edge');
-        cy.style().update();
-      }
-      else if (!targnode.hasClass('selected-edge')){
-        targnode.addClass('over-edge');
-        cy.style().update();
-      }
-      else if (!targnode.hasClass('selected-edge')){
-        targnode.addClass('over-edge');
-      }
-      else {
-        targnode.removeClass('over-edge');
-        targnode.addClass('selected-over-edge');
-      }
+      targnode.addClass('over-edge');
     }
   });
 
@@ -166,13 +157,7 @@ cy.on("mouseout",function(event){
     }
   }
   else if(targnode.isEdge()){
-    if (targnode.hasClass('selected-over-edge')){
-      targnode.removeClass('selected-over-edge');
-      targnode.addClass('selected-edge');
-    }
-    else{
-      targnode.removeClass('over-edge');
-    }
+    targnode.removeClass('over-edge');
   }
 });
 
@@ -182,7 +167,7 @@ cy.on("mouseout",function(event){
     if(event.target.isNode()){
       if(targnode.hasClass('over-node')){
         targnode.removeClass('over-node');
-        targnode.addClass('selected-over-node');
+        targnode.addClass('selected-node');
       }
       //Make border double-lined and larger on selection
       else if (targnode.hasClass('selected-over-node')){
@@ -194,16 +179,8 @@ cy.on("mouseout",function(event){
     }
     else if (event.target.isEdge()){
       // targnode.style('line-color', 'black');\
-      if(targnode.hasClass('over-edge')){
-        targnode.removeClass('over-edge');
-        targnode.addClass('selected-over-edge');
-      }
-      else if (targnode.hasClass('selected-over-edge')){
-
-      }
-      else {
-        targnode.addClass('selected-edge');
-      }
+      targnode.removeClass('over-edge');
+      targnode.addClass('selected-edge');
       // cy.$(targnode).select();
       // window.alert('edge selected is black')
     }
@@ -219,24 +196,16 @@ cy.on("mouseout",function(event){
     let targnode = event.target;
     if(event.target.isNode()){
       //Make border of nodes back to normal style and width.
-      if (targnode.hasClass('selected-over-node')){
+  
         targnode.removeClass('selected-over-node');
         targnode.removeClass('selected-node');
         targnode.removeClass('over-node');
-      }
-      else {
-        targnode.removeClass('selected-node');
-      }
     }
     else if(event.target.isEdge()){
-      if (targnode.hasClass('selected-over-edge')){
-        targnode.removeClass('selected-over-edge');
-        targnode.removeClass('selected-edge');
-        targnode.removeClass('over-edge');
-      }
-      else {
-        targnode.removeClass('selected-edge');
-      }
+      targnode.removeClass('selected-edge');
+      targnode.removeClass('over-edge')
+      console.log('removed classes on unselect')
+       
     }
   });
   

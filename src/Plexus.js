@@ -1,116 +1,100 @@
 
-import React, {useState, useEffect, useLayoutEffect} from 'react';
+//React
+import React, {useState, useEffect, Fragment} from 'react';
 import PropTypes from 'prop-types';
 
+//Other Components
 import CytoscapeComponent from 'react-cytoscapejs';
-import {Typeahead} from 'react-bootstrap-typeahead';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 import { ButtonToolbar, Button } from 'react-bootstrap';
+import {Typeahead, Menu, MenuItem} from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css'
 
+//Cytoscape
 import cytoscape from 'cytoscape';
 
+//Cytoscape Layouts
 import fcose from 'cytoscape-fcose';
 import dagre from 'cytoscape-dagre';
 import cola from 'cytoscape-cola';
 import coseBilkent from 'cytoscape-cose-bilkent';
 import euler from 'cytoscape-euler';
 
+//Firebase
 import firebase from 'firebase';
 
-import 'react-bootstrap-typeahead/css/Typeahead.css'
-import defaultOptions, { ANIMATION_DURATION } from './Old/defaultOptions'
-
-import { runLayout, runLayout2 } from './Old/Layout';
-import { save, allEvents, numberKeyResponses, confMessage, alphabetResponses } from './Old/EventResponses';
+//Plexus files
+import defaultOptions, { ANIMATION_DURATION } from './Defaults/defaultOptions'
+import { runLayout, traversalLayout, makeChangesForInitialLayout } from './Old/Layout';
+import { save, confMessage, setMenuOptions, eventResponses, eventResponseParameters } from './EventResponses/EventResponses';
+import {generalKeyResponses, alphabetResponses, numberKeyResponses, typeaheadResponses, shiftNumbersList} from './EventResponses/KeyResponses';
+import BarHandler, { inputChangeHandler, onBlurHandler, clear, focusHandler, setBarSettings} from './EventResponses/BarHandlers';
 import { saveToText } from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
-import { cytoscapeEvents } from './Old/CyEvents';
-import {addEdgeSmart, addNodeSmart} from './Old/ModifyGraph';
-import { quickSelect, barSelect } from './Old/FocusLevels';
-import windowEvents from './Old/WindowEvents';
+import { cytoscapeEvents } from './EventResponses/CyEvents';
+import {addEdgeSmart, addNodeSmart, nedge} from './Old/ModifyGraph';
+import windowEvents from './EventResponses/WindowEvents';
 import { async } from 'q';
+import logo from './plexusloading.gif';
 
+//Plexus Components
+import Buttons from './Buttons';
+import SampleComponent from './SampleComponent';
+
+//Register external layouts
 cytoscape.use(fcose);
 cytoscape.use(cola);
 cytoscape.use(dagre);
 cytoscape.use(coseBilkent);
 cytoscape.use(euler);
 
+//The Plexus Component
 function Plexus(props){
-    const [layout, setLayout] = useState(defaultOptions.layout);
-    const [eles, setEles] = useState([]);
-    const [eleNames, setEleNames] = useState([]);
-    const [firebaseRef, setRef] = useState();
-    const [label, setLabel] = useState("Davey");
-    const [stylesheet, setStylesheet] = useState([{ 
-        selector: 'node',
-        style: {
-            "font-family": "Optima",
-            'text-border-width': '5px', 'label': label
-        }
-    }]);
-    const [lastTwo, setLastTwo] = useState(new LastTwo());
-    const [lastTwoText, setLastTwoText] = useState();
-    const [lastEdgeName, setLastEdgeName] = useState("");
+    const [layout, setLayout] = useState(defaultOptions.layout); //initial layout
+    const [eles, setEles] = useState([]); //initial set of elements
+    const [eleNames, setEleNames] = useState([]); //dynamically updating set of element names
+    const [firebaseRef, setRef] = useState(); //reference to Firebase database
+    const [label, setLabel] = useState("Davey"); //for debugging purposes; will eventually be removed once 'rename' uses universal top bar
+    const [lastTwo, setLastTwo] = useState(new LastTwo()); //object that stores the last two nodes with which the user interacted
+    const [lastEdgeName, setLastEdgeName] = useState(""); //the name of the last edge added, to be used as default when adding new edge
+    const [stylesheet, setStylesheet] = useState(defaultOptions.style);
+    const [nedgeInProgress, setNedgeInProgress] = useState({ongoing: false, ele: {}});
 
-    //constants pertaining specifically to keypress responses
-    const [repeatTracker, setRepeatTracker] = useState(false);
+    //Relating to keypress responses
     const [enteredText, setEnteredText] = useState("");
     const [typeMode, setTypeMode] = useState("search");
+    //export {setTypeMode};
+    const [barOptions, setBarOptions] = useState({
+        allowNew: false,
+        inputHandler: () => {},
+        options: eleNames
+    });
+    const [eleBeingModified, setEleBeingModified] = useState(-1);
+    const [defaultInputValue, setDefaultInputValue] = useState("Davey");
         //typeMode can be "search", "rename", or "create"
 
+    //Component references
     let cyRef = React.createRef();
     let typeaheadRef = React.createRef();
     //let firebaseRef;
-    const[firstLayout, setFirstLayout] = useState(true);
-    const [fl, setFl] = useState(true);
-    const [loading, setLoading] = useState(true);
+    const [cy, setCy] = useState("json");
+    //
 
-    //Return updated stylesheet (with new value for label)
-    const getStyle = () => {
-        return defaultOptions.style;
-    }
-    const clear = (evt) => {
-        if(evt.keyCode==13){
-            // setEnteredText(typeaheadRef.getInput());
-            console.log(typeaheadRef.getInput());
-            //Zoom into the search term node
-            barSelect(cyRef, typeaheadRef.getInstance().getInput().value);
-            
-            typeaheadRef.clear();
-            typeaheadRef.blur();
-        }
-    }
-    const getElementNames = () => {
-        return cyRef.nodes().map((ele) => {
-            return ele.data('name');
-        });
-    }
-    const getElements = () => {
-        return cyRef.elements();
-    }
-    const clear1= () => {
-        typeaheadRef.getInstance().clear();
-    }
-    const setFitToTrue = (layout) => {
-        let realLayout = {...layout};
-        //first,unrelatedly, change fit setting of layout to true
-        realLayout.fit=true;
-        realLayout.animate= 'end';  
-        realLayout.animationEasing='ease-in-sine'; 
-        realLayout.animationDuration= 2*ANIMATION_DURATION;
-        realLayout.refresh=50;
-        //realLayout.ease
-        return realLayout;
-    }
+    const[firstLayout, setFirstLayout] = useState(true); //Whether the first layout has occurred yet
+    const [loading, setLoading] = useState(true); //Whether the program is still initializing
+    
+    // Had to do menuResults storings in hacky way, because Typeahead component is lacking
+        //In particular, typeahead component doesn't allow retrieval of current menu results,
+            //except through assigning a function to the renderMenu prop
+    let menuResults;
+    //const[menuResults, setMenuResults] = useState([]);
 
-    //For testing in this layout branch mode
-    //THIS IS THE NEWLY COMMENTED PART
+    //Fetch elements data to start.
     useEffect(() => {
         const fetchData = async () => {
-            // //Store firebase reference
+            //Store firebase reference
             let ref = firebase.database().ref().child('elements');
-            // //Retrieve elements data
+            //Retrieve elements data
             ref.once('value').then(async (snap) => {
                 // console.log(snap.val())
                 await setEles(JSON.parse(snap.val()))
@@ -118,109 +102,125 @@ function Plexus(props){
                 await setRef(ref);
                 //Set loading to false
                 await setLoading(false);
-                return JSON.parse(snap.val())
+                //return JSON.parse(snap.val())
             })
-
-           // setEles(defaultOptions.Potter);
-
-
-            //Then create list of element ids. 
-            //COMMENTED OUT BECAUSE CYREF NOT NECESSARILY LOADED YET.
-            //IT WAS WORKING BEFORE BUT DON'T WANT TO MESS WITH ORDER IN UNCERTAIN TERRITORY 
-    
-            // .then(eles => {
-            //   setEleNames(getElementNames(eles));
-            // });
-    
-            
         }
         fetchData();
+
+        //don't render at first with labels, make it's more scratchy
+
     }, []);
+
+    //After load
     useEffect(() => {
         if(!loading){
-            //event responses (nonkey)
-            cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
-                setLastEdgeName, firebaseRef, typeaheadRef, 
-                firstLayout, setFirstLayout, layout);
-            windowEvents(cyRef, setRepeatTracker);
+            //All non-key-press event responses
+            eventResponses(null, null, "cy&window", ...eval(eventResponseParameters));
+
+            //Initially set the options for the universal bar, later updating gets done in CyEvents
+            let s = setMenuOptions(cyRef, setEleNames); 
+            setBarSettings(setBarOptions, typeMode, menuResults, s);
+
+            setCy(cyRef);
+            //setStylesheet(defaultOptions.style);
         }
     }, [loading]);
-    useEffect(()=>{
-        if(!loading){
-            setEleNames(getElementNames());
-        }
-    }, [cyRef])
+    useEffect(()=> {
+        console.log('eleNames when setting bar settings: ', eleNames, "\ntype mode: ", typeMode);
+        
+        setBarSettings(setBarOptions, typeMode, menuResults, eleNames);
+        //setOnChangeHandler();
+    }, [typeMode]);
+    // useEffect(()=>{
+    //     if(!loading){
+    //         setMenuOptions(cy, setEleNames);
+    //     }
+    // }, [cyRef])
+
     return (
         <div>
             <br></br>
-            <div id='top'>
-            <ButtonToolbar className="button-container"> 
-                <Button id="layoutButton" variant="outline-secondary" className="newButton" size='sm'
-                    onClick={() => runLayout(cyRef, cyRef.elements(), defaultOptions.layout)}>Layout</Button>
-                <Button variant="outline-secondary" className="newButton" size='sm'
-                    onClick={() => save(cyRef, firebaseRef)}>Save</Button>
-                <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
-                    onClick={() => saveToText(cyRef)}>Download</Button>
-                &nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;
-                <Button id="addNodeButton" variant="outline-primary" className="newButton" size="lg"
-                    onClick={()=>{addNodeSmart(cyRef,5);}}>Add Node</Button>
-                <Button id='lasttwo' variant="outline-primary" className="newButton" size='lg'
-                    onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo)}>&#10233;</Button>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-            </ButtonToolbar>
-            <Typeahead 
-                    className = "bar"
-                    id = "searchSuggest"
-                    ref={(typeahead) => typeaheadRef = typeahead}
-                    onChange={(selected) => {
-                        setLabel(selected)
-                    }}
-                    onInputChange={(text, event) => {
-                        //workaround for space bar
-                        {/* if(text===' '){
-                            typeaheadRef.getInstance().clear();
-                        } */}
-                        setLabel(text)
-                    }}
-                    //inputProps={onFocus}
-                    options={eleNames}
-                    selectHintOnEnter={true}
-                    highlightOnlyResult={true}
-                    maxResults={10}
-                    //onFocus={()=>clear1()}
-                    onKeyDown={(evt) => clear(evt)}
-                />
-            {/* <h3 id = 'lasttwo' className="potential">&#160;&#160;&#160;&#160;&#10233;&#160;&#160;&#160;&#160;</h3> */}
-            </div>
             {loading ?
-                <p id='loading'>Awakening...</p> :
-                <CytoscapeComponent
-                    autoFocus
-                    id='cy'
-                    elements={eles}
-                    style={ { width: '100%', height: '740px' }}
-                    stylesheet={ getStyle() }
-                    layout={setFitToTrue(layout)}
-                    cy={(cy) => { cyRef = cy }}
-                />}
+                <p id='loading'>
+                    Awaking <br>
+                    </br><img src={logo} id='loader'></img> 
+                </p> :
+                <Fragment>
+                    {/* <SampleComponent cyRef={"hello"}/> */}
+                    <div id='top'>
+                        <ButtonToolbar className="button-container"> 
+                            <Button id="layoutButton" variant="outline-secondary" className="newButton" size='sm'
+                                onClick={() => runLayout(cyRef, cyRef.elements(), defaultOptions.layout)}>Layout</Button>
+                            <Button variant="outline-secondary" className="newButton" size='sm'
+                                onClick={() => save(cyRef, firebaseRef)}>Save</Button>
+                            <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
+                                onClick={() => saveToText(cyRef)}>Download</Button>
+                            &nbsp;
+                            <Button id="addNodeButton" variant="outline-primary" className="newButton" //size="lg"
+                                onClick={()=>{addNodeSmart(cyRef, setEleBeingModified, typeaheadRef, setTypeMode);}}>Add Node</Button>
+                            <Button id='lasttwo' variant="outline-primary" className="newButton" //size='lg'
+                                onClick={()=>addEdgeSmart(cyRef,lastEdgeName, lastTwo, setEleBeingModified, typeaheadRef, setTypeMode)}>Add Edge: &nbsp; __ &#10233; __</Button>
+                        </ButtonToolbar>
+                        <KeyboardEventHandler 
+                            className="bar"
+                            handleKeys={['esc', 'enter']}
+                            onKeyEvent={(key, event)=>typeaheadResponses(key, event, cyRef, typeaheadRef, menuResults, typeMode)}>
+                            <Typeahead
+                                id = "searchSuggest"
+                                ref={(typeahead) => typeaheadRef = typeahead}
+                                onInputChange={(text, event) => {
+                                    barOptions.inputHandler(text, event, typeMode, eleBeingModified);
+                                }} 
+
+                                newSelectionPrefix="(new) "
+                                //allowNew={barOptions.allowNew}
+                                allowNew={barOptions.allowNew}
+                                onChange={(selected) => {
+                                    BarHandler(selected, cyRef, eleBeingModified, typeaheadRef, typeMode);
+                                }}
+                                options={barOptions.options}
+                                //emptyLabel={"Fuck the fuckers"}
+                                selectHintOnEnter={true}
+                                maxResults={10}
+                                //defaultSelected = {[barOptions.defaultInputValue]}
+                                //highlightOnlyResult={true}
+                                onFocus={()=> console.log(barOptions.options)}
+                                onBlur={() => onBlurHandler(typeMode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeaheadRef)}
+                                labelKey='name'
+                            />
+                        </KeyboardEventHandler>
+                    </div>
+                    <CytoscapeComponent
+                        autoFocus
+                        id='cy'
+                        elements={eles}
+                        style={ { width: '100%', height: '740px' }}
+                        stylesheet={ stylesheet }
+                        layout={makeChangesForInitialLayout(layout)}
+                        cy={(cy) => { cyRef = cy }}
+                        /* textureOnViewport={true}
+                        hideEdgesOnViewport={true} */
+                        pixelRatio='auto'
+                    />
+                </Fragment>
+            }
             <KeyboardEventHandler
                 handleKeys={['shift+e', 'shift+n', 'shift+space', 'shift+r', 'shift+backspace', 
                     'shift+space', 'shift+enter', 'shift+l', 'shift+a', 'shift+d', 'shift+t',
                     'meta+s', 'meta+d', 'meta+z', 'meta+y', 'command+shift+enter', "shift+backspace",
                     'command+shift+backspace', 'shift+b',
-                     'ctrl+d', 'all']}
+                    'ctrl+d', 'all']}
                 onKeyEvent={(key, event) => 
-                   allEvents(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, repeatTracker, typeaheadRef)
+                    eventResponses(key, event, "key", ...eval(eventResponseParameters))
                 } 
             />
             <KeyboardEventHandler
-                handleKeys={['numeric']}
+                handleKeys={shiftNumbersList()}
                 onKeyEvent={(key, event) => {numberKeyResponses(cyRef, key)}
                 } 
             />
             <KeyboardEventHandler
-                handleKeys={['alphabetic']}
+                handleKeys={['alphabetic', 'numeric']}
                 onKeyEvent={(key, event) => {alphabetResponses(cyRef, key, typeaheadRef)}
                 } 
             />
@@ -231,9 +231,9 @@ function Plexus(props){
         </div>
     );
 }
-Plexus.propTypes = {
-    eles: PropTypes.array,
-    stylesheet: PropTypes.array
-};
+// Plexus.propTypes = {
+//     eles: PropTypes.array,
+//     stylesheet: PropTypes.array
+// };
 export default Plexus;
 
