@@ -1,4 +1,5 @@
-# Plexus stack, now using React for UX, Firebase for database storage, Cytoscape for graph visualization.
+# Plexus
+## now using React for UX, Firebase for database storage, Cytoscape for graph visualization.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
