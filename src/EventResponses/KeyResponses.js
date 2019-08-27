@@ -8,7 +8,7 @@ import {barSelect} from '../Old/FocusLevels';
 
 export function generalKeyResponses(key, event, cy, database, lastTwoObj, 
     lastEdgeAdded, typeahead, setEleNames, typeMode, setTypeMode,
-    eleBeingModified, setEleBeingModified, nedgeInProgress, setNedgeInProgress) {
+    eleBeingModified, setEleBeingModified, nedgeInProgress, setNedgeInProgress, firebaseRef) {
    // console.log(`key: ${key}`);
     switch(key){
         //case 'shift': typeahead.getInstance().blur(); break;
@@ -22,7 +22,7 @@ export function generalKeyResponses(key, event, cy, database, lastTwoObj,
         case 'shift+t': test(cy); break;
 
         //Backing up
-        case 'meta + s': event.preventDefault(); save(cy); break;
+        case 'meta + s': event.preventDefault(); save(cy, firebaseRef); break;
         case 'meta + d': event.preventDefault(); saveToText(cy); break;
         case 'meta + z': event.preventDefault(); break;
         case 'meta + y': event.preventDefault(); break;

@@ -152,7 +152,7 @@ function Plexus(props){
                             <Button id="layoutButton" variant="outline-secondary" className="newButton" size='sm'
                                 onClick={() => runLayout(cyRef, cyRef.elements(), defaultOptions.layout)}>Layout</Button>
                             <Button variant="outline-secondary" className="newButton" size='sm'
-                                onClick={() => save(cyRef, firebaseRef)}>Save</Button>
+                                onClick={() => save(cyRef, firebaseRef, true)}>Save</Button>
                             <Button id="downloadButton" variant="outline-secondary" className="newButton" size='sm'
                                 onClick={() => saveToText(cyRef)}>Download</Button>
                             &nbsp;

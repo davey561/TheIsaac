@@ -13,7 +13,7 @@ import {numberKeyDown} from '../Old/Miscellaneous';
 import { cytoscapeEvents } from './CyEvents';
 import {generalKeyResponses} from './KeyResponses';
 import windowEvents from './WindowEvents';
-import { calclulateEmphasis } from '../Emphasis';
+import { calculateEmphasis } from '../Emphasis';
 
 export const eventResponseParameters = "[cyRef, firebaseRef, lastTwo, \
     typeaheadRef, setEleNames, setLastTwo, lastEdgeName, setLastEdgeName, \
@@ -26,7 +26,7 @@ export function eventResponses(key, event, eventKind,
     switch(eventKind){
         case "key": 
             generalKeyResponses(key, event, cyRef, firebaseRef, lastTwo, lastEdgeName, 
-                typeaheadRef, setEleNames, typeMode, setTypeMode, eleBeingModified, setEleBeingModified, nedgeInProgress, setNedgeInProgress);
+                typeaheadRef, setEleNames, typeMode, setTypeMode, eleBeingModified, setEleBeingModified, nedgeInProgress, setNedgeInProgress, firebaseRef);
             break;
         case "cy&window":
             cytoscapeEvents(cyRef, lastTwo, setLastTwo, lastEdgeName, 
@@ -37,7 +37,7 @@ export function eventResponses(key, event, eventKind,
             break;
     }
 }
-export function save(cy, firebaseRef){
+export function save(cy, firebaseRef, showSaved){
     //@ts-ignore
     // let mode = document.getElementById('codeSelection').value;
     // firebaseRef.child("Users").child(mode).set(JSON.stringify(elements.jsons()));
@@ -45,9 +45,11 @@ export function save(cy, firebaseRef){
     // localStorage.setItem('graphitems', JSON.stringify(cy.elements().jsons()));
     //Operate the snackbar
     firebase.database().ref().child('elements').set(JSON.stringify(cy.elements().jsons()));
-    var x = document.getElementById("snackbar");
-    x.className = "show";
-    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    if(showSaved){
+        var x = document.getElementById("snackbar");
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    }
 }
 export const test = (cy) =>{
     // cy.style().update();
@@ -70,12 +72,16 @@ export const test = (cy) =>{
     //     }
     // })
     // console.log(rankings);
-    let emphases = calclulateEmphasis(cy);
-    console.log(emphases);
-    cy.nodes().forEach((ele) => {
-        ele.data('emphasis', emphases[ele.id()])
-    });
-
+        //let x; 
+        //x = setInterval(()=>console.log('x being set again'), 1000);
+        let emphases = setInterval(()=>{
+            let emphases = calculateEmphasis(cy);
+            //console.log(emphases);
+            cy.nodes().forEach((ele) => {
+                ele.data('emphasis', emphases[ele.id()])
+            });
+        }, 1000);
+        
     //cy.nodes().style('width')
     
 }

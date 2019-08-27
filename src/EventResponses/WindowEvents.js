@@ -12,7 +12,7 @@ const windowEvents= (cyRef) => {
         //saveWhichUser();
         cyRef.nodes().classes('');
         cyRef.elements().deselect();
-        save(cyRef);
+        save(cyRef, false);
       });
       document.addEventListener('click', function(e) { 
         if(document.activeElement.toString() == '[object HTMLButtonElement]'){ 

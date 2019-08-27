@@ -5,11 +5,13 @@ const layout = {
     cose: {
         name: 'cose',
         animate: 'end',  animationEasing: 'ease', animationDuration: ANIMATION_DURATION,
-        randomize: false,
+        randomize: false, //seems to be random regardless of whether this is true or false
         refresh: 1,
-        idealEdgeLength: .9*IDEAL_EDGE_LENGTH,
+        idealEdgeLength: IDEAL_EDGE_LENGTH/2,
+        edgeElasticity: IDEAL_EDGE_LENGTH/6,
+        nodeOverlap: 20,
         fit: true,
-        nodeRepulsion: 5000,
+        nodeRepulsion: 4000,
         gravity: 50,
         nodeDimensionsIncludeLabels: true,
         padding: 30
@@ -18,10 +20,12 @@ const layout = {
         name: 'fcose', //uses the cose-bilkent layout, downloaded from internet, good for compound graphs
         animate: true,  animationEasing: 'ease', animationDuration: ANIMATION_DURATION,
         randomize: false,
-        idealEdgeLength: .7*IDEAL_EDGE_LENGTH,
+        idealEdgeLength: .6*IDEAL_EDGE_LENGTH,
+        edgeElasticity: .1,
         fit: false,
         nodeDimensionsIncludeLabels: true,
         padding: 30,
+       //nodeRepulsion: 9000
         //quality: 'draft',
         //sampleType: false,
 

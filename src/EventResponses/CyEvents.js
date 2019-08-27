@@ -17,7 +17,7 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   //   setEleBeingModified(event.target);
   // });
    cy.on(
-    "add data select tap",
+    "add select tap", //data used to be here too
     (event) => {
       if(event.target === cy){
       }
@@ -41,7 +41,11 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
     cy.on(
       "add remove data",
       function(event){
-        save(cy, firebaseRef);
+        let showThatSaved = true;
+        if(event.type==='data'){
+          showThatSaved = false;
+        }
+        save(cy, firebaseRef, showThatSaved);
         setMenuOptions(cy, setEleNames);
       }
     );

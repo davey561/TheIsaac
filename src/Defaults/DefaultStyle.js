@@ -23,17 +23,11 @@ const style = {
         'background-opacity': .9,
         'width': function(ele){
             //let old = 8*(2+ele.degree());
-            let newo = ele.data('emphasis');
-            //console.log('old greater than new? ', old>newo);
-            return newo;
-            //return ele.data('emphasis');
+            return ele.data('emphasis');
         },
         'height': function(ele){
            // let old = 8*(2+ele.degree());
-            let newo = ele.data('emphasis');
-           // console.log('old greater than new? ', old>newo);
-            return newo;
-            //return ele.data('emphasis');
+            return ele.data('emphasis');
         },
         'font-family': 'monospace',
         'text-wrap': 'wrap',
@@ -45,7 +39,7 @@ const style = {
             //return Math.floor(sizeNodeText(ele));
             let l;
             ele.data('name') && ele.data('name').length>0 ? l = ele.data('name').length : l=5;
-            return 0.5 * ele.width() / Math.sqrt(l); //so buffering less
+            return 0.6 * ele.width() / Math.sqrt(l); //so buffering less
             //return MIN_FONT_SIZE; //so buffering is less
         },
         label: function(ele){
@@ -61,7 +55,8 @@ const style = {
         style: {
         //'label': 'data(type)',
         'width': function(ele){
-            return (ele.source().degree() + ele.target().degree())/4
+            //return (ele.source().data('emphasis') + ele.target().data('emphasis'))/40
+            return 1;
         },
         'font-size': function (ele){
             // console.log('oh hello');
@@ -121,6 +116,16 @@ const style = {
     },
 
     //Custom style classes
+    'home-node': { selector: '.home-node',
+        style: 
+        {
+            'display' : 'none',
+            'visibility': 'invisible',
+            // 'width': 0,
+            // height: 0
+
+        }
+    },
     'over-node': { selector: '.over-node',
         style: 
         {
@@ -154,7 +159,5 @@ const style = {
         //'line-fill': 'radial-gradient'
         }
     }
-
-
 }
 export default style;
