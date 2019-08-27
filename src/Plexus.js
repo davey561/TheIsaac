@@ -201,6 +201,7 @@ function Plexus(props){
                         style={ { width: '100%', height: '740px' }}
                         stylesheet={ stylesheet }
                         layout={makeChangesForInitialLayout(layout)}
+                        //layout={defaultOptions.layout}
                         cy={(cy) => { cyRef = cy }}
                         /* textureOnViewport={true}
                         hideEdgesOnViewport={true} */

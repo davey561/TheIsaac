@@ -22,10 +22,18 @@ const style = {
         'background-color': '#FE5454',
         'background-opacity': .9,
         'width': function(ele){
-            return 8*(2+ele.degree());
+            //let old = 8*(2+ele.degree());
+            let newo = ele.data('emphasis');
+            //console.log('old greater than new? ', old>newo);
+            return newo;
+            //return ele.data('emphasis');
         },
         'height': function(ele){
-            return 8*(2+ele.degree());
+           // let old = 8*(2+ele.degree());
+            let newo = ele.data('emphasis');
+           // console.log('old greater than new? ', old>newo);
+            return newo;
+            //return ele.data('emphasis');
         },
         'font-family': 'monospace',
         'text-wrap': 'wrap',

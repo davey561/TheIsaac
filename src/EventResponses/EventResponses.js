@@ -13,6 +13,7 @@ import {numberKeyDown} from '../Old/Miscellaneous';
 import { cytoscapeEvents } from './CyEvents';
 import {generalKeyResponses} from './KeyResponses';
 import windowEvents from './WindowEvents';
+import { calclulateEmphasis } from '../Emphasis';
 
 export const eventResponseParameters = "[cyRef, firebaseRef, lastTwo, \
     typeaheadRef, setEleNames, setLastTwo, lastEdgeName, setLastEdgeName, \
@@ -50,11 +51,30 @@ export function save(cy, firebaseRef){
 }
 export const test = (cy) =>{
     // cy.style().update();
-    console.log(cy.nodes()[0].data(), cy.edges()[0].data());
-    let pr = cy.elements().pageRank();
-    let arrEles = cy.nodes().toArray();
-    let rankings = arrEles.map((ele)=> pr.rank(ele));
-    console.log(rankings);
+    // cy.nodes().forEach((ele)=> {
+    //     ele.data('emphasis', 1);
+    // })
+    
+    // console.log(cy.nodes()[0].data(), cy.edges()[0].data());
+    // let pr = cy.elements().pageRank();
+    // let arrEles = cy.nodes().toArray();
+    // let rankings = arrEles.map((ele)=> {
+    //     pr.rank(ele);
+    // });
+    // cy.nodes().forEach((ele)=>{
+    //     ele.data('emphasis', 20*pr.rank(ele));
+    // });
+    // cy.on('tap', (event)=> {
+    //     if(event.target!==cy && event.target.isNode()){
+    //         event.target.data('emphasis', 25*pr.rank(event.target));
+    //     }
+    // })
+    // console.log(rankings);
+    let emphases = calclulateEmphasis(cy);
+    console.log(emphases);
+    cy.nodes().forEach((ele) => {
+        ele.data('emphasis', emphases[ele.id()])
+    });
 
     //cy.nodes().style('width')
     

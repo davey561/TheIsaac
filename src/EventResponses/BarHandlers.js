@@ -8,11 +8,9 @@ export const clear = (typeahead) => {
     typeahead.clear();
 }
 const BarHandler = (selected, cy, ele, typeahead, mode) => {
-    console.log('changeOnned baby')
     if(selected.length==1){
         switch(mode){
-            case "search": 
-                console.log('search')
+            case "search":
                 try{
                     barSelect(cy, selected[0].id);
                 } catch(Exception){}
@@ -87,9 +85,9 @@ export const retrieveBarOptions = (eleNames) => {
 export const setBarSettings = (setBarOptions, typeMode, menuResults, eleNames) => {
     switch(typeMode){
         case "search": 
-            console.log(eleNames);
+            //console.log(eleNames);
             setBarOptions(retrieveBarOptions(eleNames).search);
-            console.log('set bar menu options for search as: ', retrieveBarOptions(eleNames).search.options)
+            //console.log('set bar menu options for search as: ', retrieveBarOptions(eleNames).search.options)
             break;
         case "rename":
             setBarOptions(retrieveBarOptions(eleNames).rename);
@@ -111,12 +109,10 @@ export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode){
       case "rename": 
         setTypeMode('rename');
         instance.clear();
-        console.log('renaming');
         input.value= defaultName;
         input.select();
         break;
       case "create": 
-        console.log("settignignsldgnlsglksjlk type mode", setTypeMode);
         setTypeMode('create');
         instance.clear();
         input.value = defaultName;

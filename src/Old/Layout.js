@@ -11,6 +11,7 @@ cytoscape.use(dagre);
 export function runLayout(cy, eles, layout){
   if(!cy.animated()){
     try{
+      console.log(layout);
       eles.layout(layout).run();
     } catch (Exception) {}
   }
@@ -67,8 +68,8 @@ export const makeChangesForInitialLayout = (layout) => {
   realLayout.fit=true;
   realLayout.animate= 'end';  
   realLayout.animationEasing='ease-in-out-quint'; 
-  realLayout.animationDuration= 1.5*ANIMATION_DURATION;
-  realLayout.randomize=false;
+  realLayout.animationDuration= 2*ANIMATION_DURATION;
+  //realLayout.randomize=false;
   //realLayout.ease
   return realLayout;
 }

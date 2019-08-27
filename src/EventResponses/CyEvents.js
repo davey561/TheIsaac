@@ -13,9 +13,9 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
                                 typeMode, setTypeMode, eleBeingModified, setEleBeingModified){
   //keep track of last two
   console.log('in cytoscape events')
-  cy.on('tapstart cxttapstart', (event) => {
-    setEleBeingModified(event.target);
-  })
+  // cy.on('tapstart cxttapstart', (event) => {
+  //   setEleBeingModified(event.target);
+  // });
    cy.on(
     "add data select tap",
     (event) => {
@@ -86,8 +86,10 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   //rename
   cy.on("cxttap",function(event){
     let mode = 'rename';
-    event.target.select();
-    getBarReady(cy, event.target, typeahead, mode, event.target.data('name'), setTypeMode); //now includes call to setTypeMode
+    if(event.target!== cy){
+      event.target.select();
+      getBarReady(cy, event.target, typeahead, mode, event.target.data('name'), setTypeMode); //now includes call to setTypeMode
+    }
   });
 
   //Delete node on taphold
