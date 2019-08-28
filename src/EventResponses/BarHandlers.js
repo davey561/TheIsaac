@@ -9,23 +9,13 @@ export const clear = (typeahead) => {
 }
 const BarHandler = (selected, cy, ele, typeahead, mode) => {
     if(selected.length==1){
-        switch(mode){
-            case "search":
-                try{
-                    barSelect(cy, selected[0].id);
-                } catch(Exception){}
-                typeahead.blur();
-                break;
-            case "rename": //this is not where the rename part goes
-                // console.log('called');
-                // ele.data('name', selected[0].name);
-                break;
-    
-            case "create": 
-                break;
-            default: console.warn("Mode given as input to bar handler is ", mode, ", which is not valid. \
-                Must be either search, rename, or clear");
+        if(mode==='search'){
+            try{
+                barSelect(cy, selected[0].id);
+            } catch(Exception){}
+            typeahead.blur();
         }
+        //not where the rename and create part go, they're in onInputChange
     }
     
 }
@@ -33,9 +23,7 @@ export default BarHandler;
 
 export const inputChangeHandler = (text, event, mode, ele) => {
     switch(mode){
-        case "rename": 
-            ele.data('name', text);
-        case "create":
+        case "rename": case "create":
             ele.data('name', text);
 
     }
@@ -97,26 +85,34 @@ export const setBarSettings = (setBarOptions, typeMode, menuResults, eleNames) =
             break;
     }
 }
-export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode){
+export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode, setEleBeingModified){
+   console.log('defaultname: ' , defaultName);
     let instance = typeahead.getInstance();
-    instance.focus();
     let input = instance.getInput();
+    setEleBeingModified(ele);
+    
     switch(mode){
+            
       case "search": 
+        instance.focus();
         setTypeMode('search');
         input.select();
         break;
       case "rename": 
+        typeahead.focus();
+        //instance.clear();
         setTypeMode('rename');
-        instance.clear();
-        input.value= defaultName;
+        input.value = defaultName;
         input.select();
+        
+        
         break;
       case "create": 
         setTypeMode('create');
-        instance.clear();
-        input.value = defaultName;
+        //instance.clear();
         input.select();
+        input.value = defaultName;
+        instance.focus();
         break;
     }
     

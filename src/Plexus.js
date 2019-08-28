@@ -82,6 +82,7 @@ function Plexus(props){
 
     const[firstLayout, setFirstLayout] = useState(true); //Whether the first layout has occurred yet
     const [loading, setLoading] = useState(true); //Whether the program is still initializing
+    const [homeEmphasis, setHomeEmphasis] = useState()
     
     // Had to do menuResults storings in hacky way, because Typeahead component is lacking
         //In particular, typeahead component doesn't allow retrieval of current menu results,
@@ -124,6 +125,7 @@ function Plexus(props){
             setCy(cyRef);
             //setStylesheet(defaultOptions.style);
         }
+        console.log('useeffect for [loading]')
     }, [loading]);
     useEffect(()=> {
         console.log('eleNames when setting bar settings: ', eleNames, "\ntype mode: ", typeMode);
@@ -173,6 +175,7 @@ function Plexus(props){
                                 id = "searchSuggest"
                                 ref={(typeahead) => typeaheadRef = typeahead}
                                 onInputChange={(text, event) => {
+                                    console.log("value of input: ", typeaheadRef.getInstance().getInput().value)
                                     barOptions.inputHandler(text, event, typeMode, eleBeingModified);
                                 }} 
 
@@ -188,7 +191,7 @@ function Plexus(props){
                                 maxResults={10}
                                 //defaultSelected = {[barOptions.defaultInputValue]}
                                 //highlightOnlyResult={true}
-                                onFocus={()=> console.log(barOptions.options)}
+                                //onFocus={()=> console.log(typeaheadRef.getInput().value)}
                                 onBlur={() => onBlurHandler(typeMode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeaheadRef)}
                                 labelKey='name'
                             />

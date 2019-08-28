@@ -3,7 +3,7 @@ import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm'
 import cola from 'cytoscape-cola';
 import dagre from 'cytoscape-dagre';
 import { animateFitDirect } from './FocusLevels';
-import {ANIMATION_DURATION} from '../Defaults/DefaultLayout';
+import {ANIMATION_DURATION, IDEAL_EDGE_LENGTH} from '../Defaults/DefaultLayout';
 
 cytoscape.use(cola);
 cytoscape.use(dagre);
@@ -65,7 +65,7 @@ export function fCoseLayout(cy){
 export const makeChangesForInitialLayout = (layout) => {
   let realLayout = {...layout};
   //first,unrelatedly, change fit setting of layout to true
-  realLayout.fit=true;
+  realLayout.fit = true;
   realLayout.animate= 'end';  
   realLayout.animationEasing='ease-in-out-quint'; 
   realLayout.animationDuration= 2*ANIMATION_DURATION;

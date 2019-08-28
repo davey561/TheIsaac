@@ -35,6 +35,15 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
       lastTwo.renderText(cy);
     }
   );
+  cy.on('tap', (event)=>{
+    event.target.data('home-connection', .1);
+    event.target.scratch('time-since', 1);
+    setInterval(()=> {
+      let timeSince = event.target.scratch('time-since');
+      event.target.data('home-connection', 1/ timeSince);
+      event.target.scratch('time-since', timeSince+.001);
+    }, 200)
+  })
   //autosave
   cy.pon('layoutstop').then(() => {
     //window.alert('ready');
@@ -89,10 +98,10 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   })
   //rename
   cy.on("cxttap",function(event){
-    let mode = 'rename';
     if(event.target!== cy){
+      //setEleBeingModified(event.target);
       event.target.select();
-      getBarReady(cy, event.target, typeahead, mode, event.target.data('name'), setTypeMode); //now includes call to setTypeMode
+      getBarReady(cy, event.target, typeahead, 'rename', event.target.data('name'), setTypeMode, setEleBeingModified); //now includes call to setTypeMode
     }
   });
 

@@ -21,11 +21,11 @@ const style = {
         'text-overflow-wrap': 'whitespace',
         'background-color': '#FE5454',
         'background-opacity': .9,
-        'width': function(ele){
+        width: function(ele){
             //let old = 8*(2+ele.degree());
             return ele.data('emphasis');
         },
-        'height': function(ele){
+        height: function(ele){
            // let old = 8*(2+ele.degree());
             return ele.data('emphasis');
         },
@@ -55,8 +55,8 @@ const style = {
         style: {
         //'label': 'data(type)',
         'width': function(ele){
-            //return (ele.source().data('emphasis') + ele.target().data('emphasis'))/40
-            return 1;
+            return (ele.source().data('emphasis') + ele.target().data('emphasis'))/80
+            // return 1;
         },
         'font-size': function (ele){
             // console.log('oh hello');
