@@ -32,17 +32,19 @@ export const onBlurHandler = (mode, setTypeMode, nedgeInProgress, setNedgeInProg
     switch(mode){
         case "rename": 
             setTypeMode('search');
+            //setEleBeingModified(-1);
             break;
         case "create":
             //communicating with nedge function in ModfiyGraph.js through react state nedgeInProgress
             if(nedgeInProgress.ongoing){
-                console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
-                setEleBeingModified(nedgeInProgress.ele);
-                nedgeInProgress.ele.select();
-                getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
-                setNedgeInProgress({ongoing: false, ele: null});
+                // console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
+                // setEleBeingModified(nedgeInProgress.ele);
+                // nedgeInProgress.ele.select();
+                // getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
+                // setNedgeInProgress({ongoing: false, ele: null});
             } else {
                 setTypeMode('search');
+               // setEleBeingModified(-1);
             }
                 
             
@@ -85,34 +87,34 @@ export const setBarSettings = (setBarOptions, typeMode, menuResults, eleNames) =
             break;
     }
 }
+
 export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode, setEleBeingModified){
-   console.log('defaultname: ' , defaultName);
+    console.log(ele.data('name'), mode);
+   
+   
     let instance = typeahead.getInstance();
     let input = instance.getInput();
-    setEleBeingModified(ele);
-    
+    instance.focus();
+    setEleBeingModified(ele); //for some reason, very important that this is here.
     switch(mode){
-            
       case "search": 
-        instance.focus();
         setTypeMode('search');
         input.select();
         break;
       case "rename": 
-        typeahead.focus();
-        //instance.clear();
         setTypeMode('rename');
-        input.value = defaultName;
+        instance.clear();
+        console.log('renaming');
+        input.value= defaultName;
         input.select();
-        
-        
+        instance.focus();
         break;
       case "create": 
+        console.log("settignignsldgnlsglksjlk type mode", setTypeMode);
         setTypeMode('create');
-        //instance.clear();
-        input.select();
+        instance.clear();
         input.value = defaultName;
-        instance.focus();
+        input.select();
         break;
     }
     

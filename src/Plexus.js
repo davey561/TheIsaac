@@ -76,6 +76,7 @@ function Plexus(props){
     //Component references
     let cyRef = React.createRef();
     let typeaheadRef = React.createRef();
+
     //let firebaseRef;
     const [cy, setCy] = useState("json");
     //
@@ -124,15 +125,26 @@ function Plexus(props){
 
             setCy(cyRef);
             //setStylesheet(defaultOptions.style);
+
+            //TESTING
+            // let input = typeaheadRef.getInstance().getInput();
+            // input.onchange = () => console.log('input value: ', input.value);
         }
         console.log('useeffect for [loading]')
     }, [loading]);
     useEffect(()=> {
-        console.log('eleNames when setting bar settings: ', eleNames, "\ntype mode: ", typeMode);
-        
+        console.log("type mode is now: ", typeMode);
         setBarSettings(setBarOptions, typeMode, menuResults, eleNames);
         //setOnChangeHandler();
     }, [typeMode]);
+
+    //for testing purposes
+    useEffect(()=> {
+        let s = eleBeingModified.data ? eleBeingModified.data('name'): "not defined"
+        console.log("element being modified is now: ", s);
+        //setOnChangeHandler();
+    }, [eleBeingModified]);
+
     // useEffect(()=>{
     //     if(!loading){
     //         setMenuOptions(cy, setEleNames);
@@ -191,7 +203,6 @@ function Plexus(props){
                                 maxResults={10}
                                 //defaultSelected = {[barOptions.defaultInputValue]}
                                 //highlightOnlyResult={true}
-                                //onFocus={()=> console.log(typeaheadRef.getInput().value)}
                                 onBlur={() => onBlurHandler(typeMode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeaheadRef)}
                                 labelKey='name'
                             />

@@ -22,12 +22,14 @@ const style = {
         'background-color': '#FE5454',
         'background-opacity': .9,
         width: function(ele){
-            //let old = 8*(2+ele.degree());
-            return ele.data('emphasis');
+            let old = 8*(2+ele.degree());
+            // return ele.data('emphasis');
+            return old;
         },
         height: function(ele){
-           // let old = 8*(2+ele.degree());
-            return ele.data('emphasis');
+           let old = 8*(2+ele.degree());
+            // return ele.data('emphasis');
+            return old;
         },
         'font-family': 'monospace',
         'text-wrap': 'wrap',
