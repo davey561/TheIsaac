@@ -24,22 +24,20 @@ import euler from 'cytoscape-euler';
 import firebase from 'firebase';
 
 //Plexus files
-import defaultOptions, { ANIMATION_DURATION } from './Defaults/defaultOptions'
-import { runLayout, traversalLayout, makeChangesForInitialLayout } from './Old/Layout';
-import { save, confMessage, setMenuOptions, eventResponses, eventResponseParameters } from './EventResponses/EventResponses';
-import {generalKeyResponses, alphabetResponses, numberKeyResponses, typeaheadResponses, shiftNumbersList} from './EventResponses/KeyResponses';
-import BarHandler, { inputChangeHandler, onBlurHandler, clear, focusHandler, setBarSettings} from './EventResponses/BarHandlers';
+import defaultOptions from './Defaults/defaultOptions'
+import { runLayout, makeChangesForInitialLayout } from './Old/Layout';
+import { save, setMenuOptions, eventResponses, eventResponseParameters } from './EventResponses/EventResponses';
+import { alphabetResponses, numberKeyResponses, typeaheadResponses, shiftNumbersList} from './EventResponses/KeyResponses';
+import BarHandler, { onBlurHandler, setBarSettings} from './EventResponses/BarHandlers';
 import { saveToText } from './Old/ConvertToBullets';
 import LastTwo from './Old/LastTwo';
-import { cytoscapeEvents } from './EventResponses/CyEvents';
 import {addEdgeSmart, addNodeSmart, nedge} from './Old/ModifyGraph';
-import windowEvents from './EventResponses/WindowEvents';
-import { async } from 'q';
+// import { async } from 'q';
 import logo from './plexusloading.gif';
 
-//Plexus Components
-import Buttons from './Buttons';
-import SampleComponent from './SampleComponent';
+// //Plexus Components
+// import Buttons from './Buttons';
+// import SampleComponent from './SampleComponent';
 
 //Register external layouts
 cytoscape.use(fcose);
@@ -61,35 +59,31 @@ function Plexus(props){
     const [nedgeInProgress, setNedgeInProgress] = useState({ongoing: false, ele: {}});
 
     //Relating to keypress responses
-    const [enteredText, setEnteredText] = useState("");
-    const [typeMode, setTypeMode] = useState("search");
-    //export {setTypeMode};
+    const [firstLayout, setFirstLayout] = useState(true);
+    const [typeMode, setTypeMode] = useState("search"); //the mode of the universal search bar...
+        //either "search", "rename", or "create"
+    //props for Typeahead (universal bar) component
     const [barOptions, setBarOptions] = useState({
         allowNew: false,
         inputHandler: () => {},
         options: eleNames
     });
     const [eleBeingModified, setEleBeingModified] = useState(-1);
-    const [defaultInputValue, setDefaultInputValue] = useState("Davey");
-        //typeMode can be "search", "rename", or "create"
+    const [currentName, setCurrentName] = useState("Davey");
 
     //Component references
     let cyRef = React.createRef();
     let typeaheadRef = React.createRef();
 
-    //let firebaseRef;
-    const [cy, setCy] = useState("json");
-    //
 
-    const[firstLayout, setFirstLayout] = useState(true); //Whether the first layout has occurred yet
     const [loading, setLoading] = useState(true); //Whether the program is still initializing
-    const [homeEmphasis, setHomeEmphasis] = useState()
+
+    const [homeEmphasis, setHomeEmphasis] = useState() //How much emphasis the hidden homenode has
     
     // Had to do menuResults storings in hacky way, because Typeahead component is lacking
         //In particular, typeahead component doesn't allow retrieval of current menu results,
             //except through assigning a function to the renderMenu prop
-    let menuResults;
-    //const[menuResults, setMenuResults] = useState([]);
+    let menuResults; //NOT: const[menuResults, setMenuResults] = useState([]);
 
     //Fetch elements data to start.
     useEffect(() => {
@@ -122,10 +116,6 @@ function Plexus(props){
             //Initially set the options for the universal bar, later updating gets done in CyEvents
             let s = setMenuOptions(cyRef, setEleNames); 
             setBarSettings(setBarOptions, typeMode, menuResults, s);
-
-            setCy(cyRef);
-            //setStylesheet(defaultOptions.style);
-
             //TESTING
             // let input = typeaheadRef.getInstance().getInput();
             // input.onchange = () => console.log('input value: ', input.value);
@@ -142,6 +132,17 @@ function Plexus(props){
     useEffect(()=> {
         let s = eleBeingModified.data ? eleBeingModified.data('name'): "not defined"
         console.log("element being modified is now: ", s);
+        console.log(typeMode);
+        console.log(barOptions)
+        setCurrentName(getDefInputVal());
+
+        // if(typeaheadRef.getInstance){
+        //     typeaheadRef.getInstance().getInput().value = "Davey";
+
+        //     // typeaheadRef.getInstance().getInput().value = getDefInputVal();
+        //     // console.log('setting input to ', getDefInputVal())
+        // }
+        
         //setOnChangeHandler();
     }, [eleBeingModified]);
 
@@ -150,7 +151,14 @@ function Plexus(props){
     //         setMenuOptions(cy, setEleNames);
     //     }
     // }, [cyRef])
-
+    const getDefInputVal=() => {
+        if(eleBeingModified.data){
+            console.log('eleBeingmodified name, ', eleBeingModified.data('name'));
+            return eleBeingModified.data('name')
+        } else{
+            return "";
+        }
+    }
     return (
         <div>
             <br></br>
@@ -202,6 +210,11 @@ function Plexus(props){
                                 selectHintOnEnter={true}
                                 maxResults={10}
                                 //defaultSelected = {[barOptions.defaultInputValue]}
+                                /* defaultInputValue={(eleBeingModified.data && eleBeingModified.data('name')?
+                                         "Davey": ""
+                                )}  */
+                                //defaultInputValue="Davey"
+                               // defaultInputValue={currentName}
                                 //highlightOnlyResult={true}
                                 onBlur={() => onBlurHandler(typeMode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeaheadRef)}
                                 labelKey='name'

@@ -29,6 +29,7 @@ export const inputChangeHandler = (text, event, mode, ele) => {
     }
 }
 export const onBlurHandler = (mode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeahead) => {
+    setEleBeingModified(-1);
     switch(mode){
         case "rename": 
             setTypeMode('search');
@@ -56,13 +57,13 @@ export const retrieveBarOptions = (eleNames) => {
             allowNew: false,
             inputHandler: () => {},
             //focusHandler: () => clear(typeaheadRef)
-            options: eleNames
+            options: eleNames,
         },
         rename: {
             allowNew: true,
             inputHandler: inputChangeHandler,
         //  focusHandler: () => {}
-            options: []
+            options: [],
         },
         create: {
             allowNew: true,
@@ -90,11 +91,9 @@ export const setBarSettings = (setBarOptions, typeMode, menuResults, eleNames) =
 
 export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode, setEleBeingModified){
     console.log(ele.data('name'), mode);
-   
-   
     let instance = typeahead.getInstance();
-    let input = instance.getInput();
     instance.focus();
+    let input = instance.getInput();
     setEleBeingModified(ele); //for some reason, very important that this is here.
     switch(mode){
       case "search": 
@@ -103,17 +102,17 @@ export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode, 
         break;
       case "rename": 
         setTypeMode('rename');
-        instance.clear();
+        //instance.clear(); //not sure why this is necessary
         console.log('renaming');
-        input.value= defaultName;
+        //input.value= defaultName;
         input.select();
-        instance.focus();
+        //instance.focus();
         break;
       case "create": 
         console.log("settignignsldgnlsglksjlk type mode", setTypeMode);
         setTypeMode('create');
-        instance.clear();
-        input.value = defaultName;
+        //instance.clear();
+        //input.value = defaultName;
         input.select();
         break;
     }

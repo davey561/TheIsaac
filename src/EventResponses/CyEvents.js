@@ -31,10 +31,13 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
           lastTwo.update(cy, event.target.source().id(), event.target.target().id());
         }
       }
-      lastTwo.style(cy);
-      lastTwo.renderText(cy);
+      
     }
   );
+  cy.on('add select tap data', (event) =>{
+    lastTwo.style(cy);
+    lastTwo.renderText(cy);
+  });
   cy.on('tap', (event)=>{
     event.target.data('home-connection', .1);
     event.target.scratch('time-since', 1);
