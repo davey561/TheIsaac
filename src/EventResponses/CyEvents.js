@@ -13,11 +13,8 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
                                 typeMode, setTypeMode, eleBeingModified, setEleBeingModified){
   //keep track of last two
   console.log('in cytoscape events')
-  cy.on('tapstart cxttapstart', (event) => {
-    setEleBeingModified(event.target);
-  });
    cy.on(
-    "add select tap", //data used to be here too
+    "add select tap data", //data used to be here too //data's back again, I think i took it out originally cuz it was messing with save, but that's resolved now
     (event) => {
       if(event.target === cy){
       }
@@ -31,22 +28,22 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
           lastTwo.update(cy, event.target.source().id(), event.target.target().id());
         }
       }
-      
+      lastTwo.style(cy);
+      lastTwo.renderText(cy);
     }
   );
-  cy.on('add select tap data', (event) =>{
-    lastTwo.style(cy);
-    lastTwo.renderText(cy);
-  });
-  // cy.on('tap', (event)=>{
-  //   event.target.data('home-connection', .1);
-  //   event.target.scratch('time-since', 1);
-  //   setInterval(()=> {
-  //     let timeSince = event.target.scratch('time-since');
-  //     event.target.data('home-connection', 1/ timeSince);
-  //     event.target.scratch('time-since', timeSince+.001);
-  //   }, 200)
-  // }) HOW IS THIS THE THING
+  cy.on('tap', (event)=>{
+    if(event.target!==cy){
+      event.target.data('home-connection', .1);
+      event.target.scratch('time-since', 1);
+        setInterval(()=> {
+          let timeSince = event.target.scratch('time-since');
+          //event.target.data('home-connection', 1/ timeSince);
+          event.target.scratch('time-since', timeSince+.001);
+        }, 1000)
+    }
+  })
+
   //autosave
   cy.pon('layoutstop').then(() => {
     //window.alert('ready');
@@ -102,7 +99,6 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   //rename
   cy.on("cxttap",function(event){
     if(event.target!== cy){
-      //setEleBeingModified(event.target);
       event.target.select();
       getBarReady(cy, event.target, typeahead, 'rename', event.target.data('name'), setTypeMode, setEleBeingModified); //now includes call to setTypeMode
     }

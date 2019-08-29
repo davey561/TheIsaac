@@ -1,8 +1,6 @@
 import {barSelect} from '../Old/FocusLevels';
 import { database } from 'firebase';
 import React from 'react';
-import {Typeahead, Menu, MenuItem} from 'react-bootstrap-typeahead';
-//import {getBarReady} from './BarHandlers'
 
 export const clear = (typeahead) => {
     typeahead.clear();
@@ -29,23 +27,21 @@ export const inputChangeHandler = (text, event, mode, ele) => {
     }
 }
 export const onBlurHandler = (mode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeahead) => {
-    //setEleBeingModified(-1);
     switch(mode){
         case "rename": 
             setTypeMode('search');
-            //setEleBeingModified(-1);
             break;
         case "create":
+            console.log('registered that we creating out here')
             //communicating with nedge function in ModfiyGraph.js through react state nedgeInProgress
             if(nedgeInProgress.ongoing){
+                //Confirm that the nedge in progress is a node
                 console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
-                setEleBeingModified(nedgeInProgress.ele);
                 nedgeInProgress.ele.select();
-                getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
+                getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode, setEleBeingModified);
                 setNedgeInProgress({ongoing: false, ele: null});
             } else {
                 setTypeMode('search');
-               // setEleBeingModified(-1);
             }
                 
             
@@ -94,19 +90,16 @@ export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode, 
     let instance = typeahead.getInstance();
     instance.focus();
     let input = instance.getInput();
-    //setEleBeingModified(ele); //for some reason, very important that this is here.
+    setEleBeingModified(ele); //only place that this function is called now
+    setTypeMode(mode);
     switch(mode){
-      case "search": 
-        setTypeMode('search');
+      case "search":
         input.select();
         break;
       case "rename": case "create":
-        setTypeMode('rename');
         instance.clear(); //not sure why this is necessary
-        console.log('renaming');
         input.value= defaultName;
         input.select();
         break;
     }
-    
   }

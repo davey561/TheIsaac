@@ -57,7 +57,6 @@ export function addNode(cy, label, location){
       return -1;
     } else{
       let ele = eles[0];
-      setEleBeingModified(ele);
       ele.select();
       console.log('ele being modified is ' + ele.data('name'), ", typemode is: ", typeMode);
       getBarReady(cy, ele, typeahead, typeMode, ele.data('name'), setTypeMode, setEleBeingModified);
@@ -282,7 +281,6 @@ export function addEdgeSmart(cy, lastEdgeAdded, lastTwoObj, setEleBeingModified,
   //Allow user to add edge
   if(sourceNode!=null && targetNode!=null){
     let newEdge = addNewEdge(cy, sourceNode, targetNode, lastEdgeAdded);
-    // setEleBeingModified(newEdge);
     newEdge.select();
     getBarReady(cy, newEdge, typeahead, "create", lastEdgeAdded, setTypeMode, setEleBeingModified);
   }
@@ -292,7 +290,6 @@ export function nedge(cy, lastTwoObj, setEleBeingModified, typeahead, setTypeMod
   let newNode = addNode(cy, -1, findGoodLocationForNewNode(cy, 5));
   let newEdge = addNewEdge(cy, pastSelected, newNode, -1);
   newEdge.select();
- // setEleBeingModified(newEdge);
   setNedgeInProgress({ongoing: true, ele: newNode}); //communicate cross-program that blur response should be special for this nedging; this other function can
   //figure out which edge to target by just taking the only incident edge of the eleBeingModified 
   getBarReady(cy, newEdge, typeahead, "create", "", setTypeMode, setEleBeingModified);
@@ -361,9 +358,7 @@ export function deleteSome(cy){
 export function addNodeSmart(cy, setEleBeingModified, typeahead, setTypeMode){
   let coords = findGoodLocationForNewNode(cy,5);
   let newNode = addNode(cy, -1, coords);
- //setEleBeingModified(newNode);
   getBarReady(cy, newNode, typeahead, "create", "", setTypeMode, setEleBeingModified);
-  //cy.container().focus();
 }
 function getPaddedExtent(cy, radius){
   let extent = cy.extent();
