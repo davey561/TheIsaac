@@ -38,15 +38,15 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
     lastTwo.style(cy);
     lastTwo.renderText(cy);
   });
-  cy.on('tap', (event)=>{
-    event.target.data('home-connection', .1);
-    event.target.scratch('time-since', 1);
-    setInterval(()=> {
-      let timeSince = event.target.scratch('time-since');
-      event.target.data('home-connection', 1/ timeSince);
-      event.target.scratch('time-since', timeSince+.001);
-    }, 200)
-  })
+  // cy.on('tap', (event)=>{
+  //   event.target.data('home-connection', .1);
+  //   event.target.scratch('time-since', 1);
+  //   setInterval(()=> {
+  //     let timeSince = event.target.scratch('time-since');
+  //     event.target.data('home-connection', 1/ timeSince);
+  //     event.target.scratch('time-since', timeSince+.001);
+  //   }, 200)
+  // }) HOW IS THIS THE THING
   //autosave
   cy.pon('layoutstop').then(() => {
     //window.alert('ready');

@@ -29,7 +29,7 @@ export const inputChangeHandler = (text, event, mode, ele) => {
     }
 }
 export const onBlurHandler = (mode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeahead) => {
-    setEleBeingModified(-1);
+    //setEleBeingModified(-1);
     switch(mode){
         case "rename": 
             setTypeMode('search');
@@ -38,11 +38,11 @@ export const onBlurHandler = (mode, setTypeMode, nedgeInProgress, setNedgeInProg
         case "create":
             //communicating with nedge function in ModfiyGraph.js through react state nedgeInProgress
             if(nedgeInProgress.ongoing){
-                // console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
-                // setEleBeingModified(nedgeInProgress.ele);
-                // nedgeInProgress.ele.select();
-                // getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
-                // setNedgeInProgress({ongoing: false, ele: null});
+                console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
+                setEleBeingModified(nedgeInProgress.ele);
+                nedgeInProgress.ele.select();
+                getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
+                setNedgeInProgress({ongoing: false, ele: null});
             } else {
                 setTypeMode('search');
                // setEleBeingModified(-1);
@@ -100,19 +100,11 @@ export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode, 
         setTypeMode('search');
         input.select();
         break;
-      case "rename": 
+      case "rename": case "create":
         setTypeMode('rename');
         instance.clear(); //not sure why this is necessary
         console.log('renaming');
         input.value= defaultName;
-        input.select();
-        //instance.focus();
-        break;
-      case "create": 
-        console.log("settignignsldgnlsglksjlk type mode", setTypeMode);
-        setTypeMode('create');
-        //instance.clear();
-        //input.value = defaultName;
         input.select();
         break;
     }

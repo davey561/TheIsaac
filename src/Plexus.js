@@ -195,7 +195,7 @@ function Plexus(props){
                                 id = "searchSuggest"
                                 ref={(typeahead) => typeaheadRef = typeahead}
                                 onInputChange={(text, event) => {
-                                    console.log("value of input: ", typeaheadRef.getInstance().getInput().value)
+                                   // console.log("value of input: ", typeaheadRef.getInstance().getInput().value)
                                     barOptions.inputHandler(text, event, typeMode, eleBeingModified);
                                 }} 
 
@@ -216,6 +216,7 @@ function Plexus(props){
                                 //defaultInputValue="Davey"
                                // defaultInputValue={currentName}
                                 //highlightOnlyResult={true}
+                                onFocus={()=> console.log(barOptions.options)}
                                 onBlur={() => onBlurHandler(typeMode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeaheadRef)}
                                 labelKey='name'
                             />
