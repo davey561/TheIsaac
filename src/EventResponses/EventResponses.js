@@ -9,7 +9,7 @@ import {addNode, retrieveNewName, addEdge, findGoodLocationForNewNode,
 import {runLayout, colaLayout, dagreLayout, fCoseLayout} from '../Old/Layout';
 import { saveToText } from '../Old/ConvertToBullets';
 import {quickSelect, barSelect} from '../Old/FocusLevels';
-import {numberKeyDown} from '../Old/Miscellaneous';
+import {numberKeyDown, arrAvg} from '../Old/Miscellaneous';
 import { cytoscapeEvents } from './CyEvents';
 import {generalKeyResponses} from './KeyResponses';
 import windowEvents from './WindowEvents';
@@ -55,31 +55,45 @@ export const test = (cy) =>{
         let i = 0;
 
 
-        // cy.edges().forEach((edge) => {
-        //     if(typeof edge.data('weight') === 'undefined'){
-        //         edge.data('weight', DEF_EDGE_WEIGHT);
-        //     }
+        cy.edges().forEach((edge) => {
+            if(typeof edge.data('weight') === 'undefined'){
+                edge.data('weight', DEF_EDGE_WEIGHT);
+            }
+        })
+        // cy.nodes().forEach((node)=>{
+        //     node.data('emphasis', 8*(2+node.degree()));
         // })
-        cy.nodes().forEach((node) => {
-            console.log('home connection for ', node.data('name'), ": ", node.data('home-connection'));
-           // if(!typeof node.data('home-connection')){
-                node.data('home-connection', 0.00001);
-                node.data('emphasis', 1);
-            //}
-        });
+        // console.log(cy.nodes().toArray().map((ele)=> ele.width()));
+        
+        // cy.nodes().forEach((node) => {
+        //     console.log('home connection for ', node.data('name'), ": ", node.data('home-connection'));
+        //    // if(!typeof node.data('home-connection')){
+        //         node.data('home-connection', 0.00001);
+        //         node.data('emphasis', 1);
+        //     //}
+        // });
 
-        let emphases;
-        let hello = setTimeout(()=>{
-                // let goose = cy.$('[name = "maddie"]');
-                // //console.log('goose"s home connection', goose.data('home-connection'));
-                // if(i>=1) goose.data('home-connection', 2/ Math.sqrt(i));
-            emphases = calculateEmphasis(cy, 10, 1);
-            console.log(emphases);
-            cy.nodes().forEach((ele) => {
-                ele.data('emphasis', emphases[ele.id()])
-            });
-            i++;
-        }, 1000);
+        // let emphases;
+        // let hello = setTimeout(()=>{
+        //         // let goose = cy.$('[name = "maddie"]');
+        //         // //console.log('goose"s home connection', goose.data('home-connection'));
+        //         // if(i>=1) goose.data('home-connection', 2/ Math.sqrt(i));
+        //     emphases = calculateEmphasis(cy, 10, 1);
+        //     console.log(emphases);
+        //     cy.nodes().forEach((ele) => {
+        //         ele.data('emphasis', emphases[ele.id()])
+        //     });
+        //     i++;
+        // }, 1000);
+        let emphases = calculateEmphasis(cy, 1, 1);
+        console.log(emphases);
+        cy.nodes().forEach((ele) => {
+            ele.data('emphasis', emphases[ele.id()])
+        });
+        let widths = cy.nodes().toArray().map((ele)=> ele.width())
+        console.log(arrAvg(widths));
+        
+
         
     //cy.nodes().style('width')
     

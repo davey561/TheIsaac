@@ -2,6 +2,16 @@ import {TB_RATIO, MIN_FONT_SIZE, sizeNodeText, setTextMaxWidth, setNodeLabel, WE
 import {edgeTextCalcs, sizeEdgeFont} from '../Old/TextSizing';
 import {arrAvg} from '../Old/Miscellaneous';
 import { distance, distanceBetweenPoints } from '../Old/ModifyGraph';
+const calcSize = (ele) => {
+    // let old = 8*(2+ele.degree());
+    // return old;
+    let emph = ele.data('emphasis');
+    //emphasis should represent area of the node's ellipse, not the width or height
+    //area of an ellipse = pi*width/2*height/2, so if width=height, width is emph/pi^0.5*2
+    //return Math.round(Math.sqrt((emph / Math.pi))*2);
+    return Math.round(Math.sqrt(emph/ Math.PI)*2);
+            
+}
 const style = {
     elements:  { selector: '*',
         style: {
@@ -21,16 +31,8 @@ const style = {
         'text-overflow-wrap': 'whitespace',
         'background-color': '#FE5454',
         'background-opacity': .9,
-        'width': function(ele){
-            let old = 8*(2+ele.degree());
-            // return ele.data('emphasis');
-            return old;
-        },
-        'height': function(ele){
-           let old = 8*(2+ele.degree());
-            // return ele.data('emphasis');
-            return old;
-        },
+        width: (ele) => calcSize(ele),
+        height: (ele) => calcSize(ele),
         'font-family': 'monospace',
         'text-wrap': 'wrap',
         'text-max-width': function(ele){
@@ -56,8 +58,8 @@ const style = {
     edges: { selector: 'edge',
         style: {
         //'label': 'data(type)',
-        'width': function(ele){
-            return (ele.source().data('emphasis') + ele.target().data('emphasis'))/80
+        width: function(ele){
+            return (ele.source().data('emphasis') + ele.target().data('emphasis'))/2000
             // return 1;
         },
         'font-size': function (ele){
