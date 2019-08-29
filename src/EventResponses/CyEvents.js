@@ -15,9 +15,9 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   console.log('in cytoscape events')
   cy.on('tapstart cxttapstart', (event) => {
     setEleBeingModified(event.target);
-  })
+  });
    cy.on(
-    "add data select tap",
+    "add select tap", //data used to be here too
     (event) => {
       if(event.target === cy){
       }
@@ -31,17 +31,33 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
           lastTwo.update(cy, event.target.source().id(), event.target.target().id());
         }
       }
-      lastTwo.style(cy);
-      lastTwo.renderText(cy);
+      
     }
   );
+  cy.on('add select tap data', (event) =>{
+    lastTwo.style(cy);
+    lastTwo.renderText(cy);
+  });
+  cy.on('tap', (event)=>{
+    event.target.data('home-connection', .1);
+    event.target.scratch('time-since', 1);
+    setInterval(()=> {
+      let timeSince = event.target.scratch('time-since');
+      event.target.data('home-connection', 1/ timeSince);
+      event.target.scratch('time-since', timeSince+.001);
+    }, 200)
+  })
   //autosave
   cy.pon('layoutstop').then(() => {
     //window.alert('ready');
     cy.on(
       "add remove data",
       function(event){
-        save(cy, firebaseRef);
+        let showThatSaved = true;
+        if(event.type==='data'){
+          showThatSaved = false;
+        }
+        save(cy, firebaseRef, showThatSaved);
         setMenuOptions(cy, setEleNames);
       }
     );
@@ -85,9 +101,11 @@ export function cytoscapeEvents(cy, lastTwo, setLastTwo, lastEdgeName,
   })
   //rename
   cy.on("cxttap",function(event){
-    let mode = 'rename';
-    event.target.select();
-    getBarReady(cy, event.target, typeahead, mode, event.target.data('name'), setTypeMode); //now includes call to setTypeMode
+    if(event.target!== cy){
+      //setEleBeingModified(event.target);
+      event.target.select();
+      getBarReady(cy, event.target, typeahead, 'rename', event.target.data('name'), setTypeMode, setEleBeingModified); //now includes call to setTypeMode
+    }
   });
 
   //Delete node on taphold
@@ -223,5 +241,6 @@ cy.on("mouseout",function(event){
   // updates node text on zoom, updates edge text on position
   cy.on('zoom position', function(evt){
     cy.style().update();
+    document.getElementById('zoomLevel').innerHTML = Math.floor(cy.zoom())+"x";
   })
 }

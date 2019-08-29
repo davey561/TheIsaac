@@ -21,23 +21,27 @@ const style = {
         'text-overflow-wrap': 'whitespace',
         'background-color': '#FE5454',
         'background-opacity': .9,
-        'width': function(ele){
-            return 8*(2+ele.degree());
+        width: function(ele){
+            let old = 8*(2+ele.degree());
+            // return ele.data('emphasis');
+            return old;
         },
-        'height': function(ele){
-            return 8*(2+ele.degree());
+        height: function(ele){
+           let old = 8*(2+ele.degree());
+            // return ele.data('emphasis');
+            return old;
         },
         'font-family': 'monospace',
         'text-wrap': 'wrap',
         'text-max-width': function(ele){
-            return ele.width();
+            return 1.1*ele.width();
             //return setTextMaxWidth(ele);
         },
         'font-size': function(ele){
             //return Math.floor(sizeNodeText(ele));
             let l;
             ele.data('name') && ele.data('name').length>0 ? l = ele.data('name').length : l=5;
-            return 0.5 * ele.width() / Math.sqrt(l); //so buffering less
+            return 0.6 * ele.width() / Math.sqrt(l); //so buffering less
             //return MIN_FONT_SIZE; //so buffering is less
         },
         label: function(ele){
@@ -53,7 +57,8 @@ const style = {
         style: {
         //'label': 'data(type)',
         'width': function(ele){
-            return (ele.source().degree() + ele.target().degree())/4
+            return (ele.source().data('emphasis') + ele.target().data('emphasis'))/80
+            // return 1;
         },
         'font-size': function (ele){
             // console.log('oh hello');
@@ -113,6 +118,16 @@ const style = {
     },
 
     //Custom style classes
+    'home-node': { selector: '.home-node',
+        style: 
+        {
+            'display' : 'none',
+            'visibility': 'invisible',
+            // 'width': 0,
+            // height: 0
+
+        }
+    },
     'over-node': { selector: '.over-node',
         style: 
         {
@@ -142,11 +157,9 @@ const style = {
     'selected-edge': { selector: '.selected-edge',
         style: 
         {
-        'line-color' : 'black',
+        'line-color' : '#7da2ff',
         //'line-fill': 'radial-gradient'
         }
     }
-
-
 }
 export default style;

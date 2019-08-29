@@ -8,26 +8,14 @@ export const clear = (typeahead) => {
     typeahead.clear();
 }
 const BarHandler = (selected, cy, ele, typeahead, mode) => {
-    console.log('changeOnned baby')
     if(selected.length==1){
-        switch(mode){
-            case "search": 
-                console.log('search')
-                try{
-                    barSelect(cy, selected[0].id);
-                } catch(Exception){}
-                typeahead.blur();
-                break;
-            case "rename": //this is not where the rename part goes
-                // console.log('called');
-                // ele.data('name', selected[0].name);
-                break;
-    
-            case "create": 
-                break;
-            default: console.warn("Mode given as input to bar handler is ", mode, ", which is not valid. \
-                Must be either search, rename, or clear");
+        if(mode==='search'){
+            try{
+                barSelect(cy, selected[0].id);
+            } catch(Exception){}
+            typeahead.blur();
         }
+        //not where the rename and create part go, they're in onInputChange
     }
     
 }
@@ -35,27 +23,29 @@ export default BarHandler;
 
 export const inputChangeHandler = (text, event, mode, ele) => {
     switch(mode){
-        case "rename": 
-            ele.data('name', text);
-        case "create":
+        case "rename": case "create":
             ele.data('name', text);
 
     }
 }
 export const onBlurHandler = (mode, setTypeMode, nedgeInProgress, setNedgeInProgress, setEleBeingModified, typeahead) => {
+    setEleBeingModified(-1);
     switch(mode){
         case "rename": 
             setTypeMode('search');
+            //setEleBeingModified(-1);
             break;
         case "create":
             //communicating with nedge function in ModfiyGraph.js through react state nedgeInProgress
             if(nedgeInProgress.ongoing){
-                console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
-                setEleBeingModified(nedgeInProgress.ele);
-                getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
-                setNedgeInProgress({ongoing: false, ele: null});
+                // console.assert(nedgeInProgress.ele && nedgeInProgress.ele.isNode(), "stored element for nedgeInProgress either isn't defined or isn't a node");
+                // setEleBeingModified(nedgeInProgress.ele);
+                // nedgeInProgress.ele.select();
+                // getBarReady(null, nedgeInProgress.ele, typeahead, "create", "", setTypeMode);
+                // setNedgeInProgress({ongoing: false, ele: null});
             } else {
                 setTypeMode('search');
+               // setEleBeingModified(-1);
             }
                 
             
@@ -67,13 +57,13 @@ export const retrieveBarOptions = (eleNames) => {
             allowNew: false,
             inputHandler: () => {},
             //focusHandler: () => clear(typeaheadRef)
-            options: eleNames
+            options: eleNames,
         },
         rename: {
             allowNew: true,
             inputHandler: inputChangeHandler,
         //  focusHandler: () => {}
-            options: []
+            options: [],
         },
         create: {
             allowNew: true,
@@ -86,9 +76,9 @@ export const retrieveBarOptions = (eleNames) => {
 export const setBarSettings = (setBarOptions, typeMode, menuResults, eleNames) => {
     switch(typeMode){
         case "search": 
-            console.log(eleNames);
+            //console.log(eleNames);
             setBarOptions(retrieveBarOptions(eleNames).search);
-            console.log('set bar menu options for search as: ', retrieveBarOptions(eleNames).search.options)
+            //console.log('set bar menu options for search as: ', retrieveBarOptions(eleNames).search.options)
             break;
         case "rename":
             setBarOptions(retrieveBarOptions(eleNames).rename);
@@ -98,10 +88,13 @@ export const setBarSettings = (setBarOptions, typeMode, menuResults, eleNames) =
             break;
     }
 }
-export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode){
+
+export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode, setEleBeingModified){
+    console.log(ele.data('name'), mode);
     let instance = typeahead.getInstance();
     instance.focus();
     let input = instance.getInput();
+    //setEleBeingModified(ele); //for some reason, very important that this is here.
     switch(mode){
       case "search": 
         setTypeMode('search');
@@ -109,16 +102,17 @@ export function getBarReady(cy, ele, typeahead, mode, defaultName, setTypeMode){
         break;
       case "rename": 
         setTypeMode('rename');
-        instance.clear();
+        instance.clear(); //not sure why this is necessary
         console.log('renaming');
         input.value= defaultName;
         input.select();
+        //instance.focus();
         break;
       case "create": 
         console.log("settignignsldgnlsglksjlk type mode", setTypeMode);
         setTypeMode('create');
-        instance.clear();
-        input.value = defaultName;
+        //instance.clear();
+        //input.value = defaultName;
         input.select();
         break;
     }

@@ -3,7 +3,7 @@ import cytoscape from '../../node_modules/cytoscape/dist/cytoscape.esm'
 import cola from 'cytoscape-cola';
 import dagre from 'cytoscape-dagre';
 import { animateFitDirect } from './FocusLevels';
-import {ANIMATION_DURATION} from '../Defaults/DefaultLayout';
+import {ANIMATION_DURATION, IDEAL_EDGE_LENGTH} from '../Defaults/DefaultLayout';
 
 cytoscape.use(cola);
 cytoscape.use(dagre);
@@ -11,6 +11,7 @@ cytoscape.use(dagre);
 export function runLayout(cy, eles, layout){
   if(!cy.animated()){
     try{
+      console.log(layout);
       eles.layout(layout).run();
     } catch (Exception) {}
   }
@@ -64,11 +65,11 @@ export function fCoseLayout(cy){
 export const makeChangesForInitialLayout = (layout) => {
   let realLayout = {...layout};
   //first,unrelatedly, change fit setting of layout to true
-  realLayout.fit=true;
+  realLayout.fit = true;
   realLayout.animate= 'end';  
   realLayout.animationEasing='ease-in-out-quint'; 
-  realLayout.animationDuration= 1.5*ANIMATION_DURATION;
-  realLayout.randomize=false;
+  realLayout.animationDuration= 2*ANIMATION_DURATION;
+  //realLayout.randomize=false;
   //realLayout.ease
   return realLayout;
 }

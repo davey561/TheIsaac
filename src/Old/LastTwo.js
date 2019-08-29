@@ -34,7 +34,11 @@ function LastTwo(props){
             if(typeof this.lastTwo[i] === 'undefined' || this.lastTwo[i] == null) {
                 names[i] = '__';
             } else {
+                let charLim = 16;
                 names[i] = cy.getElementById(this.lastTwo[i]).data('name');
+                if(names[i].length > charLim){
+                    names[i] = names[i].slice(0,charLim) + "...";
+                }
             }
         }
         return names;

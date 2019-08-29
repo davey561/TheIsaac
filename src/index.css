@@ -10,13 +10,13 @@ body{
   background-color: 'lightblue';
 }
 .bar{
-  width:40%;
+  width:30%;
   display: inline-block;
   /* display: flex;
   justify-content: space-between; */
   /* float: right; */
   /* margin: auto; */
-  margin: 0% 2em;
+  margin: 0% 1em;
   left: 0px;
 }
 #parent {
@@ -34,6 +34,7 @@ body{
   display: inline-block;
   white-space: nowrap;
   overflow-x: auto;
+  /* top: 100px; */
   /* display: flex;
   justify-content: space-between; */
   
@@ -91,6 +92,30 @@ body{
   text-align: center;
   font-style: italic;
   font-family: "Apple Chancery, cursive"
+  
+}
+#zoomIcon{
+  height: 26px;
+  width: 26px;
+  display: inline-block;
+  /* top: 10px; */
+}
+#zoomLevel{
+  font-size: 28px;
+  border-radius: 4px;
+  display: inline-block;
+  color: rgb(85, 133, 254);
+  /* border: dotted; */
+  /* border-width: 5px; */
+}
+#zoom{
+  font-style: bold;
+  /* margin: 0px 1em; */
+  /* float: left; */
+  display: inline-block;
+  font-family: 'Courier';
+  position: relative;
+  /* top: 5px; */
 }
 #loader{
   width: 49px;
