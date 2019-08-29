@@ -36,9 +36,9 @@ function LastTwo(props){
             } else {
                 let charLim = 16;
                 names[i] = cy.getElementById(this.lastTwo[i]).data('name');
-               // if(names[i].length > charLim){
+                if(names[i].length > charLim){
                     names[i] = names[i].slice(0,charLim) + "...";
-                //}
+                }
             }
         }
         return names;
