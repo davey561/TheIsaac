@@ -86,12 +86,12 @@ export const test = (cy) =>{
         //     i++;
         // }, 1000);
         let emphases = calculateEmphasis(cy, 1, 1);
-        console.log(emphases);
+       // console.log(emphases);
         cy.nodes().forEach((ele) => {
             ele.data('emphasis', emphases[ele.id()])
         });
         let widths = cy.nodes().toArray().map((ele)=> ele.width())
-        console.log(arrAvg(widths));
+        console.log(emphases);
         
 
         

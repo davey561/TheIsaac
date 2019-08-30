@@ -112,7 +112,9 @@ const style = {
         'text-rotation': 'autorotate',
         'target-arrow-shape': 'vee',
         'arrow-scale': '.6',
-        'line-color': 'Gainsboro',
+        // 'line-color': 'Gainsboro',
+        //Innovating a little with edge color:
+        'line-color': 'mapData(weight, 0, 1, white, red)',
         'target-arrow-color': 'Navy',
         'source-arrow-color': 'Navy'
             //fixed from the background color scandal
