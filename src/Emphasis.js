@@ -61,7 +61,6 @@ import { DEF_EDGE_WEIGHT } from "./Old/ModifyGraph";
 //the calculation, without home node:
 export const calculateEmphasis = (cy, numberIterations, howGradual) => {
     let sums = initialize(cy, 4200);
-    console.log('sums: ', sums);
     let prevSums; //meant to temporarily store nodes' past emphasis values
     let incidentEdges; //temporarily store edges incident to given node
     let numNeighbors; //number of incident edges/neighbors (temporary)
@@ -70,13 +69,10 @@ export const calculateEmphasis = (cy, numberIterations, howGradual) => {
     for(let i = 0; i<numberIterations; i++){
         prevSums = {...sums};
         sums = initialize(cy, 0);
-        console.log('prevSums: ', prevSums);
-        console.log('sums: ', sums);
        
         //For each node...
         cy.nodes().forEach((node)=> {
             //Find the incident edges
-            console.log('this node: ', node.data('name'));
             incidentEdges = node.connectedEdges();
             numNeighbors = incidentEdges.size();
             
@@ -85,20 +81,6 @@ export const calculateEmphasis = (cy, numberIterations, howGradual) => {
             incidentEdges.forEach((edge) => {
                 totalIncidence+= edge.data('weight');
             });
-            console.log('totalIncidence: ', totalIncidence);
-
-            //Find and store the amount of emphasis that the given node holds onto 
-                //ie the amount of emphasis that it does not give away to other nodes
-            // let holdsOnto;
-            // //if less than one, holds on to difference; if greater than one, normalizes
-            // if(totalIncidence<1){
-            //     holdsOnto = 1-totalIncidence
-            // } else {
-            //     holdsOnto = 0;
-            // }
-            // console.log('holdsOnto: ', holdsOnto);
-            // sums[node.id()] += holdsOnto * prevSums[node.id()]; //* node.data('emphasis'); //+= instead of = because, in previous rounds, other nodes may have given this node juice
-            // console.log('amount that this node kept: ', holdsOnto * prevSums[node.id()]);
 
             //Transfer juice to neighbors along each incident edge.
             incidentEdges.forEach((edge)=> {
@@ -109,7 +91,6 @@ export const calculateEmphasis = (cy, numberIterations, howGradual) => {
                // }
                 // sums[neighbor.id()] += (edge.data('weight')/ totalIncidence) / factor * prevSums[node.id()];
                 sums[neighbor.id()] += weight / howGradual * prevSums[node.id()];
-                console.log('weight added to: ', weight*prevSums[node.id()]);
 
             });
 

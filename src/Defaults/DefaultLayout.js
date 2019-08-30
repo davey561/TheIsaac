@@ -36,7 +36,7 @@ const layout = {
         name: 'fcose', //uses the cose-bilkent layout, downloaded from internet, good for compound graphs
         animate: true,  animationEasing: 'ease', animationDuration: ANIMATION_DURATION,
         randomize: false,
-        idealEdgeLength: 1*IDEAL_EDGE_LENGTH,
+        idealEdgeLength: 1.4*IDEAL_EDGE_LENGTH,
         edgeElasticity: .1,
         fit: false,
         nodeDimensionsIncludeLabels: true,

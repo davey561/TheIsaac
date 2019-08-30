@@ -5,11 +5,11 @@ import { distance, distanceBetweenPoints } from '../Old/ModifyGraph';
 const calcSize = (ele) => {
     // let old = 8*(2+ele.degree());
     // return old;
-    let emph = ele.data('emphasis');
+
     //emphasis should represent area of the node's ellipse, not the width or height
     //area of an ellipse = pi*width/2*height/2, so if width=height, width is emph/pi^0.5*2
     //return Math.round(Math.sqrt((emph / Math.pi))*2);
-    return Math.round(Math.sqrt(emph/ Math.PI)*2);
+    return Math.round(Math.sqrt(ele.data('emphasis')/ 3.14)*2);
             
 }
 const style = {
@@ -84,8 +84,10 @@ const style = {
             // return WEIRD_TEXT_SIZING_FACTOR* 9/10 * fontSize/c.currZoomLevel;
             //return MIN_FONT_SIZE; //simplied so that buffering is less
             let l;
+            let dist = distanceBetweenPoints(ele.source().position(), ele.target().position()) - 20; //CAUSES TOO MUCH BUFFERING- (ele.source().width() + ele.target().width());
+            ///This would be ideal, but also causes some buffering /let endpointsDist = dist - (calcSize(ele.source()) + calcSize(ele.target()))/2;
             ele.data('name') && ele.data('name').length>0 ? l = ele.data('name').length : l=5;
-            return 2 + .25 * arrAvg([ele.source().width(), ele.target().width()]) / Math.sqrt(l); //so buffering less
+            return 2 + 0.002 * arrAvg([ele.source().width(), ele.target().width()]) / Math.sqrt(l) * dist; //so buffering less
         },
         'label': function(ele){
             // let c = edgeTextCalcs(ele);
