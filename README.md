@@ -1,5 +1,5 @@
 # The Isaac Bot
-#### Goal: to learn like a person learns.
+## Goal: to learn like a person learns.
 
 ### Code Splitting
 
