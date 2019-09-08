@@ -6,15 +6,17 @@ import * as serviceWorker from './serviceWorker';
 import * as firebase from 'firebase';
 
  // Initialize Firebase NEED TO UPDATE THIS INFO
-//  const firebaseConfig = {
-//     apiKey: "AIzaSyCj2i9CSgQRFWIf60pX2Sx5bStinFh8Tvs",
-//     authDomain: "plexus-74145.firebaseapp.com",
-//     databaseURL: "https://plexus-74145.firebaseio.com",
-//     projectId: "plexus-74145",
-//     storageBucket: "",
-//     messagingSenderId: "110353849498",
-//     appId: "1:110353849498:web:cf1ffb735c0f146a"
-//   };
+ const firebaseConfig = {
+  apiKey: "AIzaSyC-PXoygCwFQG9e0rUqh9-BkEQgiycvvzo",
+  authDomain: "the-isaac.firebaseapp.com",
+  databaseURL: "https://the-isaac.firebaseio.com",
+  projectId: "the-isaac",
+  storageBucket: "",
+  messagingSenderId: "811295976428",
+  appId: "1:811295976428:web:bc1eaea80f67cfd054eec9"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
 //   const app = firebase.initializeApp(firebaseConfig);
 ReactDOM.render(<App />, document.getElementById('root'));
 
