@@ -68,14 +68,11 @@ function App(props) {
 
   }, []);
   useEffect(()=>{
-    if(!loading){
+    if(!loading && user){
         document.addEventListener('keydown', (event)=>{
           if(event.key==="Enter"){
               renderAll(cy);
           }
-        });
-        document.addEventListener('beforeunload', ()=>{
-          firebase.auth().signOut();
         });
         cy.on('add remove', (event)=>{
           //console.log('type: ', event.type, ". target: " + event.target.data('name'));
@@ -83,7 +80,7 @@ function App(props) {
           //console.log('saved');
         })
     }
-  }, [loading])
+  }, [loading, user])
   return (
     <div className="Isaac-Container">
       <h1 id='title'>The Isaac</h1>
