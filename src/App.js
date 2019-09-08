@@ -86,7 +86,6 @@ function App(props) {
       <h1 id='title'>The Isaac</h1>
       {user && !loading
         ? <div>
-            <p>Hello,</p>
             <Chatter cy={cy}/>
           </div>
         : <LoginPage setUser={setUser} setLoggedIn={setLoggedIn}/>

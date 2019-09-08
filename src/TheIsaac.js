@@ -36,23 +36,16 @@ export const renderResponse = (response) => {
         let renderedChatBot = document.getElementById('convo');
         renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> <img src = 'TheIsaac.ico' width=40px height = 40px></img> Isaac:  ${response}`;
         renderedChatBot.scrollTop = renderedChatBot.scrollHeight;
-    }, Math.random()*2000);
+    }, Math.random()*1000);
 }
 export const respond = (comment, cy) => {
-    let result = "You know what... I'm going to kiss you!'";
     if(Math.random()<.02){
-        return result;
+        return "You know what... I'm going to kiss you!'";
     }
-    // let wordpos = new WordPOS({profile: true});
-    // console.log(wordpos);
-    // wordpos.isAdjective('awesome', function(r){console.log(r)});
-    //wordpos.getNouns(comment, (r)=> console.log(r));
 
     let words = new pos.Lexer().lex(comment);
     let tagger = new pos.Tagger();
     let taggedWords = tagger.tag(words);
-    
-
     let nouns = [];
     for (let i in taggedWords) {
         let taggedWord = taggedWords[i];
@@ -61,16 +54,16 @@ export const respond = (comment, cy) => {
         
         let tag = taggedWord[1];
         let firstTwoLetters = tag.slice(0,2);
-        if(arrContains(["NN", "PR", "JJ"], firstTwoLetters)){ //|| tag.slice(0,2)==="PR"){
+        if(contains(["NN", "PR", "JJ"], firstTwoLetters)){ //|| tag.slice(0,2)==="PR"){
             nouns.push(word);
-            if(word==='your'){
-                console.warn("What the fuck, your is a pronoun?");
-            }
         } 
     }
     //overriding:
     if(taggedWords.length==1) nouns = [taggedWords[0]];
-    //console.log('nouns: ', nouns);
+    let lowercaseNouns = nouns.map(noun => {
+        noun.toLowerCase()
+    })
+    
     //add all new to the graph
     learnNewConcepts(cy, nouns);
 
@@ -78,12 +71,20 @@ export const respond = (comment, cy) => {
     connectConceptsInSameComment(cy, nouns, comment)
 
     //see if I know enough about any of em to say something
-    let topic = doIKnowEnoughToSaySomething(cy, nouns, .3);
-    if(topic){
-        return responseForFamiliarTopic(topic, nouns);
+    let processedWords = processWords(justTheWords(taggedWords));
+    if(containsPlural(processedWords, ["who", "what", "when", "where", "why", "?"])){
+        return respondForFamiliarTopic(cy, comment, nouns);
+    } else if(containsPlural(processedWords, ["are", "is"])) {
+        let x = Math.random();
+        const divisor = 3;
+        const acknowledgments = ["Huh, ok.", "I see.", "Gotcha.", "Cool."]
+        for(let i = 0; i<acknowledgments.length; i++){
+            if(x<i / divisor){
+                return acknowledgments[i];
+            }
+        }
     }
-    return (nouns[0]? "I don't know much about " + nouns[0] + ". Tell me more!": 
-        comment + " to you too.");
+    return respondForFamiliarTopic(cy, comment, nouns);
 }
 
 const learnNewConcepts = (cy, nouns)=> {
@@ -147,8 +148,8 @@ const strongestRelation = (node, currentTopics) => {
         if(neighbor.data('name')==='face'){
             //console.log('face');
         }
-        let contains = arrContains(currentTopics, neighbor.data('name'));
-        if((currWeight>maxWeight) && (!contains)){
+        let included = contains(currentTopics, neighbor.data('name'));
+        if((currWeight>maxWeight) && (!included)){
             //console.log('neighbor name is ' + neighbor.data('name'), 'needs to be true ' + (!contains))
             strongest = {name: edge.data('name')||"", weight: currWeight, connectsTo: neighbor};
             //console.log('just set strongest relat, connects to: ' + strongest.connectsTo.data('name'));
@@ -169,7 +170,7 @@ const findCorrespondingNodes = (cy, nouns) => {
     printEles(relevantNodes);
     return relevantNodes;
 }
-const arrContains = (array, value) => {
+const contains = (array, value) => {
     //console.log('value being tested for contains is : ' , value)
     let contains = false;
     array.forEach((ele)=>{
@@ -180,22 +181,34 @@ const arrContains = (array, value) => {
     })
     return contains;
 }
+const containsPlural = (array, values) => {
+    let included = false;
+    values.forEach(value => {
+        if (contains(array, value)){
+            included = true;
+        }
+    });
+    return included;
+}
 const processWord = (word) => {
     return secondPersonFlip(word.toLowerCase());
 }
+const processWords= (words) => {
+    return words.map(word=> processWord(word));
+}
 const secondPersonFlip = (word)=> {
     let newWord;
-    if(arrContains(["i", "me"], word)){
+    if(contains(["i", "me"], word)){
         newWord="you";
-    } else if(arrContains(["you"], word)){
+    } else if(contains(["you"], word)){
         newWord="i";
-    } else if(arrContains(["your"], word)){
+    } else if(contains(["your"], word)){
         newWord="my";
-    } else if(arrContains(["yours"], word)){
+    } else if(contains(["yours"], word)){
         newWord="mine";
-    } else if(arrContains(["my"], word)){
+    } else if(contains(["my"], word)){
         newWord="your";
-    } else if(arrContains(["mine"], word)){
+    } else if(contains(["mine"], word)){
         newWord="yours";
     } else{
         newWord = word;
@@ -208,6 +221,18 @@ const responseForFamiliarTopic = (topic, nouns)=>{
         word => secondPersonFlip(word.toLowerCase())
     );
     //window.alert(responseWords);
-    let responseString = responseWords.reduce((str, word)=> str+ " " + word); 
+    let responseString = responseWords.reduce((str, word)=> str + " " + word); 
     return `${responseString}`
+}
+const respondForFamiliarTopic = (cy, comment, nouns) => {
+    console.log('nouns: ', nouns);
+    let topic = doIKnowEnoughToSaySomething(cy, nouns, .3);
+    if(topic){
+        return responseForFamiliarTopic(topic, nouns);
+    }
+    return (nouns[0]? "I don't know much about " + nouns[0] + ". Tell me more!": 
+        comment + " to you too.");
+}
+const justTheWords= (taggedWords) => {
+   return taggedWords.map(word=> word[0]);
 }
