@@ -3,30 +3,38 @@
 import WordPOS from 'wordpos';
 import pos from 'pos';
 import { noConflict } from 'q';
+/**
+ * Renders the user's comment
+ */
 export const renderComment = () => {
     let renderedChatBot = document.getElementById('convo');
     let inputdom = document.getElementById('comment-section');
     let input = inputdom.value;
-    //console.log('currently rendered text is ' + renderedText)
-
-    renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> You: ${input}`;
+    renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> You:  ${input}`;
    // inputdom.blur();
 }
+/**
+ * Handles all responses to user's submitting a comment 
+ * @param {*} cy
+ */
 export const renderAll = (cy) => {
-    //console.log('rendering all')
     let inputdom = document.getElementById('comment-section');
     renderComment();
-    let ran = Math.random();
-        renderResponse(respond(inputdom.value, cy));
-    inputdom.value = "";
+    renderResponse(respond(inputdom.value, cy));
+    inputdom.value = ""; //clears the input field
 }
+
+/**
+ * Render's Isaac's response
+ * @param {*} response 
+ */
 export const renderResponse = (response) => {
     let renderedChatBot = document.getElementById('convo');
         renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> ...`;
         renderedChatBot.scrollTop = renderedChatBot.scrollHeight;
     setTimeout(()=>{
         let renderedChatBot = document.getElementById('convo');
-        renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> <img src = 'TheIsaac.ico' width=40px height = 40px></img> Isaac: ${response}`;
+        renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> <img src = 'TheIsaac.ico' width=40px height = 40px></img> Isaac:  ${response}`;
         renderedChatBot.scrollTop = renderedChatBot.scrollHeight;
     }, Math.random()*2000);
 }
@@ -52,7 +60,8 @@ export const respond = (comment, cy) => {
         let word = processWord(taggedWord[0]);
         
         let tag = taggedWord[1];
-        if(tag.slice(0,2)==="NN" || tag.slice(0,2)==="PR"){ //|| tag.slice(0,2)==="PR"){
+        let firstTwoLetters = tag.slice(0,2);
+        if(arrContains(["NN", "PR", "JJ"], firstTwoLetters)){ //|| tag.slice(0,2)==="PR"){
             nouns.push(word);
             if(word==='your'){
                 console.warn("What the fuck, your is a pronoun?");

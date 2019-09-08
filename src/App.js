@@ -3,21 +3,42 @@ import React, { useState, useEffect } from 'react';
 //Unclear if I need this wrapper component
 import {renderAll, renderComment, printEles} from './TheIsaac';
 import cytoscape from 'cytoscape';
-import firebase from 'firebase';
+import Chatter from './Chatter';
+import * as firebase from 'firebase';
+import withFirebaseAuth from 'react-with-firebase-auth'
+import 'firebase/auth';
 
-function App() {
+ // Initialize Firebase NEED TO UPDATE THIS INFO
+ const firebaseConfig = {
+  apiKey: "AIzaSyC-PXoygCwFQG9e0rUqh9-BkEQgiycvvzo",
+  authDomain: "the-isaac.firebaseapp.com",
+  databaseURL: "https://the-isaac.firebaseio.com",
+  projectId: "the-isaac",
+  storageBucket: "",
+  messagingSenderId: "811295976428",
+  appId: "1:811295976428:web:bc1eaea80f67cfd054eec9"
+};
+// Initialize Firebase
+const firebaseApp = firebase.initializeApp(firebaseConfig);
+const firebaseAppAuth = firebaseApp.auth();
+const providers = {
+  googleProvider: new firebase.auth.GoogleAuthProvider(),
+};
+
+function App(props) {
     const [ref, setRef] = useState();
     const [eles, setEles] = useState();
     const [loading, setLoading] = useState(true);
     const[cy, setCy] = useState(cytoscape({
       
-      elements: [ // list of graph elements to start with
-        // { // node a
-        //   data: { name: 'my knowledge', id: 'my knowledge' }
-        // }
-      ]
+      elements: []
     
     }));
+    const {
+      user,
+      signOut,
+      signInWithGoogle,
+    } = props;
     //const [knowledgeGraph, setKnowledgeGraph] = useState([], )
     useEffect(()=>{
     }, []);
@@ -58,21 +79,27 @@ function App() {
         })
     }
   }, [loading])
-    return (
-      <div className="Isaac-container">
-        <h1>The Isaac</h1>
-        
-        <div id = "chatter">
-            <p id = "convo">
-                Isaac: I like crew.
-            </p>
-            <div id = "input">
-                Say something: <input id = "comment-section" type="text" name="comment"></input><br></br>
-                <input type="submit" value="Submit" onClick={() => renderAll(cy)} onBlur={()=>{}}></input>
+  return (
+    <div className="Isaac-Container">
+      <h1 id='title'>The Isaac</h1>
+      
+      {
+        user 
+          ? <div>
+              <p>Hello, {user.displayName}</p>
+              <Chatter cy={cy}/>
             </div>
-        </div>
-      </div>
-    )
-  }
-
-export default App;
+          : <p>Please sign in.</p>
+      }
+      {
+        user
+          ? <button onClick={signOut}>Sign out</button>
+          : <button onClick={signInWithGoogle}>Sign in with Google</button>
+      }
+    </div>
+  )
+}
+export default withFirebaseAuth({
+    providers,
+    firebaseAppAuth,
+  })(App);

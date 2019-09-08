@@ -7,9 +7,16 @@ body {
   text-align: left;
 }
 #convo {
-  height:420px;width:400px;border:1px;overflow: auto;
+  height:420px;width:400px;border:1px;overflow: auto; border-top: 2px solid;border-bottom: 2px solid; border-style: medium;
+
 }
-/* #input {
+#title{
+  /* border-style: solid; */
+  padding: 20px;
+}
+#input{
   display: inline-block;
-  text-align: center;
-} */
+}
+#submit-button{
+  color: purple;
+}
