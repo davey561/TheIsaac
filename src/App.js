@@ -7,6 +7,8 @@ import Chatter from './Chatter';
 import * as firebase from 'firebase';
 import withFirebaseAuth from 'react-with-firebase-auth'
 import 'firebase/auth';
+import LoginPage from './LoginPage';
+
 
  // Initialize Firebase NEED TO UPDATE THIS INFO
  const firebaseConfig = {
@@ -29,16 +31,13 @@ function App(props) {
     const [ref, setRef] = useState();
     const [eles, setEles] = useState();
     const [loading, setLoading] = useState(true);
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [user, setUser] = useState();
     const[cy, setCy] = useState(cytoscape({
       
       elements: []
     
     }));
-    const {
-      user,
-      signOut,
-      signInWithGoogle,
-    } = props;
     //const [knowledgeGraph, setKnowledgeGraph] = useState([], )
     useEffect(()=>{
     }, []);
@@ -61,7 +60,10 @@ function App(props) {
           })
       }
       fetchData();
-
+      document.addEventListener('unload', ()=>{
+        window.alert('unloading')
+        firebase.auth().signOut();
+      });
       //don't render at first with labels, make it's more scratchy
 
   }, []);
@@ -71,6 +73,9 @@ function App(props) {
           if(event.key==="Enter"){
               renderAll(cy);
           }
+        });
+        document.addEventListener('beforeunload', ()=>{
+          firebase.auth().signOut();
         });
         cy.on('add remove', (event)=>{
           //console.log('type: ', event.type, ". target: " + event.target.data('name'));
@@ -82,24 +87,14 @@ function App(props) {
   return (
     <div className="Isaac-Container">
       <h1 id='title'>The Isaac</h1>
-      
-      {
-        user 
-          ? <div>
-              <p>Hello, {user.displayName}</p>
-              <Chatter cy={cy}/>
-            </div>
-          : <p>Please sign in.</p>
-      }
-      {
-        user
-          ? <button onClick={signOut}>Sign out</button>
-          : <button onClick={signInWithGoogle}>Sign in with Google</button>
+      {user && !loading
+        ? <div>
+            <p>Hello,</p>
+            <Chatter cy={cy}/>
+          </div>
+        : <LoginPage setUser={setUser} setLoggedIn={setLoggedIn}/>
       }
     </div>
   )
 }
-export default withFirebaseAuth({
-    providers,
-    firebaseAppAuth,
-  })(App);
+export default App;
