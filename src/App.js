@@ -46,16 +46,16 @@ function App() {
   }, []);
   useEffect(()=>{
     if(!loading){
-        document.addEventListener('keypress', (event)=>{
+        document.addEventListener('keydown', (event)=>{
           if(event.key==="Enter"){
               renderAll(cy);
           }
+        });
         cy.on('add remove', (event)=>{
           //console.log('type: ', event.type, ". target: " + event.target.data('name'));
           firebase.database().ref().set(JSON.stringify(cy.elements().jsons()));
           //console.log('saved');
         })
-      });
     }
   }, [loading])
     return (
@@ -68,7 +68,7 @@ function App() {
             </p>
             <div id = "input">
                 Say something: <input id = "comment-section" type="text" name="comment"></input><br></br>
-                <input type="submit" value="Submit" onClick={() => renderAll(cy)} onBlur={()=>{this.value=''}}></input>
+                <input type="submit" value="Submit" onClick={() => renderAll(cy)} onBlur={()=>{}}></input>
             </div>
         </div>
       </div>
