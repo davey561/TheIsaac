@@ -114,12 +114,26 @@ const connectConceptsInSameComment = (cy, nouns, comment) => {
         }
     }
 }
+/**
+ * No threshold now, because it will say the most relevant thing that hasn't been said yet. 
+ *  If there's nothing else to say (this is the effective threshold), then whatever
+ * @param {} cy 
+ * @param {*} nouns 
+ */
+const whichTopic = (cy, nouns) => {
+    //make list of nodes that the comment relates to, summing juice as we go
+        //do this recursively, and stop going if node juice gets down to some threshold(I'm thinking .04, if each node starts with about 1 and has .1 connectiosn)
+    //take difference between those nodes and all the nodes referenced in the comment
+    //take difference between those nodes and all the nodes that have been used thus far in the conversation
 
+   
+}
 const doIKnowEnoughToSaySomething = (cy, nouns, threshold) => {
     //first, find all the nodes that correspond to nouns
     let relevantNodes = findCorrespondingNodes(cy, nouns);
     let max = {value: 0, node: null}
     let tempSum = 0;
+
     relevantNodes.forEach((node)=> {
         tempSum = sumOfIncidentEdgeWeights(node);
         if(tempSum>max.value){
@@ -170,7 +184,7 @@ const findCorrespondingNodes = (cy, nouns) => {
     printEles(relevantNodes);
     return relevantNodes;
 }
-const contains = (array, value) => {
+export const contains = (array, value) => {
     //console.log('value being tested for contains is : ' , value)
     let contains = false;
     array.forEach((ele)=>{
@@ -180,6 +194,27 @@ const contains = (array, value) => {
         }
     })
     return contains;
+}
+export const containsGeneral = (array, value, condition) => {
+    //console.log('value being tested for contains is : ' , value)
+    let result = {isThere: false, which: null};
+    array.forEach((ele)=>{
+        if(condition(ele)===value){
+           // console.log(ele + " is " + value)
+            result={isThere: true, which: ele};
+        }
+    })
+    return contains;
+}
+export const oneEleSatisfiesCondition = (array, values, condition)=>{
+    let result = {isThere: false, which: null};
+    values.forEach(value => {
+        let tempResult = containsGeneral(array, value, condition);
+        if (tempResult.isThere){
+            result = tempResult;
+        }
+    });
+    return result;
 }
 const containsPlural = (array, values) => {
     let included = false;

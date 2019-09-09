@@ -19,7 +19,10 @@ function LoginPage({setUser, setLoggedIn}) {
                     (event) => {
                         let txtCode = document.getElementById("txtCode");
                         const pass = txtCode.value;
-                        if(pass==="COGS222") setUser(true)
+                        if(pass==="COGS222") {
+                            setUser(true);
+                            console.log('logged in')
+                        }
                         else {setUser(null); setWrong("Wrong code.")}
                     }
                 }>Verify</button>

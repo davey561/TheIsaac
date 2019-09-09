@@ -13,6 +13,7 @@
     "cytoscape-fcose": "^1.0.0",
     "cytoscape-spread": "^3.0.0",
     "firebase": "^6.6.0",
+    "js-priority-queue": "^0.1.5",
     "pos": "^0.4.2",
     "react": "^16.9.0",
     "react-bootstrap": "^1.0.0-beta.10",
