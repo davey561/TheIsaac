@@ -3,6 +3,7 @@
 import WordPOS from 'wordpos';
 import pos from 'pos';
 import { noConflict } from 'q';
+import {addNewConcepts, connectConceptsInSameComment} from './ResponseLogic/LearnNewConcepts'
 /**
  * Renders the user's comment
  */
@@ -17,10 +18,10 @@ export const renderComment = () => {
  * Handles all responses to user's submitting a comment 
  * @param {*} cy
  */
-export const renderAll = (cy) => {
+export const renderAll = (cy, responses, setResponses, pushResponse) => {
     let inputdom = document.getElementById('comment-section');
     renderComment();
-    renderResponse(respond(inputdom.value, cy));
+    renderResponse(respond(inputdom.value, cy, responses, setResponses, pushResponse));
     inputdom.value = ""; //clears the input field
 }
 
@@ -38,11 +39,37 @@ export const renderResponse = (response) => {
         renderedChatBot.scrollTop = renderedChatBot.scrollHeight;
     }, Math.random()*1000);
 }
-export const respond = (comment, cy) => {
-    if(Math.random()<.02){
+export const respond = (comment, cy, responses, setResponses, pushResponse) => {
+    //console.log('all responses ', allResponses);
+    let response = 'default';
+    //Randomly occasionally say the famous Isaac line.
+    
+    if(Math.random()<.01){
         return "You know what... I'm going to kiss you!'";
     }
+    
+    //tag the words.
+    let {taggedWords, juicyWords} = tagWords(comment);
+    
+    //if there's a one word response, do something special? TOFIGUREOUT
+        //link it to all words from the previous comment
+    
+    //add all new to the graph
+    
+    let newConcepts = addNewConcepts(cy, juicyWords);
+    console.log('after new concepts added');
+    printCollection(newConcepts, "name", "New Concepts: ");
 
+    //connect it to each other in the graph, making it twice as strong in one direction as in the other
+    let newRelations = connectConceptsInSameComment(cy, comment, newConcepts);
+    printCollection(newRelations, 'name', "New Relations");
+
+    //say something back to the user
+    //return saySomethingBack(taggedWords, cy, comment, juicyWords, newConcepts);
+    setResponses([...responses, response]);
+    return response;
+}
+const tagWords = (comment) => {
     let words = new pos.Lexer().lex(comment);
     let tagger = new pos.Tagger();
     let taggedWords = tagger.tag(words);
@@ -51,28 +78,22 @@ export const respond = (comment, cy) => {
         let taggedWord = taggedWords[i];
         //flip I and you, and make lowercase
         let word = processWord(taggedWord[0]);
-        
         let tag = taggedWord[1];
         let firstTwoLetters = tag.slice(0,2);
+        //If word is a noun, personal pronoun, or adjective (if it's a juicy relevant word, add it)
         if(contains(["NN", "PR", "JJ"], firstTwoLetters)){ //|| tag.slice(0,2)==="PR"){
             nouns.push(word);
         } 
     }
-    //overriding:
-    // if(taggedWords.length==1) {
-    //     nouns = taggedWords[0];
-    // }
-    // let lowercaseNouns = processWords(nounouns.map(noun => {
-    //     console.log(noun());
-    //     noun.toLowerCase();
-    // })
-    
-    //add all new to the graph
-    let newConcepts = learnNewConcepts(cy, nouns);
+    return {juicyWords: nouns, taggedWords: taggedWords} //have been processed (I's and you's are flipped)
+}
 
-    //connect it to each other in the graph, making it twice as strong in one direction as in the other
-    connectConceptsInSameComment(cy, nouns, comment)
 
+
+/** 
+ * Say something back to the user
+*/
+const saySomethingBack = (taggedWords, cy, comment, nouns) => {
     //see if I know enough about any of em to say something
     let processedWords = processWords(justTheWords(taggedWords));
     if(containsPlural(processedWords, ["who", "what", "when", "where", "why", "?"])){
@@ -88,66 +109,6 @@ export const respond = (comment, cy) => {
         }
     }
     return respondForFamiliarTopic(cy, comment, nouns);
-}
-
-const learnNewConcepts = (cy, nouns)=> {
-    printEles(cy);
-    let newConcepts = cy.collection();
-    nouns.forEach((noun)=>{
-        //check if exists (can just check if id exists here, might be multiple); 
-            //if not, add it to graph
-            // ** Sidenote: can tell which is the original node with that name by seeing if it the id === name.
-                //if not original, that equality ^ won't be true.
-        let original = cy.$("[id='"+noun+"']");
-        let newNode;
-        if(!(original.length>0)) {
-            newNode = cy.add({data: {name: noun, id: noun}});
-            newConcepts = newConcepts.union(newNode);
-        } else {
-            //if it does exist, add too cy, and connect strongly to the other, first instance.
-            //  1) find an id for this instance, as there may have been duplicates already
-            let i = 0;
-            while(cy.getElementById(noun + i)){
-                i++
-            }
-            let newId = noun + i;
-            
-            //add it
-            newNode = cy.add({data: {name: noun, id: newId}});
-            newConcepts = newConcepts.union(newNode);
-            
-            //add connection between it and the good guy, in both directions.
-            cy.add({data: {source: newNode, target: original, name: "composes", weight: 1}});
-            cy.add({data: {source: original, target: newNode, name: "comprises", weight: 1}});
-
-        }
-    });
-    printEles(cy);
-    return newConcepts;
-}
-export const printEles = (cy) => {
-    //console.log("printing all nodes in cy: ", cy.nodes().toArray().map((ele => ele.data('name'))));
-}
-/**
- * @param cy Core Instance
- * @param comment string comment that was entered by the user to prompt this response
- * @param newConceptNodes cytoscape collection of the new node concepts that
- *  were added from the user's comment
- */
-const connectConceptsInSameComment = (cy, comment, newConceptNodes) => {
-    //get ids of the newConceptNodes
-    const newNodeIds = newConceptNodes.toArray().map(ele => ele.id());
-    for(let src = 0; src<newNodeIds.length; src++){
-        for(let trg = 0; trg<newNodeIds.length; trg++){
-            //make sure src and trg aren't the same
-            if(src!==trg){
-                //determine weight (either .1 or .05)
-                let weight;
-                (trg > src) ? weight = .16: weight = .08;
-                cy.add({data: {source: newNodeIds[src], target: newNodeIds[trg], weight: weight, name: comment}});
-            }
-        }
-    }
 }
 /**
  * No threshold now, because it will say the most relevant thing that hasn't been said yet. 
@@ -217,7 +178,7 @@ export const findCorrespondingNodes = (cy, nouns) => {
         }
     });
     //console.log('relevant nodes: ', relevantNodes.size());
-    printEles(relevantNodes);
+    printCollection(relevantNodes, 'name');
     return relevantNodes;
 }
 export const contains = (array, value) => {
@@ -306,4 +267,7 @@ const respondForFamiliarTopic = (cy, comment, nouns) => {
 }
 const justTheWords= (taggedWords) => {
    return taggedWords.map(word=> word[0]);
+}
+export const printCollection=(collection, attribute, message)=>{
+    console.log(message, collection.toArray().map(ele=>ele.data(attribute)));
 }

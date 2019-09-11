@@ -1,36 +1,38 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {renderAll} from './TheIsaac';
 import firebase from 'firebase';
+import KeyboardEventHandler from 'react-keyboard-event-handler';
 
 function Chatter({cy, loading}){
-    // useEffect(()=>{
-        
-    //     if(!loading){
-    //         window.alert('hello!')
-    //         document.addEventListener('keydown', (event)=>{
-    //           window.alert('key presed');
-    //           if(event.key==="Enter"){
-    //               renderAll(cy);
-    //               window.alert('40')
-    //           }
-    //         cy.on('add remove', (event)=>{
-    //           //console.log('type: ', event.type, ". target: " + event.target.data('name'));
-    //           firebase.database().ref().set(JSON.stringify(cy.elements().jsons()));
-    //           //console.log('saved');
-    //         })
-    //       });
-    //     }
-    //   }, [loading])
+    const [allResponses, setAllResponses] = useState(["I like crew"]); //even indices are Isaac, odd indices are user
+    // const [pushResponse, setPushResponse] = useState(); //will be a function to push response
     return (
-        <div id = "chatter">
-            <p id = "convo">
-                Isaac:  I like crew.
-            </p>
-            <div id = "input">
-                Say something: <input id = "comment-section" type="text" name="comment"></input>
-                <input id = "submit-button" type="submit" value="Submit" onClick={() => renderAll(cy)} ></input>
+        <KeyboardEventHandler
+            handleKeys={['enter']}
+            onKeyEvent={(key, event)=> eventResponses(key, event, cy, allResponses, setAllResponses)}>
+            <div id = "chatter">
+                <p id = "convo">
+                    Isaac:  {allResponses[0]}.
+                </p>
+                <div id = "input">
+                    Say something: <input id = "comment-section" type="text" name="comment" autoFocus={true}></input>
+                    <input id = "submit-button" type="submit" value="Submit" onClick={() => renderAll(cy, allResponses, setAllResponses)} ></input>
+                </div>
             </div>
-        </div>
+        </KeyboardEventHandler>
     )
 }
 export default Chatter;
+const testChatter = (responses, setAllResponses) => {
+    console.log(responses);
+}
+
+const eventResponses = (key, event, cy, allResponses, setAllResponses) => {
+    if(key==="enter"){
+        renderAll(cy, allResponses, setAllResponses, /*newPushResponse*/);
+    }
+    else if(key==='esc'){
+      testChatter(allResponses, setAllResponses);
+    }
+}
+

@@ -8,7 +8,7 @@ import * as firebase from 'firebase';
 import withFirebaseAuth from 'react-with-firebase-auth'
 import 'firebase/auth';
 import LoginPage from './LoginPage';
-import { testDistEmph } from './EmphasisDist';
+import { testDistEmph } from './ResponseLogic/EmphasisDist';
 
 
  // Initialize Firebase NEED TO UPDATE THIS INFO
@@ -69,25 +69,15 @@ function App(props) {
 
   }, []);
   useEffect(()=>{
-    //if(!loading && user){
-        document.addEventListener('keydown', (event)=>{
-          //window.alert('keydown');
-          console.log('keydown');
-          if(event.key==="Enter"){
-              renderAll(cy);
-          }
-          else if(event.key==='Escape'){
-            testDistEmph(cy);
-          }
-        });
+    if(!loading /*&& user*/) {
         cy.on('add remove', (event)=>{
           //console.log('type: ', event.type, ". target: " + event.target.data('name'));
           firebase.database().ref().set(JSON.stringify(cy.elements().jsons()));
           //console.log('saved');
-        })
-    //}
-  }, []
-  //[loading, user]
+        });
+      }
+    },
+    [loading, /*user*/]
   )
   return (
     <div className="Isaac-Container">
@@ -103,3 +93,7 @@ function App(props) {
   )
 }
 export default App;
+
+const test = (cy) => {
+  testDistEmph(cy);
+}

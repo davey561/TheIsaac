@@ -1,5 +1,6 @@
-import { contains, oneEleSatisfiesCondition, findCorrespondingNodes } from "./TheIsaac";
+import { contains, oneEleSatisfiesCondition, findCorrespondingNodes } from "../TheIsaac";
 import PriorityQueue from "js-priority-queue";
+import {printCollection} from '../TheIsaac';
 //nouns takes the form of array of strings
 //processedWords idk
 //cy
@@ -39,9 +40,4 @@ export const distributeEmph = (cy, processedWords, nouns) => {
         return relevantNodes;
         // 4) find the path (for now, one edge) to the one with the greatest thing
     });
-}
-export const printCollection=(collection, attribute)=>{
-    let result = [];
-    collection.forEach(ele=>ele.data(attribute));
-    console.log(result);
 }
