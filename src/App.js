@@ -8,6 +8,7 @@ import * as firebase from 'firebase';
 import withFirebaseAuth from 'react-with-firebase-auth'
 import 'firebase/auth';
 import LoginPage from './LoginPage';
+import { testDistEmph } from './EmphasisDist';
 
 
  // Initialize Firebase NEED TO UPDATE THIS INFO
@@ -68,10 +69,15 @@ function App(props) {
 
   }, []);
   useEffect(()=>{
-    if(!loading && user){
+    //if(!loading && user){
         document.addEventListener('keydown', (event)=>{
+          //window.alert('keydown');
+          console.log('keydown');
           if(event.key==="Enter"){
               renderAll(cy);
+          }
+          else if(event.key==='Escape'){
+            testDistEmph(cy);
           }
         });
         cy.on('add remove', (event)=>{
@@ -79,17 +85,20 @@ function App(props) {
           firebase.database().ref().set(JSON.stringify(cy.elements().jsons()));
           //console.log('saved');
         })
-    }
-  }, [loading, user])
+    //}
+  }, []
+  //[loading, user]
+  )
   return (
     <div className="Isaac-Container">
       <h1 id='title'>The Isaac</h1>
-      {user && !loading
+      {/* {user && !loading
         ? <div>
             <Chatter cy={cy}/>
           </div>
         : <LoginPage setUser={setUser} setLoggedIn={setLoggedIn}/>
-      }
+      } */}
+      <Chatter cy={cy}/>
     </div>
   )
 }

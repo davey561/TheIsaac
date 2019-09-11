@@ -1,9 +1,17 @@
-import { contains, oneEleSatisfiesCondition } from "./TheIsaac";
+import { contains, oneEleSatisfiesCondition, findCorrespondingNodes } from "./TheIsaac";
 import PriorityQueue from "js-priority-queue";
+//nouns takes the form of array of strings
+//processedWords idk
+//cy
+export const testDistEmph = (cy ) => {
+    console.log(distributeEmph(cy, null, ["eat", "breakfast"]));
+}
 
 export const distributeEmph = (cy, processedWords, nouns) => {
     let relevantNodes = []; //make it a map, searchable by id
     let correspondingNodes =  findCorrespondingNodes(cy, nouns);
+    console.log(nouns);
+    printCollection(correspondingNodes, "name");
     //for each corresponding node
     correspondingNodes.forEach((node) => {
         //look at all of its incident edges
@@ -23,9 +31,17 @@ export const distributeEmph = (cy, processedWords, nouns) => {
                                         ? edge.data('weight')
                                         : entry.greatestSource;
                 entry = {neighbor: neighbor, weight: weight, greatestSource: greatestSource};
+                relevantNodes.push(entry);
             }
         });
         // 3) find the one with the greatest weight TODO
+        console.log('hellooooo')
+        return relevantNodes;
         // 4) find the path (for now, one edge) to the one with the greatest thing
     });
+}
+export const printCollection=(collection, attribute)=>{
+    let result = [];
+    collection.forEach(ele=>ele.data(attribute));
+    console.log(result);
 }

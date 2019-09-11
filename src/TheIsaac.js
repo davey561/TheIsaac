@@ -59,13 +59,16 @@ export const respond = (comment, cy) => {
         } 
     }
     //overriding:
-    if(taggedWords.length==1) nouns = [taggedWords[0]];
-    let lowercaseNouns = nouns.map(noun => {
-        noun.toLowerCase()
-    })
+    // if(taggedWords.length==1) {
+    //     nouns = taggedWords[0];
+    // }
+    // let lowercaseNouns = processWords(nounouns.map(noun => {
+    //     console.log(noun());
+    //     noun.toLowerCase();
+    // })
     
     //add all new to the graph
-    learnNewConcepts(cy, nouns);
+    let newConcepts = learnNewConcepts(cy, nouns);
 
     //connect it to each other in the graph, making it twice as strong in one direction as in the other
     connectConceptsInSameComment(cy, nouns, comment)
@@ -89,27 +92,59 @@ export const respond = (comment, cy) => {
 
 const learnNewConcepts = (cy, nouns)=> {
     printEles(cy);
+    let newConcepts = cy.collection();
     nouns.forEach((noun)=>{
         //check if exists (can just check if id exists here, might be multiple); 
             //if not, add it to graph
-        if(!cy.$("[id='"+noun+"']").length>0){
-            cy.add({data: {name: noun, id: noun}});
+            // ** Sidenote: can tell which is the original node with that name by seeing if it the id === name.
+                //if not original, that equality ^ won't be true.
+        let original = cy.$("[id='"+noun+"']");
+        let newNode;
+        if(!(original.length>0)) {
+            newNode = cy.add({data: {name: noun, id: noun}});
+            newConcepts = newConcepts.union(newNode);
+        } else {
+            //if it does exist, add too cy, and connect strongly to the other, first instance.
+            //  1) find an id for this instance, as there may have been duplicates already
+            let i = 0;
+            while(cy.getElementById(noun + i)){
+                i++
+            }
+            let newId = noun + i;
+            
+            //add it
+            newNode = cy.add({data: {name: noun, id: newId}});
+            newConcepts = newConcepts.union(newNode);
+            
+            //add connection between it and the good guy, in both directions.
+            cy.add({data: {source: newNode, target: original, name: "composes", weight: 1}});
+            cy.add({data: {source: original, target: newNode, name: "comprises", weight: 1}});
+
         }
     });
     printEles(cy);
+    return newConcepts;
 }
 export const printEles = (cy) => {
     //console.log("printing all nodes in cy: ", cy.nodes().toArray().map((ele => ele.data('name'))));
 }
-const connectConceptsInSameComment = (cy, nouns, comment) => {
-    for(let src = 0; src<nouns.length; src++){
-        for(let trg = 0; trg<nouns.length; trg++){
+/**
+ * @param cy Core Instance
+ * @param comment string comment that was entered by the user to prompt this response
+ * @param newConceptNodes cytoscape collection of the new node concepts that
+ *  were added from the user's comment
+ */
+const connectConceptsInSameComment = (cy, comment, newConceptNodes) => {
+    //get ids of the newConceptNodes
+    const newNodeIds = newConceptNodes.toArray().map(ele => ele.id());
+    for(let src = 0; src<newNodeIds.length; src++){
+        for(let trg = 0; trg<newNodeIds.length; trg++){
             //make sure src and trg aren't the same
             if(src!==trg){
                 //determine weight (either .1 or .05)
                 let weight;
-                (trg>src) ? weight = .1: weight = .05;
-                cy.add({data: {source: nouns[src], target: nouns[trg], weight: weight, name: comment}});
+                (trg > src) ? weight = .16: weight = .08;
+                cy.add({data: {source: newNodeIds[src], target: newNodeIds[trg], weight: weight, name: comment}});
             }
         }
     }
@@ -171,11 +206,12 @@ const strongestRelation = (node, currentTopics) => {
     });
     return strongest;
 }
-const findCorrespondingNodes = (cy, nouns) => {
+export const findCorrespondingNodes = (cy, nouns) => {
+    console.log('in find corresponding ids, nouns are ', nouns);
     let relevantNodes = cy.collection();
     //console.log('nouns: ', nouns);
     nouns.forEach((noun)=>{
-        let node = cy.$("[id='" + noun + "']");
+        let node = cy.getElementById(noun);
         if(node[0]){
             relevantNodes = relevantNodes.union(node);
         }
