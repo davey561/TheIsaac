@@ -10,30 +10,32 @@ export const addNewConcepts = (cy, nouns)=> {
             //if not, add it to graph
             // ** Sidenote: can tell which is the original node with that name by seeing if it the id === name.
                 //if not original, that equality ^ won't be true.
-        let original = cy.getElementById(noun);
-        console.log('empty? ', original.empty())
+        //let original = cy.getElementById(noun);
+        let sameNameNodes = cy.$('[name="' + noun + '"]')
+        console.log('empty? ', sameNameNodes.empty())
         let newNode;
-        if(original.empty()) {
+        if(sameNameNodes.empty()) {
             newNode = cy.add({data: {name: noun, id: noun}});
             newConcepts = newConcepts.union(newNode);
         } else {
+            newConcepts = newConcepts.union(sameNameNodes[0]);
             //if it does exist, add too cy, and connect strongly to the other, first instance.
             //  1) find an id for this instance, as there may have been duplicates already
-            let i=2; //start at two
-            while(!cy.getElementById(noun + i).empty()){
-                i++;
-                if(i>200) break;
-            }
-            let newId = noun + i;
-            console.log('newid is ' +newId)
+            // let i=2; //start at two
+            // while(!cy.getElementById(noun + i).empty()){
+            //     i++;
+            //     if(i>200) break;
+            // }
+            // let newId = noun + i;
+            // console.log('newid is ' +newId)
             
-            //add it
-            newNode = cy.add({data: {name: noun, id: newId}});
-            newConcepts = newConcepts.union(newNode);
+            // //add it
+            // newNode = cy.add({data: {name: noun, id: newId}});
+            // newConcepts = newConcepts.union(newNode);
             
-            //add connection between it and the good guy, in both directions.
-            cy.add({data: {source: newNode.id(), target: original.id(), name: "composes", weight: 1}});
-            cy.add({data: {source: original.id(), target: newNode.id(), name: "comprises", weight: 1}});
+            // //add connection between it and the good guy, in both directions.
+            // cy.add({data: {source: newNode.id(), target: original.id(), name: "composes", weight: 1}});
+            // cy.add({data: {source: original.id(), target: newNode.id(), name: "comprises", weight: 1}});
 
         }
     });
@@ -54,9 +56,20 @@ export const connectConceptsInSameComment = (cy, comment, newConceptNodes) => {
     const newNodeIds = newConceptNodes.toArray().map(ele => ele.id());
     let newEdges = cy.collection();
     for(let src = 0; src<newNodeIds.length; src++){
+        const srcId = newNodeIds[src];
+        const srcNode = cy.$id(srcId);
         for(let trg = 0; trg<newNodeIds.length; trg++){
+            const trgId = newNodeIds[trg];
+            const trgNode = cy.$id(trgId);
             //make sure src and trg aren't the same
             if(src!==trg){
+                //if they already have a connection
+                if(srcNode.neighborhood('node').contains(trgNode)){
+                    let edge = srcNode.connectedEdges().intersect(trgNode.connectedEdges());
+                    if(edge.size()>1) edge = edge[0];
+                    let weight = edge.data('weight');
+                    edge.data('weight', weight + (1-weight)/5);
+                }
                 //determine weight (either .1 or .05)
                 let weight;
                 (trg > src) ? weight = .16: weight = .08;
@@ -65,5 +78,12 @@ export const connectConceptsInSameComment = (cy, comment, newConceptNodes) => {
             }
         }
     }
+    console.log('newEdges: ', newEdges.map(edge=> {
+        return {
+            name: edge.data('name'), 
+            source: edge.source().id(), 
+            target: edge.target().id()
+        }
+    }))
     return newEdges;
 }

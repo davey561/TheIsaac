@@ -35,9 +35,7 @@ function App(props) {
     const [loggedIn, setLoggedIn] = useState(false);
     const [user, setUser] = useState();
     const[cy, setCy] = useState(cytoscape({
-      
       elements: []
-    
     }));
     //const [knowledgeGraph, setKnowledgeGraph] = useState([], )
     useEffect(()=>{
@@ -57,7 +55,6 @@ function App(props) {
               await setLoading(false);
               //return JSON.parse(snap.val())
               if(elements!=="[]") await cy.add(elements);
-              console.log('cy has been set: ',  elements);
           })
       }
       fetchData();
@@ -70,7 +67,7 @@ function App(props) {
   }, []);
   useEffect(()=>{
     if(!loading /*&& user*/) {
-        cy.on('add remove', (event)=>{
+        cy.on('add remove data', (event)=>{
           //console.log('type: ', event.type, ". target: " + event.target.data('name'));
           firebase.database().ref().set(JSON.stringify(cy.elements().jsons()));
           //console.log('saved');
