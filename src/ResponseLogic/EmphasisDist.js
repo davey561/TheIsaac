@@ -33,7 +33,7 @@ export const distributeEmph = (cy, nouns, correspondingNodes) => {
            if(!selected) break;
            path.push(selected);
            weight = weight * selected.weight;
-           window.alert(selected.weight + " and " + weight * selected.weight);
+          // window.alert(selected.weight + " and " + weight * selected.weight);
            console.log('weight is ' + weight, "original weight is " + originalweight);
            counter++;
            if(path.length>30) {

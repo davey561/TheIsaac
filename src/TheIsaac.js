@@ -102,7 +102,7 @@ const whetherToLearn = (comment, cy, juicyWords, correspondingNodes) => {
             let newRelations = connectConceptsInSameComment(cy, comment, newConcepts);
             return -1;
         //window.alert('includes any')
-    } else if(includesAny(["hi ", "hello", "how are you", "greetings", "hey"], comment)) {
+    } else if(includesAny([" hi", "hi ", "hello", "how are you", "greetings", "hey"], comment)) {
         let x = Math.random();
         if(x<.2) return "How do you do"
         else if (x<.4) return "What's up with it"
