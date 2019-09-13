@@ -26,8 +26,8 @@ function LoginPage({setUser, setLoggedIn}) {
                         else {setUser(null); setWrong("Wrong code.")}
                     }
                 }>Verify</button>
-                <label>Remember Me &nbsp;</label>
-                <input type="checkbox" checked="checked" name="remember"></input>
+                {/* <label>Remember Me &nbsp;</label>
+                <input type="checkbox" checked="checked" name="remember"></input> */}
             </div>
         </div>
 

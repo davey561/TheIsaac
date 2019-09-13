@@ -9,6 +9,7 @@ import withFirebaseAuth from 'react-with-firebase-auth'
 import 'firebase/auth';
 import LoginPage from './LoginPage';
 import { testDistEmph } from './ResponseLogic/EmphasisDist';
+import CytoscapeComponent from 'react-cytoscapejs';
 
 
  // Initialize Firebase NEED TO UPDATE THIS INFO
@@ -34,6 +35,8 @@ function App(props) {
     const [loading, setLoading] = useState(true);
     const [loggedIn, setLoggedIn] = useState(false);
     const [user, setUser] = useState();
+    let cyRef = React.createRef();
+    const [elementsForRef, setElements] = useState([{data: {id: '1'}}]);
     const[cy, setCy] = useState(cytoscape({
       elements: []
     }));
@@ -68,9 +71,8 @@ function App(props) {
   useEffect(()=>{
     if(!loading /*&& user*/) {
         cy.on('add remove data', (event)=>{
-          //console.log('type: ', event.type, ". target: " + event.target.data('name'));
           firebase.database().ref().set(JSON.stringify(cy.elements().jsons()));
-          //console.log('saved');
+          setElements(cy.elements());
         });
       }
     },
@@ -86,6 +88,7 @@ function App(props) {
         : <LoginPage setUser={setUser} setLoggedIn={setLoggedIn}/>
       } */}
       <Chatter cy={cy}/>
+      {/* <CytoscapeComponent style={ { width: '900px', height: '600px' } } cy={(cy) => { cyRef = cy }} elements={elementsForRef} layout ={{name: 'cose'}}/> */}
     </div>
   )
 }

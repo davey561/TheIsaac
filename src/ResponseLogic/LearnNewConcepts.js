@@ -1,4 +1,4 @@
-import {printCollection} from '../TheIsaac'
+import {printCollection} from '../Print';
 
 export const addNewConcepts = (cy, nouns)=> {
     printCollection(cy.nodes(), 'name');
@@ -64,15 +64,19 @@ export const connectConceptsInSameComment = (cy, comment, newConceptNodes) => {
             //make sure src and trg aren't the same
             if(src!==trg){
                 //if they already have a connection
-                if(srcNode.neighborhood('node').contains(trgNode)){
-                    let edge = srcNode.connectedEdges().intersect(trgNode.connectedEdges());
-                    if(edge.size()>1) edge = edge[0];
-                    let weight = edge.data('weight');
-                    edge.data('weight', weight + (1-weight)/5);
-                }
+                
+                // let weight;
+                // if(srcNode.neighborhood('node').contains(trgNode)){
+                //     debugger;
+                //     let edge = srcNode.connectedEdges().intersect(trgNode.connectedEdges());
+                //     if(edge.size()>1) edge = edge[0];
+                //     weight = edge.data('weight');
+                //     edge.data('weight', weight + (1-weight)/6);
+                // } else{
+                    let weight;
+                    (trg > src) ? weight = .1: weight = .05;
+                // }
                 //determine weight (either .1 or .05)
-                let weight;
-                (trg > src) ? weight = .16: weight = .08;
                 let newEdge = cy.add({data: {source: newNodeIds[src], target: newNodeIds[trg], weight: weight, name: comment}});
                 newEdges = newEdges.union(newEdge);
             }

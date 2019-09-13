@@ -6,7 +6,9 @@ import { testDistEmph } from './ResponseLogic/EmphasisDist';
 
 function Chatter({cy, loading}){
     const [allResponses, setAllResponses] = useState(["I like crew"]); //even indices are Isaac, odd indices are user
+
     // const [pushResponse, setPushResponse] = useState(); //will be a function to push response
+   
     return (
         <KeyboardEventHandler
             handleKeys={['enter', "shift+t"]}
@@ -34,10 +36,10 @@ const eventResponses = (key, event, cy, allResponses, setAllResponses) => {
         
         renderAll(cy, allResponses, setAllResponses, /*newPushResponse*/);
     }
-    // else if(key==='shift+t'){
-    //     event.preventDefault();
-    //     //testChatter(allResponses, setAllResponses);
-    //     testDistEmph(cy);
-    // }
+    else if(key==='shift+t'){
+        event.preventDefault();
+        //testChatter(allResponses, setAllResponses);
+        testDistEmph(cy, allResponses);
+    }
 }
 

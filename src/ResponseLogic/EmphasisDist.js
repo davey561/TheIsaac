@@ -1,42 +1,23 @@
 import { contains, findCorrespondingNodes, processComment } from "../TheIsaac";
 import {oneEleSatisfiesCondition} from '../Inclusion';
 import PriorityQueue from "js-priority-queue";
-import {printCollection, testFindCorresponding} from '../TheIsaac';
-import { consolidateConcepts, testConsolidateConcepts, replaceIsaacWithI } from "../DataCleaning";
+import {testFindCorresponding} from '../TheIsaac';
+import {printCollection, printEdgeWeights} from '../Print';
+import { consolidateConcepts, testConsolidateConcepts, replaceIsaacWithI, resetConnectionWeights, normalizeEdgeWeights, normalizeOutgoers } from "../DataCleaning";
 /**
  * 
  * @param {*} cy Core Instance of the Knowledge Graph
  */
-export const testDistEmph = (cy ) => {
-    let nouns = ["breakfast", "chumps"];
-    //distributeEmph(cy, nouns);
-    // consolidateConcepts(cy);
-    // testConsolidateConcepts(cy);
-    // replaceIsaacWithI(cy);
-    // cy.edges().forEach(edge => {
-    //     edge.data('name', processComment(edge.data('name')));
-    // })
-    //let edgesToRemove = cy.collection();
-    // cy.edges().forEach(edge=>{
-    //     if(edge.data('name')==="i am i"){
-    //         edgesToRemove = edgesToRemove.union(edge);
-    //     }
-    // });
-    // cy.remove(edgesToRemove);
-    console.log(cy.edges().map(edge=> edge.data('name')));
+export const testDistEmph = (cy, responses) => {
+    printEdgeWeights(cy, 30);
+    console.log(responses);
 }
+export const distributeEmph = (cy, nouns, correspondingNodes) => {
 
-export const distributeEmph = (cy, nouns) => {
-       let path = []; //keep track of path of concept nodes with which to respond
+    let path = []; //keep track of path of concept nodes with which to respond
        //debugger;
-       let correspondingNodes =  findCorrespondingNodes(cy, nouns); //get the nodes that correspond to the given nouns
        //debugger;
        let selected = getMostRelevantNeighbor(cy, correspondingNodes); //get the single most relevant neighbor of all these nodes
-       //if there's no most reelvant node, that means there's not much isaac knows about the present topic
-       if(!selected) {
-           let s = nouns[0]? nouns[0]: "that";
-           return "I don't know much about " + s + ". Tell me more!";
-       }
        const originalname = selected.neighbor.data('name');
        const originalweight = selected.weight;
        path.push(selected);
@@ -52,14 +33,16 @@ export const distributeEmph = (cy, nouns) => {
            if(!selected) break;
            path.push(selected);
            weight = weight * selected.weight;
+           window.alert(selected.weight + " and " + weight * selected.weight);
            console.log('weight is ' + weight, "original weight is " + originalweight);
            counter++;
            if(path.length>30) {
                //console.log(path.map(ele => ele.weight));
                break;
            }
-       } while(/*weight > originalweight*.93 && */ counter<Math.round(Math.random()*3));
-       console.log("path: ", path.map(entry=> entry.neighbor.id()));
+        } while(/*weight > originalweight*.93 && */ counter<Math.round(Math.random()*2));
+    //    } while(/*weight > originalweight*.93 && */ counter<Math.round(Math.random()*3));
+       console.log("path: ", path.map(entry=> [entry.neighbor.id(), entry.weight]));
        console.log('path: ', path);
         // from the path, say as many relevant things as possible.
         let response = produceTheComment(path);

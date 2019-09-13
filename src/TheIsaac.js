@@ -5,15 +5,19 @@ import pos from 'pos';
 import { noConflict } from 'q';
 import {addNewConcepts, connectConceptsInSameComment} from './ResponseLogic/LearnNewConcepts'
 import { distributeEmph } from './ResponseLogic/EmphasisDist';
+import {processComment, processWord} from './DataCleaning';
+import {printCollection} from './Print';
 import { debug } from 'util';
 /**
  * Renders the user's comment
  */
-export const renderComment = () => {
+export const renderComment = (setResponses, responses) => {
     let renderedChatBot = document.getElementById('convo');
     let inputdom = document.getElementById('comment-section');
     let input = inputdom.value;
     renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> You:  ${input}`;
+    setResponses([...responses, input]);
+    console.log('responses, from inside RC, are ',  responses);
    // inputdom.blur();
 }
 /**
@@ -22,7 +26,7 @@ export const renderComment = () => {
  */
 export const renderAll = (cy, responses, setResponses, pushResponse) => {
     let inputdom = document.getElementById('comment-section');
-    renderComment();
+    renderComment(setResponses, responses);
     renderResponse(respond(inputdom.value, cy, responses, setResponses, pushResponse));
     inputdom.value = ""; //clears the input field
 }
@@ -56,10 +60,47 @@ export const respond = (comment, cy, responses, setResponses, pushResponse) => {
     
     //if there's a one word response, do something special? TOFIGUREOUT
         //link it to all words from the previous comment
+
+    let correspondingNodes =  findCorrespondingNodes(cy, juicyWords).relevantNodes; //get the nodes that correspond to the given nouns
+    let learn = whetherToLearn(comment, cy, juicyWords, correspondingNodes);
+    console.log("whether to learn: ", learn);
+    if(learn!=-1) return learn;
+    juicyWords = removeToBeFromConsideration(juicyWords);
+
+    //say something back to the user
+    //response = saySomethingBack(taggedWords, cy, comment, juicyWords, newConcepts);
+    response = distributeEmph(cy, juicyWords, correspondingNodes);
+    setResponses([...responses, response]);
+    console.log(responses);
+    return response;
+}
+// const detectIgnorance = juicyWords => {
+//     juicyWords.forEach(word => {
+
+//     })
+// }
+const removeToBeFromConsideration = juicyWords => {
+    const toBeConjugations = ['are', 'is', 'do'];
+    let wordsToRemove = [];
+    juicyWords = juicyWords.reduce((list, word) => {
+        if(contains(toBeConjugations, word)){
+            return list;
+        } else{
+            list.push(word);
+            return list;
+        }
+    }, []);
+}
+const whetherToLearn = (comment, cy, juicyWords, correspondingNodes) => {
     comment = processComment(comment);
     const fiveWs = ['who', 'what', 'where', 'when', 'why'];
     const otherQphrases = ['do you', 'does he', 'does she', 'do they'];
     if(includesAny([...fiveWs, ...otherQphrases, "?"], comment)){
+        //add all new to the graph
+            let newConcepts = addNewConcepts(cy, juicyWords);
+            //connect it to each other in the graph, making it twice as strong in one direction as in the other
+            let newRelations = connectConceptsInSameComment(cy, comment, newConcepts);
+            return -1;
         //window.alert('includes any')
     } else if(includesAny(["hi ", "hello", "how are you", "greetings", "hey"], comment)) {
         let x = Math.random();
@@ -70,18 +111,47 @@ export const respond = (comment, cy, responses, setResponses, pushResponse) => {
            return  "Why hello"
         }
     } else{
-         //add all new to the graph
-        let newConcepts = addNewConcepts(cy, juicyWords);
-        //connect it to each other in the graph, making it twice as strong in one direction as in the other
-        let newRelations = connectConceptsInSameComment(cy, comment, newConcepts);
+        let ignorance = detectIgnorance(correspondingNodes, juicyWords);
+        if (ignorance.ignorant) {
+            return askToLearn(ignorance.which);
+        } else {
+            //add all new to the graph
+            let newConcepts = addNewConcepts(cy, juicyWords);
+            //connect it to each other in the graph, making it twice as strong in one direction as in the other
+            let newRelations = connectConceptsInSameComment(cy, comment, newConcepts);
+            return -1;
+        }
     }
-   
-
-    //say something back to the user
-    //response = saySomethingBack(taggedWords, cy, comment, juicyWords, newConcepts);
-    response = distributeEmph(cy, juicyWords);
-    setResponses([...responses, response]);
-    return response;
+}
+const askToLearn =(targetConcept) => {
+    return "I don't know much about " + targetConcept + ". Tell me more!";
+}
+/**
+ * finds whether Isaac is ignorant about one of the keywords mentioned
+ * @param {*} correspondingNodes 
+ * @param {*} nouns 
+ */
+const detectIgnorance = (correspondingNodes, keywords) => {
+    const ignorant = (correspondingNodes.size()==keywords.length? false: true);
+    let which;
+    debugger;
+    if(ignorant){
+        if(correspondingNodes.size()>0){
+            keywords.forEach(word => {
+                if(contains(
+                        correspondingNodes.toArray().map(ele=> ele.data('name')),
+                        word
+                    )){
+                    which = word;
+                }
+            });
+        }
+        else{
+            which = keywords[0];
+        }
+        
+    }
+    return {ignorant: ignorant, which: which};
 }
 const tagWords = (comment) => {
     let words = new pos.Lexer().lex(comment);
@@ -102,7 +172,7 @@ const tagWords = (comment) => {
     return {juicyWords: nouns, taggedWords: taggedWords} //have been processed (I's and you's are flipped)
 }
 export const testFindCorresponding = (cy) => {
-    let cn = findCorrespondingNodes(cy, ['davey', 'noah', 'isaac', 'breakfast', 'sdfjsdlfjlsj']);
+    let cn = findCorrespondingNodes(cy, ['davey', 'noah', 'isaac', 'breakfast', 'sdfjsdlfjlsj']).relevantNodes;
     printCollection(cn, 'id', "These are the corresponding nodes found in the test: ");
 }
 /**
@@ -113,15 +183,18 @@ export const testFindCorresponding = (cy) => {
 export const findCorrespondingNodes = (cy, nouns) => {
     console.log('in find corresponding ids, nouns are ', nouns);
     let relevantNodes = cy.collection();
+    let unknownWords = [];
     nouns.forEach((noun)=>{
         let node = cy.$('[name="' + noun + '"]');
         console.assert(node.size()<=1, "there's more than one node with name " + noun);
         if(node){
             relevantNodes = relevantNodes.union(node[0]);
+        } else{
+            unknownWords.push(noun);
         }
     });
     printCollection(relevantNodes, 'name', "These are the nodes deemed to correspond to the nouns in the comment: ");
-    return relevantNodes;
+    return {relevantNodes: relevantNodes, unknownWords: unknownWords};
 }
 export const contains = (array, value) => {
     let contains = false;
@@ -140,43 +213,6 @@ const containsPlural = (array, values) => {
         }
     });
     return included;
-}
-export const processComment = (comment) => {
-   // debugger;
-    return processWords(comment.split(" ")).reduce((comment, word) => comment + " " + word);
-}
-const processWord = (word) => {
-    return secondPersonFlip(word.toLowerCase());
-}
-const processWords= (words) => {
-    return words.map(word=> processWord(word));
-}
-const secondPersonFlip = (word)=> {
-    let newWord;
-    if(contains(["i", "me"], word)){
-        newWord="you";
-    } else if(contains(["you", "isaac"], word)){
-        newWord="i";
-    } else if(contains(["your"], word)){
-        newWord="my";
-    } else if(contains(["yours"], word)){
-        newWord="mine";
-    } else if(contains(["my"], word)){
-        newWord="your";
-    } else if(contains(["mine"], word)){
-        newWord="yours";
-    } else if(contains(["am"], word)){
-        newWord="are";
-    } else{
-        newWord = word;
-    }
-    return newWord;
-}
-const justTheWords= (taggedWords) => {
-   return taggedWords.map(word=> word[0]);
-}
-export const printCollection=(collection, attribute, message)=>{
-    console.log(message, collection.toArray().map(ele=>ele.data(attribute)));
 }
 const includesAny = (array, comment)=>{
     let contains = false;

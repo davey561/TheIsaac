@@ -92,5 +92,110 @@ export const replaceIsaacWithI = (cy) => {
         
     })
 }
+export const resetConnectionWeights = (cy, resetValue) => {
+    cy.edges().forEach(edge => edge.data('weight', resetValue));
+}
+export const normalizeOutgoers = (cy, ele) => {
+        let outgoers = ele.outgoers('edge');
+        let outgoingWeight = 0;
+        //get total outgoing weight
+        outgoers.forEach(outgoer => {
+            console.assert(outgoer.data('weight'));
+            outgoingWeight += outgoer.data('weight');
+        });
+        //normalize
+        outgoers.forEach(outgoer => {
+            let weight = outgoer.data('weight');
+            console.assert(weight);
+            outgoer.data('weight', weight / outgoingWeight);
+        });
+}
+export const normalizeEdgeWeights = (cy) => {
+    cy.nodes().forEach(ele=> {
+        let outgoers = ele.outgoers('edge');
+        let outgoingWeight = 0;
+        //get total outgoing weight
+        outgoers.forEach(outgoer => {
+            console.assert(outgoer.data('weight'));
+            outgoingWeight += outgoer.data('weight');
+        });
+        //normalize
+        outgoers.forEach(outgoer => {
+            let weight = outgoer.data('weight');
+            console.assert(weight);
+            outgoer.data('weight', weight / outgoingWeight);
+        });
+    });
+}
+export const processEdgeNames = cy => {
+    cy.edges().forEach(edge => {
+        edge.data('name', processComment(edge.data('name')));
+    })
+}
+export const processComment = (comment) => {
+    // debugger;
+     return processWords(comment.split(" ")).reduce((comment, word) => comment + " " + word);
+ }
+export const processWord = (word) => {
+     return secondPersonFlip(word.toLowerCase());
+ }
+export const processWords= (words) => {
+     return words.map(word=> processWord(word));
+ }
+export const secondPersonFlip = (word)=> {
+     let newWord;
+     if(contains(["i", "me"], word)){
+         newWord="you";
+     } else if(contains(["you", "isaac"], word)){
+         newWord="i";
+     } else if(contains(["your"], word)){
+         newWord="my";
+     } else if(contains(["yours"], word)){
+         newWord="mine";
+     } else if(contains(["my"], word)){
+         newWord="your";
+     } else if(contains(["mine"], word)){
+         newWord="yours";
+     } else if(contains(["am"], word)){
+         newWord="are";
+     } else{
+         newWord = word;
+     }
+     return newWord;
+ }
+ const justTheWords= (taggedWords) => {
+    return taggedWords.map(word=> word[0]);
+ }
+ /**
+  * Remove all edges with particular name
+  */
+ export const removeSpecificEdges = (cy, targetName) => {
+    let edgesToRemove = cy.collection();
+    cy.edges().forEach(edge=>{
+        if (edge.data('name') === targetName) {
+            edgesToRemove = edgesToRemove.union(edge);
+        }
+    });
+    cy.remove(edgesToRemove);
+}
+export const reduceEdgeWeight  = (cy, divisor) => {
+    cy.edges().forEach(edge => {
+        let newWeight = edge.data('weight') / divisor;
+        edge.data('weight', newWeight);
+    });
+}
+
+export const normalizeEdgeWeights2 = (targetNode) => {
+    let n = targetNode.neighborhood('edge');
+    let tempWeight = 0;
+    n.forEach(edge => {
+        tempWeight+= edge.data('weight');
+    });
+    n.forEach(edge => {
+        if(!edge.data('weight')) edge.data('weight', .04);
+        else if(edge.data('weight')>1) edge.data('weight', .5);
+        else edge.data('weight', edge.data('weight')/ tempWeight);
+    })
+}
 
 
