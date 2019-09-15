@@ -1,9 +1,9 @@
 import { contains, findCorrespondingNodes, processComment } from "../TheIsaac";
 import {oneEleSatisfiesCondition} from '../Inclusion';
 import PriorityQueue from "js-priority-queue";
-import {testFindCorresponding} from '../TheIsaac';
+import {testFindCorresponding, askToLearn} from '../TheIsaac';
 import {printCollection, printEdgeWeights} from '../Print';
-import { consolidateConcepts, testConsolidateConcepts, replaceIsaacWithI, resetConnectionWeights, normalizeEdgeWeights, normalizeOutgoers } from "../DataCleaning";
+import { consolidateConcepts, testConsolidateConcepts, replaceIsaacWithI, resetConnectionWeights, normalizeEdgeWeights, normalizeOutgoers, deleteSpecific } from "../DataCleaning";
 /**
  * 
  * @param {*} cy Core Instance of the Knowledge Graph
@@ -17,7 +17,11 @@ export const distributeEmph = (cy, nouns, correspondingNodes) => {
     let path = []; //keep track of path of concept nodes with which to respond
        //debugger;
        //debugger;
-       let selected = getMostRelevantNeighbor(cy, correspondingNodes); //get the single most relevant neighbor of all these nodes
+       let selected = getMostRelevantNeighbor(cy, correspondingNodes); //get the single most relevant neighbor of all these 
+       if(!selected){
+           askToLearn(nouns? nouns[0]: "that");
+       }
+       
        const originalname = selected.neighbor.data('name');
        const originalweight = selected.weight;
        path.push(selected);

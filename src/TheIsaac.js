@@ -61,11 +61,11 @@ export const respond = (comment, cy, responses, setResponses, pushResponse) => {
     //if there's a one word response, do something special? TOFIGUREOUT
         //link it to all words from the previous comment
 
+    juicyWords = removeToBeFromConsideration(juicyWords);
     let correspondingNodes =  findCorrespondingNodes(cy, juicyWords).relevantNodes; //get the nodes that correspond to the given nouns
     let learn = whetherToLearn(comment, cy, juicyWords, correspondingNodes);
     console.log("whether to learn: ", learn);
     if(learn!=-1) return learn;
-    juicyWords = removeToBeFromConsideration(juicyWords);
 
     //say something back to the user
     //response = saySomethingBack(taggedWords, cy, comment, juicyWords, newConcepts);
@@ -90,6 +90,7 @@ const removeToBeFromConsideration = juicyWords => {
             return list;
         }
     }, []);
+    return juicyWords;
 }
 const whetherToLearn = (comment, cy, juicyWords, correspondingNodes) => {
     comment = processComment(comment);
@@ -111,7 +112,7 @@ const whetherToLearn = (comment, cy, juicyWords, correspondingNodes) => {
            return  "Why hello"
         }
     } else{
-        let ignorance = detectIgnorance(correspondingNodes, juicyWords);
+        let ignorance = detectIgnorance(correspondingNodes, juicyWords, cy);
         if (ignorance.ignorant) {
             return askToLearn(ignorance.which);
         } else {
@@ -123,7 +124,7 @@ const whetherToLearn = (comment, cy, juicyWords, correspondingNodes) => {
         }
     }
 }
-const askToLearn =(targetConcept) => {
+export const askToLearn =(targetConcept) => {
     return "I don't know much about " + targetConcept + ". Tell me more!";
 }
 /**
@@ -131,25 +132,20 @@ const askToLearn =(targetConcept) => {
  * @param {*} correspondingNodes 
  * @param {*} nouns 
  */
-const detectIgnorance = (correspondingNodes, keywords) => {
-    const ignorant = (correspondingNodes.size()==keywords.length? false: true);
+const detectIgnorance = (correspondingNodes, keywords, cy) => {
+    const ignorant = false;
     let which;
-    debugger;
     if(ignorant){
-        if(correspondingNodes.size()>0){
-            keywords.forEach(word => {
-                if(contains(
-                        correspondingNodes.toArray().map(ele=> ele.data('name')),
-                        word
-                    )){
-                    which = word;
-                }
-            });
-        }
-        else{
-            which = keywords[0];
-        }
-        
+        keywords.forEach(word => {
+            debugger;
+            if(contains(
+                    cy.nodes().toArray().map(ele=> ele.data('name')),
+                    word
+                )){
+                which = word;
+                ignorant = true;
+            }
+        });
     }
     return {ignorant: ignorant, which: which};
 }

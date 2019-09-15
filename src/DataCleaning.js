@@ -197,5 +197,8 @@ export const normalizeEdgeWeights2 = (targetNode) => {
         else edge.data('weight', edge.data('weight')/ tempWeight);
     })
 }
+export const deleteSpecific = (cy, name) => {
+    cy.remove(cy.filter('[name="'+  name +'"]'));
+}
 
 
