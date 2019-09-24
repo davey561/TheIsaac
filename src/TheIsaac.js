@@ -48,10 +48,19 @@ export const renderResponse = (response) => {
 export const respond = (comment, cy, responses, setResponses, pushResponse) => {
     //console.log('all responses ', allResponses);
     let response = 'default';
+
     //Randomly occasionally say the famous Isaac line.
-    
-    if(Math.random()<.01){
-        return "You know what... I'm going to kiss you!'";
+    if(Math.random()<.02){
+        if(Math.random()<.2){
+            //return "You know what... I'm going to kiss you!'";
+        }
+        else if(Math.random()<.5){
+            return "Crew girls dig my curious mind.";
+        }
+        else {
+            return "i have never met emma and I don't know what you're talking about"
+        }
+        
     }
     
     //tag the words.
@@ -92,17 +101,23 @@ const removeToBeFromConsideration = juicyWords => {
     }, []);
     return juicyWords;
 }
+const removeFromArray = (array, toRemove) => {
+    let result = array.reduce((list, word) => {
+        if(contains(toRemove, word)){
+            return list;
+        } else{
+            list.push(word);
+            return list;
+        }
+    }, []);
+    return result;
+}
 const whetherToLearn = (comment, cy, juicyWords, correspondingNodes) => {
     comment = processComment(comment);
     const fiveWs = ['who', 'what', 'where', 'when', 'why'];
     const otherQphrases = ['do you', 'does he', 'does she', 'do they'];
     if(includesAny([...fiveWs, ...otherQphrases, "?"], comment)){
-        //add all new to the graph
-            let newConcepts = addNewConcepts(cy, juicyWords);
-            //connect it to each other in the graph, making it twice as strong in one direction as in the other
-            let newRelations = connectConceptsInSameComment(cy, comment, newConcepts);
             return -1;
-        //window.alert('includes any')
     } else if(includesAny([" hi", "hi ", "hello", "how are you", "greetings", "hey"], comment)) {
         let x = Math.random();
         if(x<.2) return "How do you do"
