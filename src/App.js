@@ -87,7 +87,8 @@ function App(props) {
           </div>
         : <LoginPage setUser={setUser} setLoggedIn={setLoggedIn}/>
       } */}
-      <Chatter cy={cy}/>
+      <h1>The Chatbot's consciousness is under development. Check back again in November</h1>
+      {/* <Chatter cy={cy}/> */}
       {/* <CytoscapeComponent style={ { width: '900px', height: '600px' } } cy={(cy) => { cyRef = cy }} elements={elementsForRef} layout ={{name: 'cose'}}/> */}
     </div>
   )

@@ -18,8 +18,8 @@ export const distributeEmph = (cy, nouns, correspondingNodes) => {
        //debugger;
        //debugger;
        let selected = getMostRelevantNeighbor(cy, correspondingNodes); //get the single most relevant neighbor of all these 
-       if(!selected){
-           askToLearn(nouns? nouns[0]: "that");
+       if(!selected || !selected.neighbor){
+           return askToLearn(nouns && nouns[0]? nouns[0]: "that");
        }
        
        const originalname = selected.neighbor.data('name');
