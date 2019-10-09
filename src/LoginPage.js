@@ -19,7 +19,7 @@ function LoginPage({setUser, setLoggedIn}) {
                     (event) => {
                         let txtCode = document.getElementById("txtCode");
                         const pass = txtCode.value;
-                        if(pass==="COGS222") {
+                        if(pass==="NCG19") {
                             setUser(true);
                             console.log('logged in')
                         }

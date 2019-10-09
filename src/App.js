@@ -76,18 +76,18 @@ function App(props) {
         });
       }
     },
-    [loading, /*user*/]
+    [loading, user]
   )
   return (
     <div className="Isaac-Container">
       <h1 id='title'>The Isaac</h1>
-      {/* {user && !loading
+      {user
         ? <div>
             <Chatter cy={cy}/>
           </div>
         : <LoginPage setUser={setUser} setLoggedIn={setLoggedIn}/>
-      } */}
-      <Chatter cy={cy}/>
+      }
+      {/* <Chatter cy={cy}/> */}
       {/* <CytoscapeComponent style={ { width: '900px', height: '600px' } } cy={(cy) => { cyRef = cy }} elements={elementsForRef} layout ={{name: 'cose'}}/> */}
     </div>
   )
