@@ -19,10 +19,10 @@ export const distributeEmph = (cy, nouns, correspondingNodes) => {
        //debugger;
        let selected = getMostRelevantNeighbor(cy, correspondingNodes); //get the single most relevant neighbor of all these 
        if(!selected){
-           askToLearn(nouns? nouns[0]: "that");
+           return askToLearn(nouns? nouns[0]: "that");
        }
        
-       const originalname = selected.neighbor.data('name');
+        const originalname = selected.neighbor.data('name');
        const originalweight = selected.weight;
        path.push(selected);
        let weight = selected.weight;
@@ -50,8 +50,8 @@ export const distributeEmph = (cy, nouns, correspondingNodes) => {
        console.log('path: ', path);
         // from the path, say as many relevant things as possible.
         let response = produceTheComment(path);
-        console.log('response', response);
         return response;
+        console.log('response', response);
 }
 const produceTheComment = (path) => {
     let thingsToSay = [];

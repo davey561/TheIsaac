@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// import 'bootstrap';
-//Unclear if I need this wrapper component
 import {renderAll, renderComment, printEles} from './TheIsaac';
 import cytoscape from 'cytoscape';
 import Chatter from './Chatter';
@@ -47,20 +45,24 @@ function App(props) {
       const fetchData = async () => {
           //Store firebase reference
           let ref = firebase.database().ref();
+          //Store firebase reference
+          await setRef(ref);
           //Retrieve elements data
           ref.once('value').then(async (snap) => {
               // console.log(snap.val())
               let elements = (snap.val()==="[]"? "[]": JSON.parse(snap.val()));
               await setEles(elements)
-              //Store firebase reference
-              await setRef(ref);
               //Set loading to false
               await setLoading(false);
               //return JSON.parse(snap.val())
-              if(elements!=="[]") await cy.add(elements);
+              if(elements!=="[]") {
+                await cy.add(elements);
+                console.log('elements added');
+              }
           })
       }
-      fetchData();
+      fetchData().then(setLoading(false));
+      console.log('655555')
       document.addEventListener('unload', ()=>{
         window.alert('unloading')
         firebase.auth().signOut();
@@ -80,15 +82,20 @@ function App(props) {
   )
   return (
     <div className="Isaac-Container">
-      <h1 id='title'>The Isaac</h1>
-      {user
+      <img src = 'balloons.ico' width= {40}px height = {40}px></img>
+      <img src = 'Noah.ico' width= {70}px height = {70}px></img>
+      <img src = 'balloons.ico' width= {40}px height = {40}px></img>
+      <h1 id='title'>18 year old Noah</h1>
+      {!loading ? 
+      <p>Ready! Talk to 18-year-old Noah!</p>:
+      <p> Waking... Not yet ready...</p>}
+      {/* {user && !loading
         ? <div>
             <Chatter cy={cy}/>
           </div>
         : <LoginPage setUser={setUser} setLoggedIn={setLoggedIn}/>
-      }
-      {/* <Chatter cy={cy}/> */}
-      {/* <CytoscapeComponent style={ { width: '900px', height: '600px' } } cy={(cy) => { cyRef = cy }} elements={elementsForRef} layout ={{name: 'cose'}}/> */}
+      } */}
+      <Chatter cy={cy}/>
     </div>
   )
 }

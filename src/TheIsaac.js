@@ -41,7 +41,7 @@ export const renderResponse = (response) => {
         renderedChatBot.scrollTop = renderedChatBot.scrollHeight;
     setTimeout(()=>{
         let renderedChatBot = document.getElementById('convo');
-        renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> <img src = 'TheIsaac.ico' width=40px height = 40px></img> Isaac:  ${response}`;
+        renderedChatBot.innerHTML = `${renderedChatBot.innerHTML} <br> <img src = 'Noah.ico' width=40px height = 40px></img> 18-year-old Noey:  ${response}`;
         renderedChatBot.scrollTop = renderedChatBot.scrollHeight;
     }, Math.random()*1000);
 }
@@ -50,21 +50,22 @@ export const respond = (comment, cy, responses, setResponses, pushResponse) => {
     let response = 'default';
 
     //Randomly occasionally say the famous Isaac line.
-    if(Math.random()<.02){
+    if(Math.random()<.05){
         if(Math.random()<.2){
             //return "You know what... I'm going to kiss you!'";
+            return "I like to sing, dance, pretend, anddddd, Kazooooooo"
         }
         else if(Math.random()<.5){
-            return "Crew girls dig my curious mind.";
+            return "Hay girl summer.";
         }
         else {
-            return "i have never met emma and I don't know what you're talking about"
+            return "To be clear."
         }
         
     }
-    
     //tag the words.
     let {taggedWords, juicyWords} = tagWords(comment);
+    console.log('tagged words: ', taggedWords);
 
     
     //if there's a one word response, do something special? TOFIGUREOUT
@@ -72,6 +73,7 @@ export const respond = (comment, cy, responses, setResponses, pushResponse) => {
 
     juicyWords = removeToBeFromConsideration(juicyWords);
     let correspondingNodes =  findCorrespondingNodes(cy, juicyWords).relevantNodes; //get the nodes that correspond to the given nouns
+    console.log('correspondingNodes', correspondingNodes);
     let learn = whetherToLearn(comment, cy, juicyWords, correspondingNodes);
     console.log("whether to learn: ", learn);
     if(learn!=-1) return learn;
