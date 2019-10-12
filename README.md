@@ -4,4 +4,4 @@ The Isaac is a chatbot that interprets and adds all users' statements to its sem
 
 It has currently been taken down for development (too much unwanted traffic). Hopefully, it will be up again in November.
 
-I made The Isaac in the context of an assignment for my Introduction to Cognitive Science course, which asked the students to evaluate existing chatbots. None of them, including Mitsuku, could learn as well as I thought I could program one to learn. Hence, the Isaac was born.
+I made The Isaac in the context of an assignment for my Introduction to Cognitive Science course, which asked the students to evaluate existing chatbots. None of them, including Mitsuku (https://www.pandorabots.com/mitsuku/), could learn as well as I thought I could program one to learn. Hence, the Isaac was born.
