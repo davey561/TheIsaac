@@ -89,13 +89,13 @@ function App(props) {
       {!loading ? 
       <p>Ready! Talk to 18-year-old Noah!</p>:
       <p> Waking... Not yet ready...</p>}
-      {/* {user && !loading
+      {user && !loading
         ? <div>
             <Chatter cy={cy}/>
           </div>
         : <LoginPage setUser={setUser} setLoggedIn={setLoggedIn}/>
-      } */}
-      <Chatter cy={cy}/>
+      }
+      {/* <Chatter cy={cy}/> */}
     </div>
   )
 }
